@@ -4,7 +4,7 @@
             <slot></slot>
         </div>
         <div class="swipper-indicators" v-if="!props.vertical">
-            <button class="indicator" v-for="(item, index) in itemCount" :key="index"
+            <button class="indicator" v-for="(item, index) in props.length" :key="index"
                 :class="{ active: index === activeIndex }"></button>
         </div>
     </div>
@@ -18,29 +18,40 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
+    length: {
+        type: Number,
+        default: 0
+    }
 })
 const emit = defineEmits(['change'])
 
 const container = ref(null)
 const activeIndex = ref(0)
-const itemCount = ref(0)
-const touch = ref(false)
 
-onMounted(() => {
+onUpdated(() => {
     if (container.value) {
         const dom = container.value
-        itemCount.value = container.value.children.length
-        // 使用 scroll 事件而不是 scrollend，因为 scrollend 支持度不高
         let scrollTimeout
         dom.addEventListener('scroll', () => {
             clearTimeout(scrollTimeout)
             scrollTimeout = setTimeout(() => {
                 scrollToIndex()
-            }, 100) // 延迟执行，确保滚动结束
+            }, 100)
         })
-        dom.addEventListener('touchstart', () => touch.value = false)
-        dom.addEventListener('touchend', () => touch.value = true)
     }
+})
+const swipeTo = (index, smooth = true) => {
+    if (index < 0 || index >= props.length) return
+    activeIndex.value = index
+    const scrollPosition = props.vertical ? index * container.value.offsetHeight : index * container.value.offsetWidth
+    container.value.scrollTo({
+        top: props.vertical ? scrollPosition : 0,
+        left: props.vertical ? 0 : scrollPosition,
+        behavior: smooth ? 'smooth' : 'instant'
+    })
+}
+defineExpose({
+    swipeTo
 })
 const scrollToIndex = () => {
     const scrollPosition = props.vertical ? container.value.scrollTop : container.value.scrollLeft
@@ -74,7 +85,6 @@ const scrollToIndex = () => {
         overflow: auto;
         height: 100%;
         scroll-snap-type: x mandatory;
-        scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         transition: scroll 0.2s ease;

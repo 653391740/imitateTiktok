@@ -11,6 +11,7 @@ const router = createRouter({
         {
           path: '/home',
           name: 'home',
+          meta: { keepAlive: true },
           component: () => import('@/views/index/home.vue'),
         },
         {
@@ -24,7 +25,7 @@ const router = createRouter({
           component: () => import('@/views/index/message.vue')
         },
         {
-          path: '/user/:id?',
+          path: '/user',
           name: 'user',
           redirect: to => {
             if (to.params.id) {
@@ -61,5 +62,18 @@ const router = createRouter({
     }
   ],
 })
-
+// // 白名单
+// const whiteList = ['/home']
+// // to 即将进入的目标  from 即将离开的源头 next 是一个函数，表示放行
+// router.beforeEach((to, from, next) => {
+//   if (localStorage.getItem('tiktok')) {
+//     next()
+//   } else {
+//     if (whiteList.includes(to.path)) {
+//       next()
+//     } else {
+//       next('/home')
+//     }
+//   }
+// })
 export default router
