@@ -23,10 +23,9 @@ const findPasswordSubmit = async () => {
     try {
         toast.loading('重置中')
         await resetPassword(findPasswordForm.value)
-        resetForm()
         LoginStore.findPasswordShow = false
-        // LoginStore.closeLogin()
         toast.show('密码重置成功')
+        resetForm()
     } catch (error) {
         if (error.response.data.message === 'code_error') return toast.show('验证码错误')
         toast.show('密码重置失败')
@@ -69,14 +68,7 @@ const GetfindPasswordCode = async () => {
                         : LoginStore.findPasswordTime }}</button>
             </div>
             <input type="password" placeholder="输入新密码" v-model="findPasswordForm.password">
-            <button @click="findPasswordSubmit">
-                <svg t="1758372903582" class="icon" viewBox="0 0 1027 1024" version="1.1"
-                    xmlns="http://www.w3.org/2000/svg" p-id="2193" width="200" height="200">
-                    <path
-                        d="M380.64 755.386L950.847 185.18c17.573-17.573 46.066-17.573 63.64 0 17.573 17.574 17.573 46.066 0 63.64l-582.59 582.59c-28.308 28.308-74.205 28.308-102.512 0L9.18 511.205c-17.573-17.573-17.573-46.066 0-63.64 17.574-17.573 46.066-17.573 63.64 0l307.82 307.821z"
-                        p-id="2194" fill="#9D44B0"></path>
-                </svg>
-            </button>
+            <button @click="findPasswordSubmit" class="iconfont icon-tick"></button>
         </form>
     </popup>
 </template>
@@ -116,14 +108,9 @@ form {
         width: 44px;
         height: 44px;
         border-radius: 50%;
+        color: #9D44B0;
         background-color: #D297FD;
         margin-top: 40px;
-
-        svg {
-            width: 100%;
-            height: 100%;
-            transform: scale(0.4);
-        }
     }
 }
 </style>

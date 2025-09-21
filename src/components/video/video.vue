@@ -1,6 +1,5 @@
 <script setup>
 import { ref, defineEmits, watch, onMounted, inject, defineExpose, } from 'vue'
-import Side from '@/components/video/side-desc.vue'
 const video = ref(null);
 const isPlaying = ref(false);
 const toast = inject('toast')
@@ -69,7 +68,6 @@ watch(() => props.activeIndex, (newCurrentIndex, oldCurrentIndex) => {
         webkit-playsinline="" playsinline="" x5-video-player-type="h5" preload="none"
         :alt="item.videoId || item.Video?.videoId" @click="togglePlayback" @ended="emit('ended')" />
     <i class="iconfont icon-bofang" v-show="isPlaying" />
-    <Side :item="props.item"></Side>
 </template>
 <style scoped lang="scss">
 video {

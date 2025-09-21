@@ -68,7 +68,7 @@ const router = createRouter({
 const whiteList = ['/home']
 router.beforeEach((to, from, next) => {
   const LoginStore = loginStore()
-  if (localStorage.getItem('tiktok')) {
+  if (localStorage.getItem('tiktok_userinfo')) {
     next()
   } else {
     if (whiteList.includes(to.path)) {

@@ -1,8 +1,12 @@
 <script setup>
 import { ref, defineProps } from 'vue'
+import { useRouter } from 'vue-router'
+import { triggerLike } from '@/api/video'
 import { commentStore, loginStore } from '@/stores/counter'
 const CommentStore = commentStore()
 const LoginStore = loginStore()
+const router = useRouter()
+const loading = ref(false)
 
 const props = defineProps({
     item: {
@@ -11,17 +15,48 @@ const props = defineProps({
     }
 })
 
+const Routeruser = () => {
+    router.push({
+        path: '/user',
+        query: { userId: props.item.Video.userId }
+    })
+}
+
+const toggleLike = async () => {
+    if (!LoginStore.isLogin) return LoginStore.loginShow = true
+    if (loading.value) return
+    loading.value = true
+    try {
+        const msg = await triggerLike(props.item.Video.userId, props.item.Video.videoId)
+        if (msg === '喜欢成功') {
+            props.item.WSLCNum.likeNum++
+            props.item.WSLCNum.isLike = true
+        } else {
+            props.item.WSLCNum.likeNum--
+            props.item.WSLCNum.isLike = false
+        }
+    } catch (error) {
+        console.log(error);
+    } finally {
+        setTimeout(() => loading.value = false, 300)
+    }
+}
+
 const openCommentPopup = () => {
     if (!LoginStore.isLogin) return LoginStore.loginShow = true
     CommentStore.showPopup = true
+    CommentStore.commentNum = props.item.WSLCNum.commentNum
+    CommentStore.commentId = props.item.Video.videoId
 }
 </script>
 
 <template>
     <div class="side">
-        <img :src="'http://43.138.15.137:3000' + props.item.Video.userAvatar || 'http://43.138.15.137:3000/assets/avatar/default.png'"
+        <img @click="Routeruser"
+            :src="'http://43.138.15.137:3000' + props.item.Video.userAvatar || 'http://43.138.15.137:3000/assets/avatar/default.png'"
             alt="">
-        <span @click="qq" :data-count="props.item.WSLCNum.likeNum" class="like iconfont icon-aixin"></span>
+        <span @click="toggleLike" :data-count="props.item.WSLCNum.likeNum"
+            :class="{ 'active': props.item.WSLCNum.isLike }" class="like iconfont icon-aixin"></span>
         <span @click="openCommentPopup" :data-count="props.item.WSLCNum.commentNum"
             class="iconfont icon-pinglun"></span>
         <span :data-count="props.item.WSLCNum.shareNum" class="iconfont icon-a-fenxiang2"></span>

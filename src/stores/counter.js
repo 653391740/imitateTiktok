@@ -3,8 +3,12 @@ import { defineStore } from 'pinia'
 
 export const commentStore = defineStore('comment', () => {
   const showPopup = ref(false)
+  const commentNum = ref(0)
+  const commentId = ref('')
   return {
     showPopup,
+    commentNum,
+    commentId,
   }
 })
 export const loginStore = defineStore('login', () => {
@@ -13,11 +17,11 @@ export const loginStore = defineStore('login', () => {
   const registerTime = ref(60)
   const findPasswordShow = ref(false)
   const findPasswordTime = ref(60)
-  const isLogin = Boolean(localStorage.getItem('tiktok_userinfo'))
+  const isLogin = ref(Boolean(localStorage.getItem('tiktok_userinfo')))
 
   const closeLogin = () => {
     loginShow.value = false
-    isLogin = true
+    isLogin.value = true
   }
 
   return {

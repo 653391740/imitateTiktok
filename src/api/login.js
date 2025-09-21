@@ -14,11 +14,22 @@ export const getUserInfo = (userId) => {
     return http.get(`/user/${userId}/getUserInfo/undefined`)
 }
 
-// 获取邮箱验证码
+/**
+ * 注册和找回密码获取邮箱验证码 
+ * @param {string} email 邮箱验证码
+ * @returns  {object} 包含验证码的对象
+ */
 export const getCode = (email) => {
     return http.get(`/common/user/getCode/${email}`)
 }
-// 注册
+/**
+ * 注册
+ * @param {object} data 包含邮箱、密码、验证码的对象
+ * @param {string} data.email 邮箱
+ * @param {string} data.password 密码
+ * @param {string} data.code 验证码
+ * @returns {object} 包含注册结果的对象
+ */
 export const register = (data) => {
     return http.post('/common/user/register', data)
 }
@@ -28,7 +39,11 @@ export const updateUserInfo = (userId, data) => {
     return http.post(`/user/${userId}/modifyUserInfo`, data)
 }
 
-// 找回密码
+/**
+ * 找回密码检测邮箱是否注册
+ * @param {string} email 邮箱
+ * @returns {object} 包含邮箱是否注册的对象
+ */
 export const findPassword = (email) => {
     return http.get(`/common/user/detectEmail/${email}`)
 }

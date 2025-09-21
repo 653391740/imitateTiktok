@@ -66,8 +66,8 @@ const GetCode = async () => {
         </div>
         <form @submit.prevent>
             <h2>注册</h2>
-            <input type="text" id="email" name="email" v-model="formData.email" required placeholder="输入邮箱">
-            <input type="password" id="password" name="password" v-model="formData.password" required
+            <input type="text" id="register-email" name="email" v-model="formData.email" required placeholder="输入邮箱">
+            <input type="password" id="register-password" name="password" v-model="formData.password" required
                 placeholder="输入密码">
             <div class="code">
                 <input type="text" id="code" name="code" v-model="formData.code" required placeholder="输入邮箱验证码">

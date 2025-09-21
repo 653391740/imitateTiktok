@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, defineExpose, nextTick, onActivated, defineProps } from 'vue';
 import Video from '@/components/video/video.vue'
+import Side from '@/components/video/side-desc.vue'
 import CommentPopup from '@/components/video/commentPopup.vue'
 const activeIndex = ref(0); // 当前播放视频索引
 const swiper = ref(null)
@@ -43,6 +44,7 @@ defineExpose({
     <swipper ref="swiper" vertical :length="props.VideoList.length" @change="handleSwiperChange">
         <div class="swipper-item" v-for="item, index in props.VideoList" :key="item.id">
             <Video ref="video" :item="item" :activeIndex="activeIndex" :index="index" @ended="handleVideoEnd(index)" />
+            <Side :item="item"></Side>
         </div>
     </swipper>
     <CommentPopup></CommentPopup>

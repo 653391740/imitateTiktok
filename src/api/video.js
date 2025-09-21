@@ -3,3 +3,23 @@ import http from '@/utils/request'
 export const getPopularVideo = () => {
   return http.get('/common/video/getPopularVideo')
 }
+
+/**
+ * 点赞/取消点赞（视频）
+ * @param {string} userId 用户id
+ * @param {string} videoId 视频id
+ * @returns {object} 包含点赞结果的对象
+ */
+export const triggerLike = (userId, videoId) => {
+  return http.get(`/user/${userId}/triggerLike/${videoId}`)
+}
+
+/**
+ * 获取视频评论
+ * @param {string} videoId 视频id
+ * @param {number} pageNum 页码
+ * @returns {object} 包含评论结果的对象
+ */
+export const getVideoComment = (videoId, pageNum) => {
+  return http.get(`/video/${videoId}/getVideoComment/page/${pageNum}`)
+}
