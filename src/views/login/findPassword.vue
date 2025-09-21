@@ -2,8 +2,9 @@
 import { ref, inject } from 'vue'
 import { loginStore } from '@/stores/counter'
 import { findPassword, getCode, resetPassword } from '@/api/login'
+import { Global } from '@/stores/global'
+const global = Global()
 const LoginStore = loginStore()
-const toast = inject('toast')
 
 const findPasswordForm = ref({
     email: '653391740@qq.com',
@@ -19,22 +20,22 @@ const resetForm = () => {
 }
 
 const findPasswordSubmit = async () => {
-    if (!Object.values(findPasswordForm.value).every(item => item)) return toast.show('请输入完整信息')
+    if (!Object.values(findPasswordForm.value).every(item => item)) return global.$toast.show('请输入完整信息')
     try {
-        toast.loading('重置中')
+        global.$toast.loading('重置中')
         await resetPassword(findPasswordForm.value)
         LoginStore.findPasswordShow = false
-        toast.show('密码重置成功')
+        global.$toast.show('密码重置成功')
         resetForm()
     } catch (error) {
-        if (error.response.data.message === 'code_error') return toast.show('验证码错误')
-        toast.show('密码重置失败')
+        if (error.response.data.message === 'code_error') return global.$toast.show('验证码错误')
+        global.$toast.show('密码重置失败')
     }
 }
 
 const GetfindPasswordCode = async () => {
-    if (!findPasswordForm.value.email) return toast.show('请输入邮箱')
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(findPasswordForm.value.email)) return toast.show('请输入正确的邮箱')
+    if (!findPasswordForm.value.email) return global.$toast.show('请输入邮箱')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(findPasswordForm.value.email)) return global.$toast.show('请输入正确的邮箱')
     try {
         await findPassword(findPasswordForm.value.email)
         let timer = setInterval(() => {
@@ -46,8 +47,8 @@ const GetfindPasswordCode = async () => {
         }, 1000)
         await getCode(findPasswordForm.value.email)
     } catch (error) {
-        if (error.response.data.message === 'user not found by email.') return toast.show('邮箱不存在')
-        toast.show('获取验证码失败')
+        if (error.response.data.message === 'user not found by email.') return global.$toast.show('邮箱不存在')
+        global.$toast.show('获取验证码失败')
     }
 }
 </script>

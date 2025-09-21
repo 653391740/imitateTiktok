@@ -1,14 +1,16 @@
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
 export const commentStore = defineStore('comment', () => {
   const showPopup = ref(false)
   const commentNum = ref(0)
   const commentId = ref('')
+  const replyId = ref('') // 未开发
   return {
     showPopup,
     commentNum,
     commentId,
+    replyId,
   }
 })
 export const loginStore = defineStore('login', () => {
@@ -17,11 +19,11 @@ export const loginStore = defineStore('login', () => {
   const registerTime = ref(60)
   const findPasswordShow = ref(false)
   const findPasswordTime = ref(60)
-  const isLogin = ref(Boolean(localStorage.getItem('tiktok_userinfo')))
+  const userId = ref(JSON.parse(localStorage.getItem('tiktok_userinfo'))?.userId || '')
 
-  const closeLogin = () => {
+  const closeLogin = (Id) => {
     loginShow.value = false
-    isLogin.value = true
+    userId.value = Id
   }
 
   return {
@@ -29,7 +31,7 @@ export const loginStore = defineStore('login', () => {
     registerShow,
     findPasswordShow,
     findPasswordTime,
-    isLogin,
+    userId,
     registerTime,
     closeLogin,
   }

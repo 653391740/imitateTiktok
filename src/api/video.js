@@ -23,3 +23,15 @@ export const triggerLike = (userId, videoId) => {
 export const getVideoComment = (videoId, pageNum) => {
   return http.get(`/video/${videoId}/getVideoComment/page/${pageNum}`)
 }
+
+/**
+ * 发送视频评论
+ * @param {string} fromUserId 谁发布的评论
+ * @param {string} replyId 回复评论的id (如果是回复评论，否则为空)
+ * @param {string} content 评论内容
+ * @param {string} toVideoId 评论了哪个视频
+ * @returns {object} 包含评论结果的对象
+ */
+export const sendVideoComment = (data) => {
+  return http.post(`/user/commentVideo`, data)
+}

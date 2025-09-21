@@ -8,6 +8,9 @@ const handleScroll = async () => {
     const { scrollTop, clientHeight, scrollHeight } = pullupload.value
     if (!(scrollTop + clientHeight >= scrollHeight - 100)) return
     if (loading.value || !attrs.hasMore) return
+    AsyncPullup()
+}
+const AsyncPullup = async () => {
     try {
         loading.value = true
         await attrs.onPullup()
@@ -20,7 +23,7 @@ const handleScroll = async () => {
 const scrollToTop = () => {
     if (pullupload.value) {
         pullupload.value.scrollTop = 0
-        handleScroll()
+        AsyncPullup()
     }
 }
 // 暴露内部的 DOM 元素，以便父组件可以重置滚动位置
@@ -73,6 +76,10 @@ defineExpose({
             border-top-color: transparent;
             border-left-color: transparent;
             animation: loading-spin 0.8s linear infinite;
+        }
+
+        button {
+            color: #eeeeeebe;
         }
     }
 }

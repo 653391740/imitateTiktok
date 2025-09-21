@@ -1,8 +1,9 @@
 <script setup>
-import { ref, defineEmits, watch, onMounted, inject, defineExpose, } from 'vue'
+import { ref, defineEmits, watch, onMounted, defineExpose } from 'vue'
+import { Global } from '@/stores/global'
 const video = ref(null);
 const isPlaying = ref(false);
-const toast = inject('toast')
+const global = Global();
 
 const props = defineProps({
     item: {
@@ -32,11 +33,11 @@ const playPromise = () => {
         isPlaying.value = false;
     }).catch(error => {
         if (error.message.includes(`play() failed because the user didn't interact with the document first.`)) {
-            toast.show('由于浏览器安全策略请先点击打开声音')
+            global.$toast.show('由于浏览器安全策略请先点击打开声音')
             isPlaying.value = true;
         }
-    });
-}
+        });
+    }
 defineExpose({
     playPromise
 })

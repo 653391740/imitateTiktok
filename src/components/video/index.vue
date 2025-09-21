@@ -2,7 +2,7 @@
 import { ref, onMounted, defineExpose, nextTick, onActivated, defineProps } from 'vue';
 import Video from '@/components/video/video.vue'
 import Side from '@/components/video/side-desc.vue'
-import CommentPopup from '@/components/video/commentPopup.vue'
+import CommentPopup from '@/components/comment/commentPopup.vue'
 const activeIndex = ref(0); // 当前播放视频索引
 const swiper = ref(null)
 const video = ref(null)
@@ -20,7 +20,6 @@ onActivated(() => {
     })
 })
 
-
 const handleSwiperChange = (index) => {
     activeIndex.value = index;
 }
@@ -32,7 +31,7 @@ const handleVideoEnd = (index) => {
 // 切换到指定索引的视频
 const toIndex = (index, smooth = true) => {
     activeIndex.value = index;
-    swiper.value.swipeTo(activeIndex.value, smooth)
+    swiper.value.swipeTo(index, smooth)
     video.value[index].playPromise();
 }
 defineExpose({

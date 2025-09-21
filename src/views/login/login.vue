@@ -2,7 +2,8 @@
 import { ref, inject } from 'vue'
 import { loginStore } from '@/stores/counter'
 import { login, getUserInfo } from '@/api/login'
-const toast = inject('toast')
+import { Global } from '@/stores/global'
+const global = Global()
 const LoginStore = loginStore()
 
 const formData = ref({
@@ -10,7 +11,8 @@ const formData = ref({
     password: 'qqqqqq'
 })
 
-const resetForm = () => {
+const close = () => {
+    LoginStore.loginShow = false
     formData.value = {
         email: '',
         password: ''
@@ -20,16 +22,16 @@ const resetForm = () => {
 const handleLogin = async () => {
     if (Object.values(formData.value).every(item => item)) {
         try {
-            toast.loading('登录中')
+            global.$toast.loading('登录中')
             await new Promise(resolve => setTimeout(resolve, 1000));
             const { userId } = await login(formData.value)
             const res = await getUserInfo(userId)
             localStorage.setItem('tiktok_userinfo', JSON.stringify(res))
-            LoginStore.closeLogin()
-            toast.show('登录成功')
-            resetForm()
+            LoginStore.closeLogin(res.userId)
+            global.$toast.show('登录成功')
+            close()
         } catch (error) {
-            toast.show('账号或密码错误')
+            global.$toast.show('账号或密码错误')
         }
     }
 }
@@ -37,7 +39,7 @@ const handleLogin = async () => {
 <template>
     <popup position="bottom" background="#fff" :show="LoginStore.loginShow">
         <div class="header">
-            <span class="close iconfont icon-X" @click="LoginStore.loginShow = false"></span>
+            <span class="close iconfont icon-X" @click="close"></span>
             <p @click="LoginStore.registerShow = true">注册新账号</p>
         </div>
 

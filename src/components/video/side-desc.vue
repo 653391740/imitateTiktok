@@ -23,11 +23,11 @@ const Routeruser = () => {
 }
 
 const toggleLike = async () => {
-    if (!LoginStore.isLogin) return LoginStore.loginShow = true
+    if (!LoginStore.userId) return LoginStore.loginShow = true
     if (loading.value) return
     loading.value = true
     try {
-        const msg = await triggerLike(props.item.Video.userId, props.item.Video.videoId)
+        const msg = await triggerLike(LoginStore.userId, props.item.Video.videoId)
         if (msg === '喜欢成功') {
             props.item.WSLCNum.likeNum++
             props.item.WSLCNum.isLike = true
@@ -43,7 +43,7 @@ const toggleLike = async () => {
 }
 
 const openCommentPopup = () => {
-    if (!LoginStore.isLogin) return LoginStore.loginShow = true
+    if (!LoginStore.userId) return LoginStore.loginShow = true
     CommentStore.showPopup = true
     CommentStore.commentNum = props.item.WSLCNum.commentNum
     CommentStore.commentId = props.item.Video.videoId
@@ -52,9 +52,7 @@ const openCommentPopup = () => {
 
 <template>
     <div class="side">
-        <img @click="Routeruser"
-            :src="'http://43.138.15.137:3000' + props.item.Video.userAvatar || 'http://43.138.15.137:3000/assets/avatar/default.png'"
-            alt="">
+        <img @click="Routeruser" :src="$imgSrc(props.item.Video.userAvatar)" alt="">
         <span @click="toggleLike" :data-count="props.item.WSLCNum.likeNum"
             :class="{ 'active': props.item.WSLCNum.isLike }" class="like iconfont icon-aixin"></span>
         <span @click="openCommentPopup" :data-count="props.item.WSLCNum.commentNum"
