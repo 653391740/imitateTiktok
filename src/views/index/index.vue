@@ -47,6 +47,7 @@ nav {
     left: 0;
     display: flex;
     align-items: center;
+    border-top: 1px solid #333;
 
     a {
         flex: 0 0 20%;

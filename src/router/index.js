@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { loginStore } from '@/stores/counter'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -63,17 +65,18 @@ const router = createRouter({
   ],
 })
 // // 白名单
-// const whiteList = ['/home']
-// // to 即将进入的目标  from 即将离开的源头 next 是一个函数，表示放行
-// router.beforeEach((to, from, next) => {
-//   if (localStorage.getItem('tiktok')) {
-//     next()
-//   } else {
-//     if (whiteList.includes(to.path)) {
-//       next()
-//     } else {
-//       next('/home')
-//     }
-//   }
-// })
+const whiteList = ['/home']
+router.beforeEach((to, from, next) => {
+  const LoginStore = loginStore()
+  if (localStorage.getItem('tiktok')) {
+    next()
+  } else {
+    if (whiteList.includes(to.path)) {
+      next()
+    } else {
+      next('/home')
+      LoginStore.loginShow = true
+    }
+  }
+})
 export default router

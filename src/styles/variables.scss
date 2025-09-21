@@ -6,3 +6,81 @@ $backcolor: #161622;
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+@mixin Control-style {
+    height: 44px;
+    border: 0;
+    border-radius: 5px;
+    outline: none;
+}
+
+@mixin login-header {
+    .header {
+        display: flex;
+        justify-content: space-between;
+        padding: 20px;
+        color: #ccc;
+    }
+}
+
+@mixin Register-login-style {
+    form {
+        @include position-center;
+        width: 70%;
+        top: 40%;
+        display: flex;
+        flex-direction: column;
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #7e8c8d;
+            font-size: 12px;
+        }
+
+        input {
+            @include Control-style;
+            margin-bottom: 10px;
+            background-color: #F9F9F9;
+            padding-left: 10px;
+        }
+
+        button {
+            @include Control-style;
+            background-color: #FC3058;
+            color: #fff;
+            margin-top: 40px;
+        }
+    }
+}
+
+@mixin code($backcolor: #B669D6, $color: #ca88e7) {
+    .code {
+        display: flex;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        overflow: hidden;
+        gap: 5px;
+        background-color: $backcolor;
+
+        input {
+            width: calc(100% - 100px);
+            margin-bottom: 0;
+            border-radius: 0;
+            background-color: $color;
+
+            &::placeholder {
+                color: #835bb0;
+            }
+        }
+
+        button {
+            flex: 0 0 95px;
+            flex-shrink: 0;
+            background-color: $color;
+            color: #fff;
+        }
+    }
+}

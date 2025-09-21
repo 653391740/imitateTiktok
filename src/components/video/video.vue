@@ -1,5 +1,6 @@
 <script setup>
-import { ref, defineEmits, watch, onMounted, inject, defineExpose } from 'vue'
+import { ref, defineEmits, watch, onMounted, inject, defineExpose, } from 'vue'
+import Side from '@/components/video/side-desc.vue'
 const video = ref(null);
 const isPlaying = ref(false);
 const toast = inject('toast')
@@ -24,6 +25,7 @@ const emit = defineEmits(['ended'])
 onMounted(() => {
     if (props.activeIndex === props.index) playPromise();
 })
+
 const playPromise = () => {
     if (!video.value) return
     const playPromise = video.value.play();
@@ -62,11 +64,13 @@ watch(() => props.activeIndex, (newCurrentIndex, oldCurrentIndex) => {
 })
 </script>
 
-<template><video ref="video" :src="item.videoPath || item.Video?.videoPath"
-        :poster="item.videoCover || item.Video?.videoCover" webkit-playsinline="" playsinline=""
-        x5-video-player-type="h5" preload="none" :alt="item.videoId || item.Video?.videoId" @click="togglePlayback"
-        @ended="emit('ended')" />
-    <i class="iconfont icon-kaishi1" v-show="isPlaying" /></template>
+<template>
+    <video ref="video" :src="item.Video.videoPath" :poster="item.videoCover || item.Video?.videoCover"
+        webkit-playsinline="" playsinline="" x5-video-player-type="h5" preload="none"
+        :alt="item.videoId || item.Video?.videoId" @click="togglePlayback" @ended="emit('ended')" />
+    <i class="iconfont icon-bofang" v-show="isPlaying" />
+    <Side :item="props.item"></Side>
+</template>
 <style scoped lang="scss">
 video {
     display: block;
@@ -76,11 +80,11 @@ video {
 
 .iconfont {
     position: absolute;
-    top: 50%;
+    top: 48%;
     left: 50%;
     font-size: 45px;
     transform: translate(-50%, -50%);
-    color: #fff;
+    color: #eee;
     pointer-events: none;
 }
 </style>
