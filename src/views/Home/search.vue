@@ -2,15 +2,17 @@
 import { ref, toRefs, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { searchStore } from '@/stores/counter'
+import searchUser from './search-user.vue'
+import searchVideo from './search-video.vue'
+
 const { inputvalue } = toRefs(searchStore())
 const router = useRouter()
 const route = useRoute()
+const searchType = ref('video')
 
-watch(() => route.path, (newPath, oldPath) => {
-  if (newPath !== oldPath) {
-    inputvalue.value = ''
-  }
-}, { flush: 'post' })
+watch(() => searchType.value, (newPath, oldPath) => {
+    
+})
 
 </script>
 
@@ -24,11 +26,12 @@ watch(() => route.path, (newPath, oldPath) => {
         </div>
     </div>
     <div class="tab">
-        <router-link to="/search/video">视频</router-link>
-        <router-link to="/search/user">用户</router-link>
+        <a @touchstart="searchType = 'video'" :class="{ 'active': searchType === 'video' }">视频</a>
+        <a @touchstart="searchType = 'user'" :class="{ 'active': searchType === 'user' }">用户</a>
     </div>
     <div class="content">
-        <router-view> </router-view>
+        <searchVideo v-show="searchType === 'video'"></searchVideo>
+        <searchUser v-show="searchType === 'user'"></searchUser>
     </div>
 </template>
 
@@ -47,7 +50,7 @@ watch(() => route.path, (newPath, oldPath) => {
         padding: 12px;
         color: #8b8c96;
 
-        &.router-link-active {
+        &.active {
             color: #fff;
             border-bottom: 2px solid #face15;
         }

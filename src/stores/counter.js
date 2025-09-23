@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { login, getUserInfo } from '@/api/login'
 import { getPopularVideo, isLiked } from '@/api/video'
 import { FanUnreadNum, byLikeUnreadNum, byCommentUnreadNum, getAtUnreadNum } from '@/api/Chat'
-
+import { Toast } from '@/plugin/Toast/index.js';
 export const searchStore = defineStore('search', () => {
   const inputvalue = ref('')
   return {
@@ -102,6 +102,7 @@ export const chatStore = defineStore('chat', () => {
 export const homeStore = defineStore('home', () => {
   const VideoList = ref([])
   const isLoading = ref(false)
+  const status = ref(200)
   const getVideoList = async () => {
     try { // 获取首页视频内容
       isLoading.value = true
@@ -126,6 +127,7 @@ export const homeStore = defineStore('home', () => {
       }
     } catch (error) {
       console.log(error);
+      status.value = error.status
     } finally {
       isLoading.value = false
     }
@@ -134,6 +136,7 @@ export const homeStore = defineStore('home', () => {
     VideoList.value.map(e => e.isLiked = false)
   }
   return {
+    status,
     VideoList,
     isLoading,
     getVideoList,

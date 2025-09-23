@@ -123,18 +123,16 @@ onActivated(async () => {
     count.value = 1
     userinfoContainer.value.addEventListener('touchstart', tstart)
     userinfoContainer.value.addEventListener('touchend', tend)
+    userInfo.value = userinfo
 
     const id = route.params.id === 'me' ? userinfo.userId : route.params.id
     if (id !== userinfo.userId) userInfo.value = await getUserInfo(id, userinfo.userId)
-    console.log(id)
-
+    
     Followersnum.value = await FollowersNum(id)
     Fansnum.value = await FansNum(id)
     Likesnum.value = await LikesNum(id)
     byLikesnum.value = await byLikesNum(id)
     Videosnum.value = await VideosNum(id)
-
-    console.log(Followersnum.value, Fansnum.value, Likesnum.value, byLikesnum.value, Videosnum.value)
 
     nextTick(() => {
         // 使用滚动事件检测导航栏是否处于吸附状态

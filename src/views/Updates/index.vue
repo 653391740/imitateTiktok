@@ -61,7 +61,7 @@ const publish = async () => {
 
         const coverData = new FormData()
         const videoId = file?.filename.split('.')[0]
-        
+
         coverData.append('videoId', videoId)
         // 将Data URL转换为Blob对象
         const decodedString = atob(coverUrl.split(',')[1])
@@ -84,13 +84,13 @@ const publish = async () => {
         proxy.$toast.show('发布成功')
         router.push({ path: 'user' })
     } catch (err) {
-        console.log(err);
+        proxy.$toast.show('上传失败，请重试')
     }
 }
 const showDialog = ref(false)
 </script>
 <template>
-    <Dialog :show="showDialog" :options="{ title: '是否保存修改' }" @close="showDialog = false" @confirm="publish" />
+    <Dialog :show="showDialog" :options="{ title: '是否发布动态' }" @close="showDialog = false" @confirm="publish" />
     <Title title="发布动态" back />
     <div class="content">
         <div class="video-wrap">

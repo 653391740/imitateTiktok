@@ -100,20 +100,7 @@ const router = createRouter({
     {
       path: '/search',
       name: 'Search',
-      redirect: '/search/video',
-      component: () => import('@/views/Home/search.vue'),
-      children: [
-        {
-          path: 'video',
-          name: 'SearchVideo',
-          component: () => import('@/views/Home/search-video.vue')
-        },
-        {
-          path: 'user',
-          name: 'SearchUser',
-          component: () => import('@/views/Home/search-user.vue')
-        }
-      ]
+      component: () => import('@/views/Home/search.vue')
     }
   ],
 })
