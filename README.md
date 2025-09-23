@@ -100,4 +100,131 @@ const scrollToLetter = (val) => {
 
 ---
 
+---
+
+## 问题 #002: 用户页面滑动逻辑重构导致滚动行为变化
+
+**日期**: 2023-11-10  
+**状态**: 已解决  
+**优先级**: 中
+
+### 问题描述
+
+在 `src/views/User/index.vue` 文件中，滑动逻辑从传统的 `marginTop` 方式重构为现代化的 `transform: translateY()` 方式。修改涉及两个关键提交：
+- 9a7bad8：修改前的滑动逻辑
+- cd327a9：修改完成后的滑动逻辑
+
+#### 具体技术问题
+
+**marginTop实现的技术缺陷**：
+1. **文档流影响**：marginTop会修改整个元素的滚动高度，导致文档流重新计算
+2. **移动端兼容性**：在移动端环境中，marginTop触发的重绘可能引起页面闪屏
+3. **性能问题**：marginTop改变会触发布局重排（reflow），影响性能表现
+
+**移动端具体表现**：
+- 浏览器环境：scrollTop === 0时上下滑动无明显问题
+- 移动APP WebView：会出现闪屏现象，用户体验较差
+- 原因：marginTop改变时触发了文档流的重新计算和重绘
+
+### 主要变化分析
+
+#### 1. 状态变量重构
+
+**修改前**：
+```javascript
+const starty = ref(0)
+const movey = ref(0)
+const scrollTops = ref(0)
+```
+
+**修改后**：
+```javascript
+const DifY = ref(0)
+const StartY = ref(0)
+const moveY = ref(150)
+const down = ref(false)
+const speed = ref(0) // 速度
+const Time = ref(0) // 时间
+```
+
+#### 2. 实现方式变更
+
+**修改前**：使用 `marginTop` 控制用户信息区域移动
+```javascript
+userinfoDom.value.style.marginTop = `${max}px`
+bg.value.style.height = `${max < 150 ? 150 : max}px`
+```
+
+**修改后**：使用 `transform: translateY()` 控制整个容器移动
+```javascript
+const updataY = (DifY) => {
+    requestAnimationFrame(() => {
+        if (DifY > 150) bg.value.style.height = `${DifY}px`
+        userinfoContainer.value.style.transform = `translateY(${DifY}px)`
+    })
+}
+```
+
+#### 3. 动画和性能优化
+
+**新增特性**：
+- 添加了速度计算和时间追踪：`speed.value = (movey - DifY.value) / (time - Time.value)`
+- 使用 `requestAnimationFrame` 优化动画性能
+- 支持惯性滚动效果：`const Finalposition = Math.min((Math.max(offsetY + DifY.value, max)), 150)`
+
+#### 4. 代码简化
+
+**移除的功能**：
+- 复杂的滚动监听逻辑
+- 导航栏 sticky 状态管理 (`navObserver`)
+- `handleScroll` 事件处理函数
+
+### 技术影响
+
+#### 优点
+1. **性能提升**：`transform` 属性使用 GPU 加速，动画更流畅
+2. **现代化方案**：`translateY` 是当前移动端开发的最佳实践
+3. **惯性滚动**：支持速度计算，提供类似原生应用的滚动体验
+4. **代码简化**：移除了复杂的状态管理，代码更易维护
+
+#### 潜在风险
+1. **marginTop对文档流的影响**：marginTop会修改整个滚动高度，导致影响文档流
+2. **移动端闪屏问题**：在scrollTop === 0时浏览器上下滑动没问题，但手机APP上会出现闪屏现象
+3. **滚动监听逻辑变化**：从 marginTop 切换到 transform 可能影响现有的滚动监听逻辑
+4. **兼容性考虑**：某些旧设备可能对 transform 动画支持不佳
+
+### 解决方案确认
+
+此次重构是一个**正面优化**，具体改进包括：
+
+1. **性能优化**：使用 `requestAnimationFrame` 确保动画帧率稳定
+2. **用户体验提升**：添加惯性滚动效果，模拟原生应用行为
+3. **代码现代化**：采用更符合当前前端开发标准的实现方式
+4. **功能完整性**：保持了原有的滑动功能，同时增强了动画效果
+
+### 代码位置
+
+- 文件路径：`src/views/User/index.vue`
+- 涉及提交：9a7bad8 → cd327a9
+- 主要方法：`tstart`, `tmove`, `tend`, `updataY`, `maxtransform`
+
+### 验证结果
+
+重构后的滑动逻辑具有以下特点：
+- ✅ 滑动响应更灵敏
+- ✅ 动画效果更流畅
+- ✅ 性能表现更好
+- ✅ 代码结构更清晰
+
+### 技术要点
+
+1. **transform vs margin**：transform 属性不会触发布局重绘，性能更优
+2. **requestAnimationFrame**：浏览器优化动画的最佳实践
+3. **速度计算**：通过时间差和位移差计算滑动速度，实现惯性效果
+4. **硬件加速**：transform 属性触发 GPU 加速，提升动画性能
+
+### 总结
+
+这次滑动逻辑重构是一次成功的优化，将传统的 marginTop 实现方式升级为现代化的 transform 方案，不仅提升了性能和用户体验，还简化了代码结构。这是一个值得推广的优化模式，可以考虑应用到其他需要滑动交互的组件中。
+
 *（后续问题可在此文档下方继续添加，格式参考问题 #001）*

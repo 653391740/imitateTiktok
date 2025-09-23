@@ -5,8 +5,6 @@ const pullupload = ref(null)
 const attrs = useAttrs()
 
 const handleScroll = async (e) => {
-    console.log(e.target);
-    
     const newDom = e.target ? pullupload.value : attrs.newDom
     const { scrollTop, clientHeight, scrollHeight } = newDom
     if (!(scrollTop + clientHeight >= scrollHeight - 100)) return
