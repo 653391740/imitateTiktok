@@ -41,9 +41,13 @@ onMounted(() => {
     if (route.path.includes('videoAndDesc')) isVideoAndDesc.value = true
     if (isVideoAndDesc.value) {
         const userinfoContainer = document.querySelector('.userinfo-container')
-        userinfoContainer.addEventListener('scroll', () => {
-            const { scrollTop, clientHeight, scrollHeight } = userinfoContainer
-            newDom.value = { scrollTop, clientHeight, scrollHeight }
+        userinfoContainer.addEventListener('touchmove', () => {
+            const { top, height } = userinfoContainer.getBoundingClientRect()
+            newDom.value = {
+                scrollTop: top < 0 ? Math.abs(top) : 0,
+                clientHeight: window.innerHeight,
+                scrollHeight: height
+            }
         })
     }
 })

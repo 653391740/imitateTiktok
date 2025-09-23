@@ -56,13 +56,13 @@ const showPopup = ref(false)
 const newDom = ref({})
 onMounted(() => {
     const userinfoContainer = document.querySelector('.userinfo-container')
-    userinfoContainer.addEventListener('scroll', () => {
-        const { scrollTop, clientHeight, scrollHeight } = userinfoContainer
-        newDom.value = { scrollTop, clientHeight, scrollHeight }
-        // console.log(scrollTop, clientHeight, scrollHeight);
-    })
     userinfoContainer.addEventListener('touchmove', () => {
-        // console.log(window.getComputedStyle(userinfoContainer).transform);
+        const { top, height } = userinfoContainer.getBoundingClientRect()
+        newDom.value = {
+            scrollTop: top < 0 ? Math.abs(top) : 0,
+            clientHeight: window.innerHeight,
+            scrollHeight: height
+        }
     })
 })
 
@@ -94,40 +94,22 @@ const del = async () => {
 }
 </script>
 <template>
-    <Dialog ref="dialogRef"
-        :options="{ title: '是否删除该视频' }"
-        @close="delshow = false"
-        @confirm="del"
-        :show="delshow">
+    <Dialog ref="dialogRef" :options="{ title: '是否删除该视频' }" @close="delshow = false" @confirm="del" :show="delshow">
     </Dialog>
-    <Pullupload class="pulluploadRef"
-        ref="pulluploadRef"
-        @pullup="loadmore"
-        :newDom="newDom"
-        :error="error"
+    <Pullupload class="pulluploadRef" ref="pulluploadRef" @pullup="loadmore" :newDom="newDom" :error="error"
         :hasMore="hasMore">
-        <li v-for="item, index in list"
-            :key="item.value.Video?.videoId || index"
-            @click="openPopup(index)">
+        <li v-for="item, index in list" :key="item.value.Video?.videoId || index" @click="openPopup(index)">
             <img :src="item.value.Video?.videoCover || ''">
             <div class="iconfont icon-aixin1">{{ item.value.WSLCNum?.likeNum || 0 }}</div>
-            <div class="iconfont icon-lajitong"
-                v-if="props.showDeleteIcon && route.params.id == 'me'"
+            <div class="iconfont icon-lajitong" v-if="props.showDeleteIcon && route.params.id == 'me'"
                 @click.stop="showDelConfirm(item.value)">
             </div>
         </li>
     </Pullupload>
-    <teleport :to="body">
-        <popup class="popupRef"
-            position="right"
-            background="#161622"
-            :show="showPopup">
-            <div class="close iconfont icon-zuojiantou"
-                @click="closePopup"></div>
-            <Video ref="videoRefs"
-                :VideoList="list"
-                :autoPlay="false"
-                @updateactiveIndex="activeIndex = $event">
+    <teleport to="body">
+        <popup class="popupRef" position="right" background="#161622" :show="showPopup">
+            <div class="close iconfont icon-zuojiantou" @click="closePopup"></div>
+            <Video ref="videoRefs" :VideoList="list" :autoPlay="false" @updateactiveIndex="activeIndex = $event">
                 <template #default="{ item }">
                     <Send @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
                     </Send>

@@ -30,39 +30,59 @@ const DifY = ref(0)
 const StartY = ref(0)
 const moveY = ref(150)
 const down = ref(false)
+const speed = ref(0) // 速度
+const Time = ref(0) // 时间
 
-const updataY = () => {
-    userinfoContainer.value.style.transform = `translateY(${DifY.value}px)`
+const updataY = (DifY) => {
+    requestAnimationFrame(() => {
+        if (DifY > 150) bg.value.style.height = `${DifY}px`
+        userinfoContainer.value.style.transform = `translateY(${DifY}px)`
+    })
+}
+const maxtransform = () => {
+    const { height } = userinfoContainer.value.getBoundingClientRect()
+    const max = height - window.innerHeight
+    return max > 0 ? -max : max
 }
 const tstart = (e) => {
     down.value = true
     StartY.value = e.touches[0].pageY
-    userinfoContainer.value.addEventListener('touchmove', tmove)
-
+    userinfoContainer.value.addEventListener('touchmove', tmove, { passive: false })
+    moveY.value = parseFloat(window.getComputedStyle(userinfoContainer.value).transform.split(',')[5])
+    updataY(moveY.value)
 }
+
 const tmove = (e) => {
-    e.preventDefault()
     const currentPageY = e.touches[0].pageY
-    DifY.value = moveY.value + currentPageY - StartY.value
-    updataY()
-    if (DifY.value > 150) {
-        bg.value.style.height = `${DifY.value}px`
-    }
-    console.log(DifY.value);
+    const max = maxtransform()
+
+    const { height } = userinfoContainer.value.getBoundingClientRect()
+    const time = Date.now()
+    const movey = height - window.innerHeight > 0 ? Math.max(moveY.value + currentPageY - StartY.value, max) : 150
+    speed.value = (movey - DifY.value) / (time - Time.value)
+
+    updataY(movey)
+    DifY.value = movey
+    Time.value = time
+    if (DifY.value > 350) tend()
 }
 
 const tend = (e) => {
     down.value = false
     moveY.value = DifY.value
+    const offsetY = speed.value * 500
+    const max = maxtransform()
+    const Finalposition = Math.min((Math.max(offsetY + DifY.value, max)), 150)
+    updataY(Finalposition)
     if (moveY.value > 150) {
-        bg.value.style.transition = 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
-        bg.value.style.height = `150px`
-        userinfoContainer.value.style.transition = 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
-        userinfoContainer.value.style.transform = `translateY(150px)`
         moveY.value = 150
+        requestAnimationFrame(() => {
+            userinfoContainer.value.style.transform = `translateY(150px)`
+            bg.value.style.height = `150px`
+        })
+        userinfoContainer.value.removeEventListener('touchmove', tmove)
     }
 }
-
 
 const toUpdateUserInfo = () => {
     router.push({ name: 'UpdateUserInfo' })
@@ -102,39 +122,24 @@ onActivated(async () => {
 })
 </script>
 <template>
-    <Dialog :show="showDialog"
-        :options="{ title: '是否保存修改' }"
-        @close="showDialog = false"
-        @confirm="Logout" />
-    <div class="r"
-        v-if="route.params.id == 'me'"
-        @click="showMenu = !showMenu">...
+    <Dialog :show="showDialog" :options="{ title: '是否保存修改' }" @close="showDialog = false" @confirm="Logout" />
+    <div class="r" v-if="route.params.id == 'me'" @click="showMenu = !showMenu">...
         <transition name="fade">
-            <ul class="more-menu"
-                v-if="showMenu">
+            <ul class="more-menu" v-if="showMenu">
                 <li @click="toUpdateUserInfo">修改个人资料</li>
                 <li @click="showDialog = true">注销</li>
             </ul>
         </transition>
     </div>
-    <div class="l iconfont icon-zuojiantou"
-        v-else
-        @click="router.go(-count)"></div>
+    <div class="l iconfont icon-zuojiantou" v-else @click="router.go(-count)"></div>
 
     <img src="/src/assets/bg.jpg"
-        :style="{ 'transition': down ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)' }"
-        class="bg"
-        ref="bg">
-    <div class="userinfo-container"
-        ref="userinfoContainer"
+        :style="{ 'transition': down ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)' }" class="bg" ref="bg">
+    <div class="userinfo-container" ref="userinfoContainer"
         :style="{ 'transition': down ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)' }"
         :class="{ 'pb': route.params.id === 'me' }">
-        <div class="userinfo"
-            ref="userinfoContainer">
-            <Followbtn v-if="route.params.id !== 'me'"
-                class="Followbtn"
-                :item="userInfo"
-                :myUserId="userinfo.userId">
+        <div class="userinfo" ref="userinfoContainer">
+            <Followbtn v-if="route.params.id !== 'me'" class="Followbtn" :item="userInfo" :myUserId="userinfo.userId">
             </Followbtn>
             <div class="avatar">
                 <img :src="$imgSrc(userInfo.userAvatar)">
@@ -144,8 +149,7 @@ onActivated(async () => {
                 <div class="uid">抖音号 : {{ userInfo.userId }}</div>
                 <div class="desc">{{ userInfo.userDesc }}</div>
                 <div class="gender">
-                    <div :class="userInfo.userGender === '男' ? 'icon-nan' : 'icon-nv'"
-                        class="iconfont"></div>
+                    <div :class="userInfo.userGender === '男' ? 'icon-nan' : 'icon-nv'" class="iconfont"></div>
                     <p>{{ userInfo.userAge }}岁</p>
                 </div>
                 <div class="num-wrap">
@@ -164,16 +168,14 @@ onActivated(async () => {
                 </div>
             </div>
         </div>
-        <nav ref="nav"
-            :data-name="userInfo.userNickname">
+        <nav ref="nav" :data-name="userInfo.userNickname">
             <router-link :to="`/user/${route.params.id}/videos`">作品{{ Videosnum }}</router-link>
             <router-link :to="`/user/${route.params.id}/videoAndDesc`">动态{{ Videosnum }}</router-link>
             <router-link :to="`/user/${route.params.id}/likes`">喜欢{{ Likesnum }}</router-link>
         </nav>
         <router-view v-slot="{ Component }">
             <keep-alive max="10">
-                <component :is="Component"
-                    :key="route.fullPath" />
+                <component :is="Component" :key="route.fullPath" />
             </keep-alive>
         </router-view>
     </div>
