@@ -18,15 +18,19 @@ watch(() => attrs.newDom?.scrollTop, () => {
 const AsyncPullup = async () => {
     try {
         loading.value = true
-        await attrs.onPullup()
+        return await attrs.onPullup()
     } catch (error) {
         attrs.error = true
     } finally {
         loading.value = false
     }
+
 }
 onMounted(async () => {
-    await AsyncPullup()
+    const res = await AsyncPullup()
+    console.log(res);
+    
+    if (!res) return
     await nextTick()
     if (pullupload.value.scrollHeight === pullupload.value.clientHeight) await AsyncPullup()
 })

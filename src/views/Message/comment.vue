@@ -10,7 +10,7 @@ const loadmore = async (page) => {
 
 </script>
 <template>
-    <MessageNav @loadmore="loadmore" type="赞了你你的评论" title="@我的">
+    <MessageNav @loadmore="loadmore" type="赞了你你的评论" title="@我的" nomsgTitle="您还没有作品被评论哦" nomsgDesc="赶快分享你的视频给好友吧！">
         <template #right="{ item }">
             {{ item.commentContent }}
         </template>

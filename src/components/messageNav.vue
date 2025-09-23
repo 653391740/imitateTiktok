@@ -47,12 +47,12 @@ const loadmore = async () => {
         List.value.push(...data)
         page.value++
         error.value = false
+        
     } catch (err) {
         error.value = true
         console.log(err);
     }
 }
-
 </script>
 <template>
     <Title :title="attrs.title" back></Title>
@@ -70,13 +70,30 @@ const loadmore = async () => {
         </li>
         <template #noMore>
             <div class="noList" v-if="List.length === 0 && !hasMore">
-                暂无数据11
+                <p>{{ attrs.nomsgTitle || '暂无数据' }}</p>
+                <span>{{ attrs.nomsgDesc || '暂无更多数据' }}</span>
             </div>
         </template>
     </Pullupload>
 </template>
 
 <style lang="scss" scoped>
+.noList {
+    margin: 120px auto 0;
+
+    p {
+        color: #e8e8e9;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    span {
+        color: #8b8c96;
+        font-size: 12px;
+        line-height: 12px;
+    }
+}
+
 .pullupload {
     padding-top: 44px;
 
