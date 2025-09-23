@@ -25,6 +25,25 @@ export const getVideoComment = (videoId, pageNum) => {
 }
 
 /**
+ * 评论是否点赞
+ * @param {string} userId 用户id
+ * @param {string} videoId 视频id
+ * @returns {object} 包含点赞结果的对象
+ */
+export const isLiked = (userId, videoId) => {
+  return http.get(`/user/${userId}/isLiked/${videoId}`)
+}
+/**
+ * 评论是否点赞
+ * @param {string} userId 用户id
+ * @param {string} commentId 评论id
+ * @returns {object} 包含点赞结果的对象
+ */
+export const isLikedComment = (userId, commentId) => {
+  return http.get(`/user/${userId}/isLikedComment/${commentId}`)
+}
+
+/**
  * 发送视频评论
  * @param {string} fromUserId 谁发布的评论
  * @param {string} replyId 回复评论的id (如果是回复评论，否则为空)
@@ -34,4 +53,24 @@ export const getVideoComment = (videoId, pageNum) => {
  */
 export const sendVideoComment = (data) => {
   return http.post(`/user/commentVideo`, data)
+}
+
+/**
+ * 点赞/取消点赞（评论）
+ * @param {string} userId 用户id
+ * @param {string} videoId 视频id
+ * @param {string} commentId 评论id
+ * @returns {object} 包含点赞结果的对象
+ */
+export const triggerLikeComment = (userId, videoId, commentId) => {
+  return http.get(`/user/${userId}/triggerLikeComment/${videoId}/${commentId}`)
+}
+
+/**
+ * 我关注的动态
+ * @param {string} userId 用户id
+ * @param {string} page 页数
+ */
+export const FollowerVideo = (userId, page) => {
+  return http.get(`user/${userId}/FollowerVideo/page/${page}`)
 }

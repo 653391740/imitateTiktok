@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router'
+import CommentPopup from '@/components/comment/commentPopup.vue'
 
 const navItems = [
     {
@@ -37,6 +37,7 @@ const navItems = [
             </div>
         </router-link>
     </nav>
+    <CommentPopup></CommentPopup>
 </template>
 <style lang="scss" scoped>
 nav {

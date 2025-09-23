@@ -1,9 +1,7 @@
 <script setup>
-import { ref, defineEmits, watch, onMounted, defineExpose } from 'vue'
-import { Global } from '@/stores/global'
-const video = ref(null);
+import { ref, defineEmits, watch, onMounted, defineExpose, toRefs } from 'vue'
+const videodemo = ref(null);
 const isPlaying = ref(false);
-const global = Global();
 
 const props = defineProps({
     item: {
@@ -20,30 +18,30 @@ const props = defineProps({
         required: true
     }
 })
+const { item, activeIndex, index } = toRefs(props)
 const emit = defineEmits(['ended'])
 
 onMounted(() => {
-    if (props.activeIndex === props.index) playPromise();
+    if (activeIndex.value === index.value) playPromise();
 })
 
 const playPromise = () => {
-    if (!video.value) return
-    const playPromise = video.value.play();
+    if (!videodemo.value) return
+    const playPromise = videodemo.value.play();
     playPromise.then(() => {
         isPlaying.value = false;
     }).catch(error => {
         if (error.message.includes(`play() failed because the user didn't interact with the document first.`)) {
-            global.$toast.show('由于浏览器安全策略请先点击打开声音')
             isPlaying.value = true;
         }
-        });
-    }
+    });
+}
 defineExpose({
     playPromise
 })
 
 const togglePlayback = () => {
-    const currentVideo = video.value;
+    const currentVideo = videodemo.value;
     if (currentVideo.paused) {
         playPromise();
     } else {
@@ -52,11 +50,11 @@ const togglePlayback = () => {
     }
 }
 
-watch(() => props.activeIndex, (newCurrentIndex, oldCurrentIndex) => {
-    if (newCurrentIndex === props.index) {
+watch(() => activeIndex.value, (newCurrentIndex, oldCurrentIndex) => {
+    if (newCurrentIndex === index.value) {
         playPromise();
     } else {
-        const currentVideo = video.value;
+        const currentVideo = videodemo.value;
         currentVideo.pause();
         currentVideo.currentTime = 0;
         isPlaying.value = false;
@@ -65,9 +63,8 @@ watch(() => props.activeIndex, (newCurrentIndex, oldCurrentIndex) => {
 </script>
 
 <template>
-    <video ref="video" :src="item.Video.videoPath" :poster="item.videoCover || item.Video?.videoCover"
-        webkit-playsinline="" playsinline="" x5-video-player-type="h5" preload="none"
-        :alt="item.videoId || item.Video?.videoId" @click="togglePlayback" @ended="emit('ended')" />
+    <video ref="videodemo" :src="item.Video.videoPath" :poster="item.Video.videoCover" @click="togglePlayback"
+        @ended="emit('ended')" webkit-playsinline="" playsinline="" x5-video-player-type="h5" preload="none" />
     <i class="iconfont icon-bofang" v-show="isPlaying" />
 </template>
 <style scoped lang="scss">

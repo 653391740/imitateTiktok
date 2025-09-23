@@ -83,7 +83,6 @@ defineExpose({
 }
 
 .msg-icon {
-    margin-bottom: 8px;
     font-size: 24px;
 
     .icon-loading {

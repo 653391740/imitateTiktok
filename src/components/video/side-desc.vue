@@ -1,12 +1,12 @@
 <script setup>
-import { ref, defineProps } from 'vue'
+import { ref, defineProps, getCurrentInstance, toRefs } from 'vue'
 import { useRouter } from 'vue-router'
 import { triggerLike } from '@/api/video'
 import { commentStore, loginStore } from '@/stores/counter'
 const CommentStore = commentStore()
 const LoginStore = loginStore()
 const router = useRouter()
-const loading = ref(false)
+const { proxy } = getCurrentInstance()
 
 const props = defineProps({
     item: {
@@ -14,54 +14,46 @@ const props = defineProps({
         default: () => ({})
     }
 })
+const { Video, WSLCNum, isLiked } = toRefs(props.item)
 
 const Routeruser = () => {
     router.push({
         path: '/user',
-        query: { userId: props.item.Video.userId }
+        query: { userId: Video.value.userId }
     })
 }
 
-const toggleLike = async () => {
+const toggleLike = proxy.$throttle(async () => {
     if (!LoginStore.userId) return LoginStore.loginShow = true
-    if (loading.value) return
-    loading.value = true
     try {
-        const msg = await triggerLike(LoginStore.userId, props.item.Video.videoId)
+        const msg = await triggerLike(LoginStore.userId, Video.value.videoId)
         if (msg === '喜欢成功') {
-            props.item.WSLCNum.likeNum++
-            props.item.WSLCNum.isLike = true
+            WSLCNum.value.likeNum++
+            isLiked.value = true
         } else {
-            props.item.WSLCNum.likeNum--
-            props.item.WSLCNum.isLike = false
+            WSLCNum.value.likeNum--
+            isLiked.value = false
         }
     } catch (error) {
         console.log(error);
-    } finally {
-        setTimeout(() => loading.value = false, 300)
     }
-}
+})
 
-const openCommentPopup = () => {
-    if (!LoginStore.userId) return LoginStore.loginShow = true
-    CommentStore.showPopup = true
-    CommentStore.commentNum = props.item.WSLCNum.commentNum
-    CommentStore.commentId = props.item.Video.videoId
-}
+
 </script>
 
 <template>
     <div class="side">
-        <img @click="Routeruser" :src="$imgSrc(props.item.Video.userAvatar)" alt="">
-        <span @click="toggleLike" :data-count="props.item.WSLCNum.likeNum"
-            :class="{ 'active': props.item.WSLCNum.isLike }" class="like iconfont icon-aixin"></span>
-        <span @click="openCommentPopup" :data-count="props.item.WSLCNum.commentNum"
+        <img @click="Routeruser" :src="proxy.$imgSrc(Video.userAvatar)" alt="">
+        <span @click="toggleLike" :data-count="WSLCNum.likeNum" :class="{ 'active': isLiked }"
+            class="like iconfont icon-aixin"></span>
+        <span @click="CommentStore.openCommentPopup(Video.videoId, WSLCNum.commentNum)" :data-count="WSLCNum.commentNum"
             class="iconfont icon-pinglun"></span>
-        <span :data-count="props.item.WSLCNum.shareNum" class="iconfont icon-a-fenxiang2"></span>
+        <span :data-count="WSLCNum.shareNum" class="iconfont icon-a-fenxiang2"></span>
     </div>
     <div class="desc">
-        <p>@{{ props.item.Video.userNickname }}</p>
-        <p>{{ props.item.Video.videoDesc }}</p>
+        <p>@{{ Video.userNickname }}</p>
+        <p>{{ Video.videoDesc }}</p>
     </div>
 </template>
 

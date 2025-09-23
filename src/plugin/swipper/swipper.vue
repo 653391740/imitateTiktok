@@ -1,3 +1,58 @@
+<script setup>
+import { ref, onUpdated, onMounted } from 'vue'
+const props = defineProps({
+    vertical: {
+        type: Boolean,
+        default: false
+    },
+    length: {
+        type: Number,
+        default: 0
+    }
+})
+const emit = defineEmits(['change', 'scroll'])
+
+const container = ref(null)
+const activeIndex = ref(0)
+
+onUpdated(() => {
+    if (container.value) {
+        let scrollTimeout
+        container.value.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout)
+            scrollTimeout = setTimeout(() => {
+                scrollToIndex()
+            }, 100)
+        })
+    }
+    const { scrollTop, clientHeight, scrollHeight } = container.value
+    const scrollInfo = { scrollTop, clientHeight, scrollHeight }
+    emit('scroll', scrollInfo)
+})
+
+const swipeTo = (index, smooth = true) => {
+    if (index < 0 || index >= props.length) return
+    activeIndex.value = index
+    const scrollPosition = props.vertical ? index * container.value.offsetHeight : index * container.value.offsetWidth
+    container.value.scrollTo({
+        top: props.vertical ? scrollPosition : 0,
+        left: props.vertical ? 0 : scrollPosition,
+        behavior: smooth ? 'smooth' : 'instant'
+    })
+}
+
+
+defineExpose({
+    swipeTo,
+})
+const scrollToIndex = () => {
+    const scrollPosition = props.vertical ? container.value.scrollTop : container.value.scrollLeft
+    const itemSize = props.vertical ? container.value.offsetHeight : container.value.offsetWidth
+    const index = Math.round(scrollPosition / itemSize)
+    activeIndex.value = index
+    emit('change', activeIndex.value)
+}
+</script>
 <template>
     <div class="swipper" :class="{ vertical: props.vertical }">
         <div class="swipper-container" ref="container">
@@ -9,58 +64,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { ref, onUpdated, onMounted } from 'vue'
-
-const props = defineProps({
-    vertical: {
-        type: Boolean,
-        default: false
-    },
-    length: {
-        type: Number,
-        default: 0
-    }
-})
-const emit = defineEmits(['change'])
-
-const container = ref(null)
-const activeIndex = ref(0)
-
-onUpdated(() => {
-    if (container.value) {
-        const dom = container.value
-        let scrollTimeout
-        dom.addEventListener('scroll', () => {
-            clearTimeout(scrollTimeout)
-            scrollTimeout = setTimeout(() => {
-                scrollToIndex()
-            }, 100)
-        })
-    }
-})
-const swipeTo = (index, smooth = true) => {
-    if (index < 0 || index >= props.length) return
-    activeIndex.value = index
-    const scrollPosition = props.vertical ? index * container.value.offsetHeight : index * container.value.offsetWidth
-    container.value.scrollTo({
-        top: props.vertical ? scrollPosition : 0,
-        left: props.vertical ? 0 : scrollPosition,
-        behavior: smooth ? 'smooth' : 'instant'
-    })
-}
-defineExpose({
-    swipeTo
-})
-const scrollToIndex = () => {
-    const scrollPosition = props.vertical ? container.value.scrollTop : container.value.scrollLeft
-    const itemSize = props.vertical ? container.value.offsetHeight : container.value.offsetWidth
-    const index = Math.round(scrollPosition / itemSize)
-    activeIndex.value = index
-    emit('change', activeIndex.value)
-}
-</script>
 <style scoped lang="scss">
 .swipper {
     position: relative;

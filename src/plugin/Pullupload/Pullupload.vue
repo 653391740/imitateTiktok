@@ -1,18 +1,23 @@
 <script setup>
-import { ref, onMounted, onUnmounted, useAttrs, defineExpose } from 'vue'
+import { ref, useAttrs, watch, defineExpose } from 'vue'
 const loading = ref(false)
 const pullupload = ref(null)
 const attrs = useAttrs()
 
-const handleScroll = async () => {
-    const { scrollTop, clientHeight, scrollHeight } = pullupload.value
+const handleScroll = async (newDom = pullupload.value) => {
+    const { scrollTop, clientHeight, scrollHeight } = newDom
     if (!(scrollTop + clientHeight >= scrollHeight - 100)) return
     if (loading.value || !attrs.hasMore) return
     AsyncPullup()
 }
+
+watch(() => attrs.newDom?.scrollTop, () => {
+    handleScroll(attrs.newDom)
+})
 const AsyncPullup = async () => {
     try {
         loading.value = true
+        console.log('触发');
         await attrs.onPullup()
     } catch (error) {
         attrs.error = true

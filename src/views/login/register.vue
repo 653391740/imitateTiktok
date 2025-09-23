@@ -1,9 +1,8 @@
 <script setup>
-import { ref, inject } from 'vue'
+import { ref, inject, getCurrentInstance } from 'vue'
 import { loginStore } from '@/stores/counter'
 import { register, getCode } from '@/api/login'
-import { Global } from '@/stores/global'
-const global = Global()
+const { proxy } = getCurrentInstance()
 const LoginStore = loginStore()
 const formData = ref({
     email: '653391740@qq.com',
@@ -13,17 +12,16 @@ const formData = ref({
 const asyncRegister = async () => {
     if (Object.values(formData.value).every(item => item)) {
         try {
-            global.$toast.loading('注册中')
+            proxy.$toast.loading('注册中')
             await new Promise(resolve => setTimeout(resolve, 1000));
             const { newUserInfo } = await register(formData.value)
-            LoginStore.registerShow = false
             LoginStore.closeLogin(newUserInfo.userId)
             localStorage.setItem('tiktok_userinfo', JSON.stringify(newUserInfo))
-            global.$toast.show('注册成功')
+            proxy.$toast.show('注册成功')
             close()
         } catch (error) {
             if (error.response.data.message === 'The email is registered.') {
-                global.$toast.show('邮箱已被注册')
+                proxy.$toast.show('邮箱已被注册')
             }
         }
     }
@@ -37,8 +35,8 @@ const close = () => {
     }
 }
 const GetCode = async () => {
-    if (!formData.value.email) return global.$toast.show('请输入邮箱')
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)) return global.$toast.show('请输入正确的邮箱')
+    if (!formData.value.email) return proxy.$toast.show('请输入邮箱')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)) return proxy.$toast.show('请输入正确的邮箱')
     try {
         let timer = setInterval(() => {
             LoginStore.registerTime--
@@ -49,7 +47,7 @@ const GetCode = async () => {
         }, 1000)
         await getCode(formData.value.email)
     } catch (error) {
-        global.$toast.show('获取失败')
+        proxy.$toast.show('获取失败')
     }
 }
 </script>

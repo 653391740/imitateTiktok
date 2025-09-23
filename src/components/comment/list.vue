@@ -1,11 +1,33 @@
 <script setup>
-import { ref, defineProps } from 'vue'
-import { commentStore } from '@/stores/counter'
+import { ref, defineProps, toRefs, getCurrentInstance } from 'vue'
+import { commentStore, loginStore } from '@/stores/counter'
+import { triggerLikeComment } from '@/api/video'
+const { proxy } = getCurrentInstance()
 const CommentStore = commentStore()
+const LoginStore = loginStore()
 const props = defineProps({
     obj: {
         type: Object,
         default: () => ({})
+    }
+})
+props.obj.isLiked = false
+
+// 解构 obj 对象，获取 Comment 和 likeNum
+const { Comment, likeNum, isLiked } = toRefs(props.obj)
+
+const handleLikeComment = proxy.$throttle(async () => {
+    try {
+        const msg = await triggerLikeComment(LoginStore.userId, CommentStore.commentId, Comment.value.commentId)
+        if (msg === '喜欢评论成功') {
+            isLiked.value = true
+            likeNum.value++
+        } else {
+            isLiked.value = false
+            likeNum.value--
+        }
+    } catch (error) {
+        console.log(error)
     }
 })
 
@@ -13,14 +35,15 @@ const props = defineProps({
 <template>
     <li>
         <div class="avatar">
-            <img :src="$imgSrc(props.obj.Comment.userAvatar)">
+            <img :src="$imgSrc(Comment.userAvatar)">
         </div>
         <div class="desc">
-            <p>@{{ props.obj.Comment.userNickname }}</p>
-            <p style="color: #fff;">{{ props.obj.Comment.commentContent }}</p>
-            <p style="color: #626260;">{{ $formatTime(props.obj.Comment.createdAt) }}</p>
+            <p>@{{ Comment.userNickname }}</p>
+            <p style="color: #fff;">{{ Comment.commentContent }}</p>
+            <p style="color: #626260;">{{ $formatTime(Comment.createdAt) }}</p>
         </div>
-        <span class="iconfont icon-aixin" :data-content="props.obj.likeNum"></span>
+        <span class="iconfont icon-aixin" :data-content="likeNum" @click="handleLikeComment"
+            :class="{ 'active': isLiked }"></span>
     </li>
 </template>
 
@@ -49,6 +72,10 @@ li {
     &>span {
         color: #87878A;
         position: relative;
+
+        &.active {
+            color: #FF4D4F;
+        }
 
         &::after {
             content: attr(data-content);

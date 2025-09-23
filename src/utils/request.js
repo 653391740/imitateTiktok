@@ -1,4 +1,6 @@
 import axios from "axios";
+import { Toast } from '@/plugin/Toast/index.js';
+
 const service = axios.create({
     baseURL: '/api',
     timeout: 5000,
@@ -22,13 +24,11 @@ service.interceptors.response.use(res => {
     if (code === 403) {
         localStorage.removeItem('tiktok_userinfo')
         window.location.href = '#/login'
+        Toast.show('登录过期，请重新登录')
     } else {
         return data;
     }
 }, error => {
-    if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
-        console.log('请求超时，请检查网络连接后重试')
-    }
     return Promise.reject(error)
 });
 export default service

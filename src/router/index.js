@@ -8,23 +8,23 @@ const router = createRouter({
     {
       path: '/',
       redirect: '/home',
-      component: () => import('@/views/index/index.vue'),
+      component: () => import('@/views/index.vue'),
       children: [
         {
           path: '/home',
           name: 'home',
           meta: { keepAlive: true },
-          component: () => import('@/views/index/home.vue'),
+          component: () => import('@/views/home/index.vue'),
         },
         {
           path: '/concern',
           name: 'concern',
-          component: () => import('@/views/index/concern.vue')
+          component: () => import('@/views/concern/index.vue')
         },
         {
           path: '/message',
           name: 'message',
-          component: () => import('@/views/index/message.vue')
+          component: () => import('@/views/message/index.vue')
         },
         {
           path: '/user',
@@ -36,7 +36,7 @@ const router = createRouter({
               return '/user/me/videos';
             }
           },
-          component: () => import('@/views/index/user.vue'),
+          component: () => import('@/views/User/index.vue'),
           children: [
             {
               path: '/user/:id?/videos',
@@ -60,7 +60,7 @@ const router = createRouter({
     {
       path: '/updates',
       name: 'updates',
-      component: () => import('@/views/index/updates.vue')
+      component: () => import('@/views/updates/index.vue')
     }
   ],
 })
