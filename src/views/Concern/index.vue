@@ -14,12 +14,12 @@ const pulluploadRef = ref(null)
 const handleScroll = async () => {
     try {
         proxy.$toast.loading('加载中')
-        const res = await FollowerVideo(LoginStore.userId, page.value)
+        const res = await FollowerVideo(LoginStore.userinfo.userId, page.value)
         if (res.length === 0) return hasMore.value = false
         const updatedRes = await Promise.allSettled(res.map(async e => {
             if (!e.Video) return e
             try {
-                const likedRes = await isLiked(LoginStore.userId, e.Video.videoId)
+                const likedRes = await isLiked(LoginStore.userinfo.userId, e.Video.videoId)
                 e.isLiked = likedRes
             } catch (error) {
                 e.isLiked = false
@@ -43,7 +43,7 @@ onMounted(() => {
 <template>
     <Pullupload style="padding-bottom: 50px;" ref="pulluploadRef" @pullup="handleScroll" :error="error"
         :hasMore="hasMore">
-        <ConcernItem v-for="item, index in List" :key="index" :obj="item" />
+        <ConcernItem v-for="item, index in List" :key="index" :obj="item.value" />
     </Pullupload>
 </template>
 <style lang="scss" scoped></style>

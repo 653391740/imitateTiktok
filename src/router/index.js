@@ -14,24 +14,24 @@ const router = createRouter({
           path: '/home',
           name: 'home',
           meta: { keepAlive: true },
-          component: () => import('@/views/home/index.vue'),
+          component: () => import('@/views/Home/index.vue'),
         },
         {
           path: '/concern',
           name: 'concern',
-          component: () => import('@/views/concern/index.vue')
+          component: () => import('@/views/Concern/index.vue')
         },
         {
           path: '/message',
           name: 'message',
-          component: () => import('@/views/message/index.vue')
+          component: () => import('@/views/Message/index.vue')
         },
         {
-          path: '/user',
+          path: '/user/:id?',
           name: 'user',
-          redirect: to => {
-            if (to.params.id) {
-              return `/user/${to.params.id}/videos`;
+          redirect: from => {
+            if (from.params.id) {
+              return `/user/${from.params.id}/videos`;
             } else {
               return '/user/me/videos';
             }
@@ -39,17 +39,17 @@ const router = createRouter({
           component: () => import('@/views/User/index.vue'),
           children: [
             {
-              path: '/user/:id?/videos',
+              path: 'videos',
               name: 'Video',
               component: () => import('@/views/User/VideosNum.vue')
             },
             {
-              path: '/user/:id?/videoAndDesc',
+              path: 'videoAndDesc',
               name: 'VideoAndDesc',
               component: () => import('@/views/User/VideosAndDesc.vue')
             },
             {
-              path: '/user/:id?/like',
+              path: 'like',
               name: 'Like',
               component: () => import('@/views/User/LikesNum.vue')
             }
@@ -60,7 +60,37 @@ const router = createRouter({
     {
       path: '/updates',
       name: 'updates',
-      component: () => import('@/views/updates/index.vue')
+      component: () => import('@/views/Updates/index.vue')
+    },
+    {
+      path: '/fan',
+      name: 'Fan',
+      component: () => import('@/views/Message/fan.vue')
+    },
+    {
+      path: '/like',
+      name: 'Like',
+      component: () => import('@/views/Message/like.vue')
+    },
+    {
+      path: '/at',
+      name: 'At',
+      component: () => import('@/views/Message/at.vue')
+    },
+    {
+      path: '/comment',
+      name: 'Comment',
+      component: () => import('@/views/Message/comment.vue')
+    },
+    {
+      path: '/contact',
+      name: 'Contact',
+      component: () => import('@/views/Message/contact.vue')
+    },
+    {
+      path: '/chatWith',
+      name: 'ChatWith',
+      component: () => import('@/views/Message/ChatWith.vue')
     }
   ],
 })

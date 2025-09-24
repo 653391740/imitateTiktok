@@ -4,7 +4,8 @@ const loading = ref(false)
 const pullupload = ref(null)
 const attrs = useAttrs()
 
-const handleScroll = async (newDom = pullupload.value) => {
+const handleScroll = async (e) => {
+    const newDom = e.target ? pullupload.value : attrs.newDom
     const { scrollTop, clientHeight, scrollHeight } = newDom
     if (!(scrollTop + clientHeight >= scrollHeight - 100)) return
     if (loading.value || !attrs.hasMore) return
@@ -12,6 +13,8 @@ const handleScroll = async (newDom = pullupload.value) => {
 }
 
 watch(() => attrs.newDom?.scrollTop, () => {
+    console.log(12122);
+
     handleScroll(attrs.newDom)
 })
 const AsyncPullup = async () => {

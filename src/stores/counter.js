@@ -55,10 +55,10 @@ export const loginStore = defineStore('login', () => {
   const registerTime = ref(60)
   const findPasswordShow = ref(false)
   const findPasswordTime = ref(60)
-  const userId = ref(JSON.parse(localStorage.getItem('tiktok_userinfo'))?.userId || '')
+  const userinfo = ref(JSON.parse(localStorage.getItem('tiktok_userinfo')) || {})
 
-  const closeLogin = (id) => {
-    if (id) userId.value = id
+  const closeLogin = (newUserinfo) => {
+    if (newUserinfo) userinfo.value = newUserinfo
     loginShow.value = false
     formData.value = {
       email: '',
@@ -79,7 +79,7 @@ export const loginStore = defineStore('login', () => {
       const res = await getUserInfo(userId) // 获取到个人信息
       localStorage.setItem('tiktok_userinfo', JSON.stringify(res))
       proxy.$toast.show('登录成功')
-      closeLogin(res.userId)
+      closeLogin(res)
     } catch (error) {
       if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) proxy.$toast.show('请求超时，请检查网络连接后重试')
       const errorMessage = error.response.data.message === 'email or password error'
@@ -92,7 +92,7 @@ export const loginStore = defineStore('login', () => {
     registerShow,
     findPasswordShow,
     findPasswordTime,
-    userId,
+    userinfo,
     registerTime,
     closeLogin,
     Login,

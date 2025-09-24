@@ -24,9 +24,9 @@ const Routeruser = () => {
 }
 
 const toggleLike = proxy.$throttle(async () => {
-    if (!LoginStore.userId) return LoginStore.loginShow = true
+    if (!LoginStore.userinfo.userId) return LoginStore.loginShow = true
     try {
-        const msg = await triggerLike(LoginStore.userId, Video.value.videoId)
+        const msg = await triggerLike(LoginStore.userinfo.userId, Video.value.videoId)
         if (msg === '喜欢成功') {
             WSLCNum.value.likeNum++
             isLiked.value = true

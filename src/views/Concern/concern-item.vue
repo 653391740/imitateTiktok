@@ -17,7 +17,7 @@ const handleLike = async () => {
     try {
         isLiked.value = !isLiked.value
         isLiked.value ? WSLCNum.value.likeNum++ : WSLCNum.value.likeNum--
-        await triggerLike(LoginStore.userId, Video.value.videoId)
+        await triggerLike(LoginStore.userinfo.userId, Video.value.videoId)
     } catch (error) {
         console.log(error);
         isLiked.value = !isLiked.value

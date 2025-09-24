@@ -18,7 +18,7 @@ const { Comment, likeNum, isLiked } = toRefs(props.obj)
 
 const handleLikeComment = proxy.$throttle(async () => {
     try {
-        const msg = await triggerLikeComment(LoginStore.userId, CommentStore.commentId, Comment.value.commentId)
+        const msg = await triggerLikeComment(LoginStore.userinfo.userId, CommentStore.commentId, Comment.value.commentId)
         if (msg === '喜欢评论成功') {
             isLiked.value = true
             likeNum.value++

@@ -2,7 +2,9 @@
 import { ref, watch } from 'vue'
 import { commentStore, loginStore } from '@/stores/counter'
 import { getVideoComment, sendVideoComment } from '@/api/video'
+import Send from '@/components/send.vue'
 import List from './list.vue'
+import { jsx } from 'vue/jsx-runtime'
 
 const CommentStore = commentStore()
 const LoginStore = loginStore()
@@ -31,10 +33,8 @@ const handleScroll = async () => {
     try {
         const newComment = await getVideoComment(CommentStore.commentId, page.value)
         if (newComment.length === 0) return hasMore.value = false
-        if (page.value === 1 && commentList.value.length > 0) {
-            const CommentData = newComment.filter(item => item.Comment.userId !== LoginStore.userId)
-            const myComment = newComment.filter(item => item.Comment.userId === LoginStore.userId)
-            commentList.value = [...myComment, ...CommentData]
+        if (page.value === 1) {
+            commentList.value = newComment
         } else {
             commentList.value.push(...newComment)
         }
@@ -43,19 +43,20 @@ const handleScroll = async () => {
         error.value = true
     }
 }
-const commentInput = ref('')
-const sendComment = async () => {
-    if (!commentInput.value) return
+const sendComment = async (content) => {
+    if (!content) return
     try {
-        await sendVideoComment({
-            fromUserId: LoginStore.userId,
+        const { id, updatedAt, isRead, version, ...item } = await sendVideoComment({
+            fromUserId: LoginStore.userinfo.userId,
             replyId: CommentStore.replyId || '',
-            content: commentInput.value,
+            content,
             toVideoId: CommentStore.commentId,
         })
-        commentInput.value = ''
         page.value = 1
         AsyncScrollToTop()
+        const { userAvatar, userNickname } = JSON.parse(localStorage.getItem('tiktok_userinfo'))
+        commentList.value.unshift({ userAvatar, userNickname, ...item })
+        console.log(commentList.value);
     } catch (err) {
         error.value = true
     }
@@ -75,11 +76,7 @@ const sendComment = async () => {
                     <List v-for="item, index in commentList" :key="index" :obj="item" />
                 </Pullupload>
             </div>
-            <div class="send">
-                <input type="text" placeholder="有爱评论,说点好听的~" v-model.trim="commentInput">
-                <span class="@">@</span>
-                <span class="sendBtn iconfont icon-tick" @click="sendComment"></span>
-            </div>
+            <Send @sendComment="sendComment"></Send>
         </div>
     </popup>
 </template>
@@ -97,6 +94,7 @@ const sendComment = async () => {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    padding-bottom: 44px;
 
     .header {
         color: #626260;
@@ -112,27 +110,6 @@ const sendComment = async () => {
     .list {
         flex: 1;
         overflow: hidden;
-    }
-
-    .send {
-        height: 44px;
-        display: flex;
-        background-color: #31333B;
-
-        input {
-            flex: 1;
-            padding-left: 10px;
-            color: #fff;
-        }
-
-
-
-        span {
-            width: 44px;
-            line-height: 44px;
-            text-align: center;
-            color: #fff;
-        }
     }
 }
 </style>
