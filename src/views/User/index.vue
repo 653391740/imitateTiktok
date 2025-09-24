@@ -47,8 +47,11 @@ const maxtransform = () => {
 const tstart = (e) => {
     down.value = true
     StartY.value = e.touches[0].pageY
-    userinfoContainer.value.addEventListener('touchmove', tmove, { passive: true })
-    moveY.value = parseFloat(window.getComputedStyle(userinfoContainer.value).transform.split(',')[5])
+    userinfoContainer.value.addEventListener('touchmove', (ev) => {
+        tmove(ev)
+    }, { passive: true })
+    const y = window.getComputedStyle(userinfoContainer.value).transform
+    moveY.value = parseFloat(y.split(',')[5])
     updataY(moveY.value)
 }
 
@@ -57,10 +60,10 @@ const tmove = (e) => {
     isStuck.value = nav.value.getBoundingClientRect().top < 44
     const currentPageY = e.touches[0].pageY
     const time = Date.now()
-    const isY = userinfoContainer.value.getBoundingClientRect().height + 150 - window.innerHeight > 0
+    const isY = userinfoContainer.value.offsetHeight + 150 - window.innerHeight > 0
     const movey = isY ? Math.max(moveY.value + currentPageY - StartY.value, max) : 150
-    speed.value = (movey - DifY.value) / (time - Time.value)
-
+    const timeDiff = time - Time.value
+    speed.value = timeDiff !== 0 ? (movey - DifY.value) / timeDiff : speed.value
     updataY(movey)
     DifY.value = movey
     Time.value = time
@@ -75,6 +78,7 @@ const tend = (e) => {
         return
     }
     const max = maxtransform()
+    console.log(speed.value);
     const offsetY = speed.value * 500
     const Finalposition = Math.min((Math.max(offsetY + DifY.value, max)), 150)
     updataY(Finalposition)
@@ -197,8 +201,8 @@ onUnmounted(() => {
             <router-link :to="`/user/${route.params.id}/likes`">喜欢{{ Likesnum }}</router-link>
         </nav>
         <router-view v-slot="{ Component }">
-            <keep-alive max="10">
-                <component :is="Component" :key="route.fullPath" />
+            <keep-alive>
+                <component :is="Component" />
             </keep-alive>
         </router-view>
     </div>

@@ -9,6 +9,9 @@ const SearchStore = searchStore()
 const router = useRouter()
 const route = useRoute()
 
+const handleInput = (e) => {
+    // SearchStore.inputvalue = e.target.value
+}
 </script>
 
 <template>
@@ -16,12 +19,13 @@ const route = useRoute()
         <a @click="router.back()" class="iconfont icon-zuojiantou"></a>
         <div class="input">
             <span class="iconfont icon-sousuo"></span>
-            <input type="text" v-model="SearchStore.inputvalue"
+            <input type="text" :value="SearchStore.inputvalue" v-debounce.input="handleInput"
                 :placeholder="`输入关键字进行搜索${route.path === 'search/video' ? '(视频描述)' : '(昵称、id)'}`">
         </div>
     </div>
     <div class="tab">
-        <a @touchstart="SearchStore.searchType = 'video'" :class="{ 'active': SearchStore.searchType === 'video' }">视频</a>
+        <a @touchstart="SearchStore.searchType = 'video'"
+            :class="{ 'active': SearchStore.searchType === 'video' }">视频</a>
         <a @touchstart="SearchStore.searchType = 'user'" :class="{ 'active': SearchStore.searchType === 'user' }">用户</a>
     </div>
     <div class="content">

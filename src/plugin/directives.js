@@ -119,25 +119,30 @@ const longpress = {
 const debounce = {
   mounted(el, binding) {
     let timer = null
-    const delay = Number(binding.arg) || 500 // 默认300ms
+    const delay = Number(binding.arg) || 500
+    const eventType = Object.keys(binding.modifiers)[0] || 'click'
+    el._eventType = eventType
 
-    el._debounceHandler = () => {
+    el._debounceHandler = (e) => {
       if (timer) clearTimeout(timer)
       timer = setTimeout(() => {
-        binding.value()
+        binding.value(e) // 传递事件对象
       }, delay)
     }
 
-    el.addEventListener('click', el._debounceHandler)
+    el.addEventListener(eventType, el._debounceHandler)
   },
 
   unmounted(el) {
     if (el._debounceHandler) {
-      el.removeEventListener('click', el._debounceHandler)
+      const eventType = el._eventType || 'click'
+      el.removeEventListener(eventType, el._debounceHandler)
       delete el._debounceHandler
+      delete el._eventType
     }
   }
 }
+
 
 /**
  * 节流指令

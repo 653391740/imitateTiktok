@@ -11,17 +11,21 @@ const searchText = ref('')
 const firstnameList = ref([])
 
 const filterList = computed(() => {
-    if (searchText.value) return ChatStore.ContactList.filter(item => p.getPinyin(item.userNickname).toUpperCase().includes(searchText.value.toUpperCase()))
+    if (searchText.value) return ChatStore.ContactList.filter(item =>
+        p.getPinyin(item.userNickname).toUpperCase().includes(searchText.value.toUpperCase()))
     return ChatStore.ContactList
 })
 const firstName = (nickname) => {
+    console.log(p.getFirstLetter(nickname));
+
     return p.getFirstLetter(nickname).toUpperCase().charAt(0)
 }
 onMounted(async () => {
     const quchong = []
     ChatStore.ContactList.map(item => {
         const current = firstName(item.userNickname)
-        if (!quchong.includes(current) && /^[A-Za-z]$/.test(current)) quchong.push(current)
+        if (!quchong.includes(current)
+            && /^[A-Za-z]$/.test(current)) quchong.push(current)
     })
     quchong.sort()
     firstnameList.value = [...quchong, '#'];
@@ -30,34 +34,31 @@ onMounted(async () => {
     if (!container) return
     const uls = Array.from(container.querySelectorAll('.title'))
     observer = new IntersectionObserver((entries) => {
-        if (entries[0].boundingClientRect.top < 110 && searchText.value === '') {
+        if (entries[0].boundingClientRect.top < 110 && !searchText.value) {
             if (entries[0].isIntersecting) { // 可全视
                 activeLetter.value = entries[0].target.textContent
             } else { // 不可全视
-                activeLetter.value = entries[0].target.parentElement.nextElementSibling.querySelector('.title').textContent
+                activeLetter.value = entries[0].target.parentElement
+                    .nextElementSibling.querySelector('.title').textContent
             }
         }
         //  root 观察元素  threshold 触发可视比例
     }, { root: container, threshold: [1] })
     uls.forEach(t => observer.observe(t))
 })
-
 onBeforeUnmount(() => {
     if (observer) observer.disconnect()
-})
-
-watch(searchText, (val) => {
-    if (val) activeLetter.value = ''
-    else activeLetter.value = firstnameList.value[0] || ''
 })
 const pushChatWith = (item) => {
     const { userDesc, ...query } = item
     router.push({ path: '/chatWith', query })
 }
+const stickyElm = ref(null)
+const activeLetter = ref('')
 const scrollToLetter = (val) => {
     const container = stickyElm.value
     if (!container) return
-    const titles = Array.from(container.children)
+    const titles = Array.from(container.querySelectorAll('ul'))
     const target = titles.find(t => t.children[0].textContent.trim() === val)
     if (target) {
         const targetTop = target.getBoundingClientRect().top
@@ -67,8 +68,9 @@ const scrollToLetter = (val) => {
     }
     activeLetter.value = val
 }
-const stickyElm = ref(null)
-const activeLetter = ref('')
+watch(searchText, (val) => {
+    if (val) activeLetter.value = ''
+})
 let observer = null
 </script>
 
@@ -80,15 +82,16 @@ let observer = null
         </div>
         <div class="contact-list" ref="stickyElm">
             <ul v-for="value in firstnameList" :key="value">
-                <div class="title" v-if="!searchText">{{ value }}</div>
+                <div class="title" v-show="!searchText">{{ value }}</div>
                 <li @click="emit('selected', item)" v-for="item in filterList"
-                    :class="{ 'include-search-text': searchText }"
-                    v-show="firstName(item.userNickname) === value || (!/^[A-Za-z]$/.test(firstName(item.userNickname)) && value === '#')">
+                    :class="{ 'include-search-text': searchText }" v-show="firstName(item.userNickname) === value
+                        || (!/^[A-Za-z]$/.test(firstName(item.userNickname))
+                            && value === '#')">
                     <img v-lazy="$imgSrc(item.userAvatar)">
                     <div class="contact-info">
                         <div class="nickname">{{ item.userNickname }}</div>
                         <div class="desc">{{ item.userDesc }}</div>
-                        <span v-if="router.currentRoute.value.path === '/contact'" class="iconfont icon-pinglun"
+                        <span class="iconfont icon-pinglun" v-show="router.currentRoute.value.path == '/contact'"
                             @click.stop="pushChatWith(item)"></span>
                     </div>
                 </li>

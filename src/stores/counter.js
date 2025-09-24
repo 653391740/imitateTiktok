@@ -157,7 +157,6 @@ export const loginStore = defineStore('login', () => {
   const logout = () => {
     localStorage.removeItem('userinfo')
     localStorage.removeItem('tiktok_userinfo')
-    homeStore().falseVideoList()
     userinfo.value = {}
   }
 
