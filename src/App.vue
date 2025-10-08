@@ -1,16 +1,15 @@
 <script setup>
-import { Suspense } from 'vue';
 </script>
 
-<template>
-  <Suspense>
-    <template #default>
-      <router-view></router-view>
-    </template>
-    <template #fallback>
-      <div>Loading...</div>
-    </template>
-  </Suspense>
-</template>
+<template><keep-alive>
+  <router-view v-if="$route.meta.keepAlive"></router-view>
+</keep-alive>
+<router-view v-if="!$route.meta.keepAlive"></router-view></template>
 
-<style scoped lang="scss"></style>
+<style scoped
+  lang="scss">
+  div {
+    width: 100%;
+    height: 100vh;
+  }
+</style>

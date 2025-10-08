@@ -1,8 +1,9 @@
-import { createApp,inject } from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import './styles/global.scss'
 import plugins from '@/plugin/index.js'
+import { event } from '@/hooks/event.js'
 
 const app = createApp(App)
 
