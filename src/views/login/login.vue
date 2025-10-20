@@ -1,5 +1,5 @@
 <script setup>
-import { ref, inject, getCurrentInstance } from 'vue'
+import { ref,  getCurrentInstance } from 'vue'
 import { loginStore } from '@/stores/counter'
 const { proxy } = getCurrentInstance()
 const LoginStore = loginStore()
@@ -10,6 +10,10 @@ const handleLogin = async () => {
     } else {
         proxy.$toast.show('请输入账号密码')
     }
+}
+
+const close = () => {
+    LoginStore.loginShow = false
 }
 </script>
 <template>

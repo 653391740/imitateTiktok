@@ -36,7 +36,7 @@ export const commentStore = defineStore('comment', () => {
   const commentId = ref('')
   const replyId = ref('') // 未开发
   const openCommentPopup = (id, num) => {
-    if (!loginStore().userId) return loginStore().loginShow = true
+    if (!loginStore().userinfo) return loginStore().loginShow = true
     showPopup.value = true
     commentNum.value = num
     commentId.value = id
@@ -58,7 +58,7 @@ export const loginStore = defineStore('login', () => {
   const userinfo = ref(JSON.parse(localStorage.getItem('tiktok_userinfo')) || {})
 
   const closeLogin = (newUserinfo) => {
-    if (newUserinfo) userinfo.value = newUserinfo
+    if (newUserinfo) userinfo.value = { ...newUserinfo }
     loginShow.value = false
     formData.value = {
       email: '',
