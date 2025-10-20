@@ -12,7 +12,7 @@ export const formatTime = (value) => {
 export const formatTime2 = (value) => {
   if (!value) return ''
   const date = new Date(value)
-  const month = date.toLocaleDateString().split('/').slice(0, 2).join('-')
+  const month = date.toLocaleDateString().split('/').slice(1, 3).join('-')
   const time = date.toLocaleTimeString().split(':').slice(0, 2).join(':')
   return month + ' ' + time
 }

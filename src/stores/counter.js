@@ -2,7 +2,30 @@ import { ref, inject } from 'vue'
 import { defineStore } from 'pinia'
 import { login, getUserInfo } from '@/api/login'
 import { getPopularVideo, isLiked } from '@/api/video'
-
+export const chatStore = defineStore('chat', () => {
+  const chatList = ref(JSON.parse(localStorage.getItem('chatList')) || [])
+  const addChat = (chat) => {
+    const index = chatList.value.findIndex(e => e.userId === chat.userId)
+    if (index !== -1) {
+      chatList.value[index].content = chat.content
+    } else {
+      chatList.value.push(chat)
+    }
+    localStorage.setItem('chatList', JSON.stringify(chatList.value))
+  }
+  const deleteChat = (userId) => {
+    const index = chatList.value.findIndex(e => e.userId === userId)
+    if (index !== -1) {
+      chatList.value.splice(index, 1)
+      localStorage.setItem('chatList', JSON.stringify(chatList.value))
+    }
+  }
+  return {
+    chatList,
+    addChat,
+    deleteChat
+  }
+})
 export const homeStore = defineStore('home', () => {
   const VideoList = ref([])
   const getVideoList = async () => {
