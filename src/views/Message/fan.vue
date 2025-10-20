@@ -24,7 +24,7 @@ const handleFollow = async (item) => {
 }
 </script>
 <template>
-    <MessageNav @loadmore="loadmore" type="关注了你">
+    <MessageNav @loadmore="loadmore" type="关注了你" title="粉丝">
         <template #right="{ item }">
             <div class="btn" @click="handleFollow(item)" :class="{ 'active': item.bothStatus }">{{ item.bothStatus ?
                 '互相关注' : '关注' }}</div>

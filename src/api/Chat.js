@@ -21,5 +21,13 @@ export const triggerFollow = (userId, followUserId) => {
 }
 
 export const byLike = (userId, page) => {
-    return http.get(`/user/${userId}byLike/page/${page}`)
+    return http.get(`/user/${userId}/byLike/page/${page}`)
+}
+
+export const getAt = (userId, page) => {
+    return http.get(`/user/${userId}/getAt/page/${page}`)
+}
+
+export const byComment = (userId, page) => {
+    return http.get(`/user/${userId}/byComment/page/${page}`)
 }

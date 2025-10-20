@@ -1,5 +1,5 @@
 <script setup>
-import { ref, useAttrs, watch, defineExpose, onMounted } from 'vue'
+import { ref, useAttrs, watch, defineExpose, onMounted, nextTick } from 'vue'
 const loading = ref(false)
 const pullupload = ref(null)
 const attrs = useAttrs()
@@ -25,8 +25,10 @@ const AsyncPullup = async () => {
         loading.value = false
     }
 }
-onMounted(() => {
-    AsyncPullup()
+onMounted(async () => {
+    await AsyncPullup()
+    await nextTick()
+    if (pullupload.value.scrollHeight === pullupload.value.clientHeight) await AsyncPullup()
 })
 const scrollToTop = () => {
     if (pullupload.value) {
@@ -56,7 +58,7 @@ defineExpose({
 
         <!-- 到底 -->
         <div v-else-if="!attrs.hasMore" class="infinite-status">
-            没有更多了
+            <slot name="noMore">没有更多了</slot>
         </div>
     </div>
 </template>
