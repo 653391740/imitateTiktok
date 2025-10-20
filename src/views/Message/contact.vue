@@ -44,7 +44,7 @@ const pushChatWith = (item) => {
                 <li @click="router.push({ name: 'user', params: { id: item.userId } })" v-for="item in filterList"
                     :key="item.userId" :class="{ 'include-search-text': searchText }"
                     v-show="firstName(item.userNickname) === value || (!/^[A-Za-z]$/.test(firstName(item.userNickname)) && value === '#')">
-                    <img :src="$imgSrc(item.userAvatar)" alt="">
+                    <img :src="$imgSrc(item.userAvatar)">
                     <div class="contact-info">
                         <div class="nickname">{{ item.userNickname }}</div>
                         <div class="desc">{{ item.userDesc }}</div>

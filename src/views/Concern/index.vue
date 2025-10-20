@@ -1,9 +1,8 @@
 <script setup>
-import { ref, onMounted, getCurrentInstance } from 'vue'
+import { ref, onMounted } from 'vue'
 import { loginStore } from '@/stores/counter'
 import { FollowerVideo, isLiked } from '@/api/video'
 import ConcernItem from '@/views/Concern/concern-item.vue'
-const { proxy } = getCurrentInstance()
 const LoginStore = loginStore()
 const List = ref([])
 const page = ref(1)
@@ -13,7 +12,6 @@ const pulluploadRef = ref(null)
 
 const handleScroll = async () => {
     try {
-        proxy.$toast.loading('加载中')
         const res = await FollowerVideo(LoginStore.userinfo.userId, page.value)
         if (res.length === 0) return hasMore.value = false
         const updatedRes = await Promise.allSettled(res.map(async e => {
@@ -31,8 +29,6 @@ const handleScroll = async () => {
     } catch (error) {
         console.log(error);
         error.value = true
-    } finally {
-        proxy.$toast.clear()
     }
 }
 

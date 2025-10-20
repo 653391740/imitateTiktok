@@ -1,5 +1,5 @@
 <script setup>
-import { ref, useAttrs, watch, defineExpose } from 'vue'
+import { ref, useAttrs, watch, defineExpose, onMounted } from 'vue'
 const loading = ref(false)
 const pullupload = ref(null)
 const attrs = useAttrs()
@@ -13,14 +13,11 @@ const handleScroll = async (e) => {
 }
 
 watch(() => attrs.newDom?.scrollTop, () => {
-    console.log(12122);
-
     handleScroll(attrs.newDom)
 })
 const AsyncPullup = async () => {
     try {
         loading.value = true
-        console.log('触发');
         await attrs.onPullup()
     } catch (error) {
         attrs.error = true
@@ -28,6 +25,9 @@ const AsyncPullup = async () => {
         loading.value = false
     }
 }
+onMounted(() => {
+    AsyncPullup()
+})
 const scrollToTop = () => {
     if (pullupload.value) {
         pullupload.value.scrollTop = 0

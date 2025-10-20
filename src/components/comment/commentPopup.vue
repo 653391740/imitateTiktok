@@ -4,7 +4,6 @@ import { commentStore, loginStore } from '@/stores/counter'
 import { getVideoComment, sendVideoComment } from '@/api/video'
 import Send from '@/components/send.vue'
 import List from './list.vue'
-import { jsx } from 'vue/jsx-runtime'
 
 const CommentStore = commentStore()
 const LoginStore = loginStore()
@@ -30,6 +29,7 @@ const AsyncScrollToTop = () => {
     }
 }
 const handleScroll = async () => {
+    if (!CommentStore.commentId) return
     try {
         const newComment = await getVideoComment(CommentStore.commentId, page.value)
         if (newComment.length === 0) return hasMore.value = false

@@ -35,7 +35,7 @@ export const homeStore = defineStore('home', () => {
       const updatedData = await Promise.allSettled(data.map(async e => {
         if (!e.Video) return e
         try {
-          const likedRes = await isLiked(loginStore().userId, e.Video.videoId)
+          const likedRes = await isLiked(loginStore().userinfo.userId, e.Video.videoId)
           e.isLiked = likedRes
         } catch (error) {
           console.error(`获取视频 ${e.Video.videoId} 点赞状态失败:`, error);

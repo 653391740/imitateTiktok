@@ -11,3 +11,15 @@ export const readPrivateLetter = (userId, formId) => {
 export const sendPrivateLetter = (userId, formId, data) => {
     return http.post(`/user/${userId}/privateLetter/${formId}`, data)
 }
+
+export const getFans = (userId, page) => {
+    return http.get(`/user/${userId}/Fans/page/${page}/${userId}`)
+}
+
+export const triggerFollow = (userId, followUserId) => {
+    return http.get(`/user/${userId}/triggerFollow/${followUserId}`)
+}
+
+export const byLike = (userId, page) => {
+    return http.get(`/user/${userId}byLike/page/${page}`)
+}

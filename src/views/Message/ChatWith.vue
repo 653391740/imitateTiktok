@@ -13,20 +13,14 @@ const route = useRoute()
 const letterList = ref([])
 const chatContainer = ref(null)
 
-// 滚动到底部的函数
 const scrollToBottom = () => {
-    nextTick(() => {
-        if (chatContainer.value) {
-            chatContainer.value.scrollTop = chatContainer.value.scrollHeight
-        }
-    })
+    nextTick(() => chatContainer.value.scrollTop = chatContainer.value.scrollHeight)
 }
 
 onMounted(async () => {
     letterList.value = await getPrivateLetter(LoginStore.userinfo.userId, route.query.userId)
-    await readPrivateLetter(LoginStore.userinfo.userId, route.query.userId)
-    // 数据加载完成后滚动到底部
     scrollToBottom()
+    await readPrivateLetter(LoginStore.userinfo.userId, route.query.userId)
 })
 
 // 判断是否与上一条消息在同一十分钟内
@@ -61,7 +55,6 @@ const sendComment = async (content) => {
         content,
         createdAt
     })
-    // 发送消息后滚动到底部
     scrollToBottom()
 }
 </script>
@@ -91,6 +84,7 @@ ul {
     overflow: auto;
     color: #fff;
     border-bottom: $bordB;
+    scrollbar-width: 0;
 
     li {
         margin: 20px 0;
