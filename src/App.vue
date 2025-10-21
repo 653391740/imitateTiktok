@@ -1,14 +1,15 @@
 <script setup>
 import { getCurrentInstance } from 'vue'
-import { loginStore } from '@/stores/counter'
+import { loginStore, chatStore } from '@/stores/counter'
 const { proxy } = getCurrentInstance()
 const LoginStore = loginStore()
 LoginStore.Login(proxy)
+const ChatStore = chatStore()
+ChatStore.getAllrequest()
 </script>
 
 <template>
-<RouterView></RouterView>
+  <RouterView></RouterView>
 </template>
 
-<style scoped
-  lang="scss"></style>
+<style scoped lang="scss"></style>

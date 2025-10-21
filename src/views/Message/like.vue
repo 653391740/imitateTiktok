@@ -11,11 +11,17 @@ const loadmore = async () => {
 
 </script>
 <template>
-    <MessageNav @loadmore="loadmore" type="赞了你你的评论" title="点赞了你">
+    <MessageNav @loadmore="loadmore" title="点赞了你" nomsgTitle="您还没有被赞哦" nomsgDesc="赶快和好友互动起来吧">
+        <template #left="{ item }">
+            <p>赞了你的评论</p>
+            <p class="time">{{ $formatTime(item.createdAt) }}</p>
+        </template>
         <template #right="{ item }">
             {{ item.commentContent }}
         </template>
     </MessageNav>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+@include time;
+</style>

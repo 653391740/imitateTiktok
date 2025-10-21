@@ -2,6 +2,7 @@ import { ref, inject } from 'vue'
 import { defineStore } from 'pinia'
 import { login, getUserInfo } from '@/api/login'
 import { getPopularVideo, isLiked } from '@/api/video'
+import { FanUnreadNum, byLikeUnreadNum, byCommentUnreadNum, getAtUnreadNum } from '@/api/Chat'
 export const chatStore = defineStore('chat', () => {
   const chatList = ref(JSON.parse(localStorage.getItem('chatList')) || [])
   const addChat = (chat) => {
@@ -20,10 +21,31 @@ export const chatStore = defineStore('chat', () => {
       localStorage.setItem('chatList', JSON.stringify(chatList.value))
     }
   }
+
+
+  const FanUnreadNumRes = ref(0)
+  const byLikeUnreadNumRes = ref(0)
+  const byCommentUnreadNumRes = ref(0)
+  const getAtUnreadNumRes = ref(0)
+  const getAllrequest = async () => {
+    try {
+      FanUnreadNumRes.value = await FanUnreadNum(loginStore().userinfo.userId)
+      byLikeUnreadNumRes.value = await byLikeUnreadNum(loginStore().userinfo.userId)
+      byCommentUnreadNumRes.value = await byCommentUnreadNum(loginStore().userinfo.userId)
+      getAtUnreadNumRes.value = await getAtUnreadNum(loginStore().userinfo.userId)
+    } catch (error) {
+      console.log(error);
+    }
+  }
   return {
     chatList,
     addChat,
-    deleteChat
+    deleteChat,
+    FanUnreadNumRes,
+    byLikeUnreadNumRes,
+    byCommentUnreadNumRes,
+    getAtUnreadNumRes,
+    getAllrequest
   }
 })
 export const homeStore = defineStore('home', () => {
@@ -90,8 +112,8 @@ export const loginStore = defineStore('login', () => {
   }
 
   const formData = ref({
-    email: '653391740@qq.com',
-    password: 'qqqqqq'
+    email: '583514368@qq.com',
+    password: '123456'
   })
 
   const Login = async (proxy) => {

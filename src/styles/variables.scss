@@ -24,6 +24,15 @@ $bordB: 0.5px solid rgba(41, 40, 37, 0.8);
     }
 }
 
+@mixin time {
+    .time {
+        color: #8b8c96;
+        font-size: 11px;
+        line-height: 11px;
+        margin-top: 7px;
+    }
+}
+
 @mixin Register-login-style {
     form {
         @include position-center;

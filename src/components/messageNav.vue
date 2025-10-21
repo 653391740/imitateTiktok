@@ -47,7 +47,6 @@ const loadmore = async () => {
         List.value.push(...data)
         page.value++
         error.value = false
-        
     } catch (err) {
         error.value = true
         console.log(err);
@@ -61,15 +60,14 @@ const loadmore = async () => {
             <img :src="$imgSrc(item.userAvatar)">
             <div class="info">
                 <p class="user-name">{{ item.userNickname }}</p>
-                <p>{{ attrs.type }}</p>
-                <p class="time">{{ $formatTime(item.createdAt) }}</p>
+                <slot name="left" :item="item"></slot>
             </div>
             <div class="right">
                 <slot name="right" :item="item"></slot>
             </div>
         </li>
-        <template #noMore>
-            <div class="noList" v-if="List.length === 0 && !hasMore">
+        <template #noMore :item="item" v-if="List.length === 0 && !hasMore">
+            <div class="noList">
                 <p>{{ attrs.nomsgTitle || '暂无数据' }}</p>
                 <span>{{ attrs.nomsgDesc || '暂无更多数据' }}</span>
             </div>
@@ -114,18 +112,12 @@ const loadmore = async () => {
         img {
             width: 45px;
             height: 45px;
+            border-radius: 50%;
             margin-right: 10px;
         }
 
         .info {
             color: #fff;
-
-            .time {
-                color: #8b8c96;
-                font-size: 11px;
-                line-height: 11px;
-                margin-top: 7px;
-            }
         }
     }
 }

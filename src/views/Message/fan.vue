@@ -24,7 +24,11 @@ const handleFollow = async (item) => {
 }
 </script>
 <template>
-    <MessageNav @loadmore="loadmore" type="关注了你" title="粉丝">
+    <MessageNav @loadmore="loadmore" title="粉丝" nomsgTitle="您还没有粉丝哦" nomsgDesc="赶快互动添加好友吧">
+        <template #left="{ item }">
+            <p>关注了你</p>
+            <p class="time">{{ $formatTime(item.createdAt) }}</p>
+        </template>
         <template #right="{ item }">
             <div class="btn" @click="handleFollow(item)" :class="{ 'active': item.bothStatus }">{{ item.bothStatus ?
                 '互相关注' : '关注' }}</div>
@@ -46,4 +50,6 @@ const handleFollow = async (item) => {
         background-color: #383b44;
     }
 }
+
+@include time;
 </style>

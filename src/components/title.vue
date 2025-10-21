@@ -38,6 +38,7 @@ const emits = defineEmits(['click'])
     top: 0;
     left: 0;
     right: 0;
+    z-index: 999;
     .back,
     .msg {
         position: absolute;

@@ -31,3 +31,15 @@ export const getAt = (userId, page) => {
 export const byComment = (userId, page) => {
     return http.get(`/user/${userId}/byComment/page/${page}`)
 }
+export const FanUnreadNum = (userId) => {
+    return http.get(`/user/${userId}/FanUnreadNum`)
+}
+export const byLikeUnreadNum = (userId) => {
+    return http.get(`/user/${userId}/byLikeUnreadNum`)
+}
+export const byCommentUnreadNum = (userId) => {
+    return http.get(`/user/${userId}/byCommentUnreadNum`)
+}
+export const getAtUnreadNum = (userId) => {
+    return http.get(`/user/${userId}/getAtUnreadNum`)
+}

@@ -10,11 +10,22 @@ const loadmore = async (page) => {
 
 </script>
 <template>
-    <MessageNav @loadmore="loadmore" type="赞了你你的评论" title="@我的" nomsgTitle="您还没有作品被评论哦" nomsgDesc="赶快分享你的视频给好友吧！">
+    <MessageNav @loadmore="loadmore" title="评论" nomsgTitle="您还没有作品被评论哦" nomsgDesc="赶快分享你的视频给好友吧！">
+        <template #left="{ item }">
+            <p>{{ item.commentContent }}</p>
+            <p class="time">评论了你的评论 {{ $formatTime(item.createdAt) }}</p>
+        </template>
         <template #right="{ item }">
-            {{ item.commentContent }}
+            <img :src="item.videoCover" alt="">
         </template>
     </MessageNav>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+img {
+    width: 60px;
+    height: 60px;
+}
+
+@include time;
+</style>
