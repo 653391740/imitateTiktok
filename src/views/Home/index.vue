@@ -10,7 +10,9 @@ const HomeStore = homeStore()
 
 <template>
     <div class="iconfont icon-sousuo"></div>
-    <Video :VideoList="HomeStore.VideoList"></Video>
+    <Video :VideoList="HomeStore.VideoList">
+        <template></template>
+    </Video>
     <Login></Login>
     <Register></Register>
     <FindPassword></FindPassword>

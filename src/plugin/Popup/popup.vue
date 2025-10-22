@@ -40,8 +40,6 @@ const props = defineProps({
 <style lang="scss" scoped>
 .popup {
     position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
     transition: all 0.5s;
     opacity: 0;
@@ -49,25 +47,26 @@ const props = defineProps({
 
     &.show {
         opacity: 1;
-        transform: translate(0) !important;
+        left: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        right: 0 !important;
     }
 
     &[data-position="right"] {
-        transform: translateX(100%);
+        left: 100%;
     }
 
     &[data-position="left"] {
-        transform: translateX(-100%);
+        left: -100%;
     }
 
     &[data-position="top"] {
-        transform: translateY(-100%);
+        top: -100%;
     }
 
     &[data-position="bottom"] {
-        transform: translateY(100%);
-        top: unset;
-        bottom: 0;
+        top: 100%;
     }
 }
 </style>

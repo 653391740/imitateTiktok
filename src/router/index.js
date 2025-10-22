@@ -49,8 +49,8 @@ const router = createRouter({
               component: () => import('@/views/User/VideosAndDesc.vue')
             },
             {
-              path: 'like',
-              name: 'Like',
+              path: 'likes',
+              name: 'Likes',
               component: () => import('@/views/User/LikesNum.vue')
             }
           ]

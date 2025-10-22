@@ -28,8 +28,6 @@ const AsyncPullup = async () => {
 }
 onMounted(async () => {
     const res = await AsyncPullup()
-    console.log(res);
-
     if (!res) return
     await nextTick()
     if (pullupload.value.scrollHeight === pullupload.value.clientHeight) await AsyncPullup()
@@ -54,10 +52,12 @@ defineExpose({
         <div v-if="loading" class="infinite-status">
             <i class="icon-loading"></i>
         </div>
-        
+
         <!-- 到底 -->
         <div v-else-if="!attrs.hasMore" class="infinite-status">
-            <slot name="noMore">没有更多了</slot>
+            <slot name="noMore">
+                <p>没有更多了</p>
+            </slot>
         </div>
 
         <!-- 异常 -->
@@ -73,18 +73,24 @@ defineExpose({
     width: 100%;
     height: 100%;
     overflow: auto;
+    background-color: $backcolor;
     scrollbar-width: none;
 
     .infinite-status {
+        width: 100%;
         color: #626260;
         text-align: center;
         font-size: 12px;
         padding: 10px;
 
+        &>* {
+            height: 24px;
+            line-height: 24px;
+        }
+
         .icon-loading {
             display: inline-block;
             width: 24px;
-            height: 24px;
             margin-top: 10px;
             border: 2px solid #626260;
             border-radius: 50%;

@@ -17,11 +17,17 @@ const filterList = computed(() => {
     return list.value
 })
 const firstName = (nickname) => {
-    return p.getFirstLetter(nickname).charAt(0)
+    return p.getFirstLetter(nickname).toUpperCase().charAt(0)
 }
 onMounted(async () => {
     list.value = await searchUser(LoginStore.userinfo.userId)
-    firstnameList.value = [...list.value.map(item => firstName(item.userNickname)).sort((a, b) => a - b), '#'];
+    const quchong = []
+    list.value.map(item => {
+        const current = firstName(item.userNickname)
+        if (!quchong.includes(current) && /^[A-Za-z]$/.test(current)) quchong.push(current)
+    })
+    quchong.sort()
+    firstnameList.value = [...quchong, '#'];
 })
 const pushChatWith = (item) => {
     const { userDesc, ...query } = item

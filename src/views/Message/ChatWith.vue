@@ -118,6 +118,7 @@ ul {
 
             img {
                 width: 40px;
+                height: 40px;
                 margin: 0 20px;
                 border-radius: 50%;
             }

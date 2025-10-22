@@ -5,6 +5,10 @@ const props = defineProps({
     msg: {
         type: String,
         default: '有爱评论,说点好听的~'
+    },
+    backgroundC: {
+        type: String,
+        default: '#161622'
     }
 })
 const commentInput = ref('')
@@ -14,7 +18,7 @@ const send = () => {
 }
 </script>
 <template>
-    <div class="send" :style="{ backgroundColor: props.background }">
+    <div class="send" :style="{ backgroundColor: props.backgroundC }">
         <input type="text" :placeholder="props.msg" v-model.trim="commentInput" @keyup.enter="send">
         <span class="@">@</span>
         <span class="sendBtn iconfont icon-tick" @click="send"></span>
@@ -23,13 +27,13 @@ const send = () => {
 
 <style lang="scss" scoped>
 .send {
+    border-top: $bordB;
     position: absolute;
     left: 0;
     bottom: 0;
     width: 100%;
     height: 44px;
     display: flex;
-    background-color: #31333B;
 
     input {
         flex: 1;

@@ -64,7 +64,7 @@ const sendComment = async (content) => {
 </script>
 
 <template>
-    <popup @click="CommentStore.showPopup = false" position="bottom" background="transparent"
+    <popup class="commentPopupbox" @click="CommentStore.showPopup = false" position="bottom" background="transparent"
         :show="CommentStore.showPopup">
         <div @click.stop class="commentPopup">
             <div class="header">
@@ -82,6 +82,10 @@ const sendComment = async (content) => {
 </template>
 
 <style lang="scss" scoped>
+.commentPopupbox {
+    z-index: 999;
+}
+
 .commentPopup {
     position: absolute;
     bottom: 0;

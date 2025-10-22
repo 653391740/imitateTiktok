@@ -24,6 +24,14 @@ const handleLike = async () => {
         isLiked.value ? WSLCNum.value.likeNum++ : WSLCNum.value.likeNum--
     }
 }
+const videoRef = ref(null)
+const playVideo = () => {
+    if (videoRef.value.paused) {
+        videoRef.value.play()
+    } else {
+        videoRef.value.pause()
+    }
+}
 </script>
 
 <template>
@@ -31,8 +39,8 @@ const handleLike = async () => {
         <img :src="$imgSrc(Video.userAvatar)" alt="">
         <span class="nickname">@{{ Video.userNickname }}</span>
         <p class="desc">{{ Video.videoDesc }}</p>
-        <video :src="Video.videoPath" :poster="Video.videoCover" @click="playVideo(index)"></video>
-        <span @click="handleLike(index)" class="iconfont icon-aixin" :class="{ 'active': isLiked }"
+        <video ref="videoRef" :src="Video.videoPath" :poster="Video.videoCover" @click="playVideo()"></video>
+        <span @click="handleLike()" class="iconfont icon-aixin" :class="{ 'active': isLiked }"
             :data-count="WSLCNum.likeNum"></span>
         <span @click="CommentStore.openCommentPopup(Video.videoId, WSLCNum.commentNum)" class="iconfont icon-pinglun"
             :data-count="WSLCNum.commentNum"></span>
@@ -47,6 +55,7 @@ const handleLike = async () => {
     padding-bottom: 20px;
     color: #fff;
     border-bottom: 1px solid rgba(41, 40, 37, 0.8);
+    
 
     .icon-aixin.active {
         color: #f00;

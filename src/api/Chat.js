@@ -43,3 +43,18 @@ export const byCommentUnreadNum = (userId) => {
 export const getAtUnreadNum = (userId) => {
     return http.get(`/user/${userId}/getAtUnreadNum`)
 }
+export const FollowersNum = (userId) => {
+    return http.get(`/user/${userId}/FollowersNum`)
+}
+export const FansNum = (userId) => {
+    return http.get(`/user/${userId}/FansNum`)
+}
+export const byLikesNum = (userId) => {
+    return http.get(`/user/${userId}/byLikesNum`)
+}
+export const LikesNum = (userId) => {
+    return http.get(`/user/${userId}/LikesNum`)
+}
+export const VideosNum = (userId) => {
+    return http.get(`/user/${userId}/VideosNum`)
+}

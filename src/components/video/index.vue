@@ -1,7 +1,7 @@
 <script setup>
 import { ref, defineEmits, defineExpose, nextTick, onActivated, defineProps } from 'vue';
 import { useRoute } from 'vue-router'
-import Video from '@/components/video/video.vue'
+import Videoitem from '@/components/video/video.vue'
 import Side from '@/components/video/side-desc.vue'
 import { homeStore } from '@/stores/counter'
 
@@ -15,6 +15,10 @@ const props = defineProps({
     VideoList: {
         type: Array,
         default: () => []
+    },
+    autoPlay: {
+        type: Boolean,
+        default: true
     }
 })
 
@@ -36,7 +40,7 @@ const handleVideoEnd = (index) => {
 const toIndex = (index, smooth = true) => {
     activeIndex.value = index;
     swiper.value.swipeTo(index, smooth)
-    video.value[index].playPromise();
+    video.value[index].togglePlayback();
 }
 
 const newDom = ref(null)
@@ -57,9 +61,10 @@ defineExpose({
         <swipper ref="swiper" vertical :length="props.VideoList.length" @scroll="handleSwiperScroll"
             @change="handleSwiperChange">
             <div class="swipper-item" v-for="item, index in props.VideoList" :key="item.id">
-                <Video ref="video" :item="item.value" :activeIndex="activeIndex" :index="index"
-                    @ended="handleVideoEnd(index)" />
+                <Videoitem ref="video" :item="item.value" :activeIndex="activeIndex" :index="index"
+                    :autoPlay="props.autoPlay" @ended="handleVideoEnd(index)" />
                 <Side :item="item.value"></Side>
+                <slot :item="item.value"></slot>
             </div>
         </swipper>
     </Pullupload>

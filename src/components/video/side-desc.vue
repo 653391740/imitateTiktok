@@ -27,6 +27,8 @@ const toggleLike = proxy.$throttle(async () => {
     if (!LoginStore.userinfo.userId) return LoginStore.loginShow = true
     try {
         const msg = await triggerLike(LoginStore.userinfo.userId, Video.value.videoId)
+        console.log(props.item);
+        
         if (msg === '喜欢成功') {
             WSLCNum.value.likeNum++
             isLiked.value = true
@@ -39,7 +41,7 @@ const toggleLike = proxy.$throttle(async () => {
     }
 })
 
-
+ 
 </script>
 
 <template>

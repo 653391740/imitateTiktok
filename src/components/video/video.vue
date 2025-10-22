@@ -16,13 +16,17 @@ const props = defineProps({
         type: Number,
         default: 0,
         required: true
+    },
+    autoPlay: {
+        type: Boolean,
+        default: true
     }
 })
-const { item, activeIndex, index } = toRefs(props)
+const { item, activeIndex, index, autoPlay } = toRefs(props)
 const emit = defineEmits(['ended'])
 
 onMounted(() => {
-    if (activeIndex.value === index.value) playPromise();
+    if (activeIndex.value === index.value && autoPlay.value) playPromise();
 })
 
 const playPromise = () => {
@@ -31,32 +35,29 @@ const playPromise = () => {
     playPromise.then(() => {
         isPlaying.value = false;
     }).catch(error => {
-        if (error.message.includes(`play() failed because the user didn't interact with the document first.`)) {
-            isPlaying.value = true;
-        }
+        if (error.message.includes(`play() failed because the user didn't interact with the document first.`)) isPlaying.value = true;
     });
 }
-defineExpose({
-    playPromise
-})
 
 const togglePlayback = () => {
-    const currentVideo = videodemo.value;
-    if (currentVideo.paused) {
+    if (videodemo.value.paused) {
         playPromise();
     } else {
-        currentVideo.pause();
+        videodemo.value.pause();
         isPlaying.value = true;
     }
 }
+
+defineExpose({
+    togglePlayback
+})
 
 watch(() => activeIndex.value, (newCurrentIndex, oldCurrentIndex) => {
     if (newCurrentIndex === index.value) {
         playPromise();
     } else {
-        const currentVideo = videodemo.value;
-        currentVideo.pause();
-        currentVideo.currentTime = 0;
+        videodemo.value.pause();
+        videodemo.value.currentTime = 0;
         isPlaying.value = false;
     }
 })

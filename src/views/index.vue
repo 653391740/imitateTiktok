@@ -21,7 +21,7 @@ const navItems = [
     },
     {
         name: '我',
-        path: '/user'
+        path: '/user/me'
     }
 ]
 </script>
