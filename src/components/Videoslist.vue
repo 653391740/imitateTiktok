@@ -67,6 +67,7 @@ const closePopup = () => {
         :hasMore="hasMore">
         <li v-for="item, index in list" :key="item.value.Video.videoId" @click="openPopup(index)">
             <img :src="item.value.Video.videoCover">
+            <div class="like iconfont icon-dianzan" :class="{'liked': item.isLiked}"></div>
         </li>
     </Pullupload>
     <teleport to="body">

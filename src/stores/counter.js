@@ -110,6 +110,10 @@ export const loginStore = defineStore('login', () => {
       password: ''
     }
   }
+  const updateUserInfo = (newUserinfo) => {
+    userinfo.value = { ...newUserinfo }
+    localStorage.setItem('tiktok_userinfo', JSON.stringify(newUserinfo))
+  }
 
   const formData = ref({
     email: '583514368@qq.com',
@@ -122,7 +126,7 @@ export const loginStore = defineStore('login', () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       const { userId } = await login(formData.value) // 登录
       const res = await getUserInfo(userId) // 获取到个人信息
-      localStorage.setItem('tiktok_userinfo', JSON.stringify(res))
+      updateUserInfo(res)
       proxy.$toast.show('登录成功')
       closeLogin(res)
     } catch (error) {
@@ -131,7 +135,6 @@ export const loginStore = defineStore('login', () => {
       if (errorMessage) proxy.$toast.show(errorMessage)
     }
   }
-
   return {
     loginShow,
     registerShow,
@@ -141,6 +144,8 @@ export const loginStore = defineStore('login', () => {
     registerTime,
     closeLogin,
     Login,
+    updateUserInfo,
     formData
   }
 })
+

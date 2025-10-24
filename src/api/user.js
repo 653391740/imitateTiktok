@@ -12,3 +12,9 @@ export const VideosPage = (userId, page) => {
 export const getLikesPage = (uid, page) => {
     return http.get(`user/${uid}/Likes/page/${page}`)
 }
+export const uploadAvatar = (uid, data) => {
+    return http.post(`user/${uid}/uploadAvatar`, data)
+}
+export const modifyUserInfo = (uid, data) => {
+    return http.post(`user/${uid}/modifyUserInfo`, data)
+}

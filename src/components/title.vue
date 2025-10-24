@@ -1,7 +1,8 @@
 <script setup>
-import { ref, defineEmits } from 'vue'
+import { ref, defineEmits, useAttrs } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
+const attrs = useAttrs()
 const props = defineProps({
     title: {
         type: String,
@@ -20,7 +21,8 @@ const emits = defineEmits(['click'])
 </script>
 <template>
     <div class="title">
-        <span v-if="back" class="back iconfont icon-zuojiantou" @click="router.back()"></span>
+        <span v-if="back || attrs.onBack" class="back iconfont icon-zuojiantou"
+            @click="attrs.onBack ? attrs.onBack() : router.back()"></span>
         <p>{{ title }}</p>
         <div class="msg" @click="emits('click')">{{ msg }}</div>
     </div>
@@ -39,6 +41,7 @@ const emits = defineEmits(['click'])
     left: 0;
     right: 0;
     z-index: 999;
+
     .back,
     .msg {
         position: absolute;
@@ -50,6 +53,7 @@ const emits = defineEmits(['click'])
     .back {
         left: 10px;
     }
+
     .msg {
         right: 10px;
     }

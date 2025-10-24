@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import { loginStore } from '@/stores/counter';
-import { useRoute } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { FollowersNum, FansNum, byLikesNum, LikesNum, VideosNum } from '@/api/Chat'
 import { getUserInfo } from '@/api/user'
 
+const router = useRouter()
 const route = useRoute()
 const { userinfo } = loginStore()
 const userInfo = ref({ ...userinfo })
@@ -13,19 +14,8 @@ const Fansnum = ref(0)
 const Likesnum = ref(0)
 const byLikesnum = ref(0)
 const Videosnum = ref(0)
-onMounted(async () => {
-    userinfoContainer.value.addEventListener('touchstart', tstart)
-    userinfoContainer.value.addEventListener('touchend', tend)
-    const id = route.params.id === 'me' ? userinfo.userId : route.params.id
-    if (id !== userinfo.userId) userInfo.value = await getUserInfo(id, userinfo.userId)
-    console.log(id);
-    Followersnum.value = await FollowersNum(id)
-    Fansnum.value = await FansNum(id)
-    Likesnum.value = await LikesNum(id)
-    byLikesnum.value = await byLikesNum(id)
-    Videosnum.value = await VideosNum(id)
 
-})
+
 const showMenu = ref(false)
 const userinfoContainer = ref(null)
 const userinfoDom = ref(null)
@@ -85,10 +75,25 @@ const tstart = () => {
     bg.value.style.transition = 'none'
     diffY.value = parseFloat(height) - 150
 }
+const toUpdateUserInfo = () => {
+    router.push({ name: 'UpdateUserInfo' })
+}
+onMounted(async () => {
+    userinfoContainer.value.addEventListener('touchstart', tstart)
+    userinfoContainer.value.addEventListener('touchend', tend)
+    const id = route.params.id === 'me' ? userinfo.userId : route.params.id
+    if (id !== userinfo.userId) userInfo.value = await getUserInfo(id, userinfo.userId)
+    console.log(id);
+    Followersnum.value = await FollowersNum(id)
+    Fansnum.value = await FansNum(id)
+    Likesnum.value = await LikesNum(id)
+    byLikesnum.value = await byLikesNum(id)
+    Videosnum.value = await VideosNum(id)
+})
 </script>
 <template>
     <img src="/src/assets/bg.jpg" class="bg" ref="bg">
-    <div class="userinfo-container" ref="userinfoContainer" :class="route.params.id !== 'me' ? 'noShow' : 'pb'">
+    <div class="userinfo-container" ref="userinfoContainer" :class="{ 'pb': route.params.id === 'me' }">
         <div class="userinfo" ref="userinfoDom">
             <div class="avatar">
                 <img :src="$imgSrc(userInfo.userAvatar)">
@@ -125,10 +130,10 @@ const tstart = () => {
         <router-view></router-view>
     </div>
     <div class="r" v-if="route.params.id == 'me'" @click="showMenu = !showMenu">...</div>
-    <div class="l iconfont icon-zuojiantou" v-else></div>
+    <div class="l iconfont icon-zuojiantou" v-else @click="router.back()"></div>
     <ul class="more-menu" :class="{ 'show': showMenu }">
-        <li>修改个人资料</li>
-        <li>注销</li>
+        <li @click="toUpdateUserInfo">修改个人资料</li>
+        <li @click="logout">注销</li>
     </ul>
 </template>
 <style lang="scss" scoped>
@@ -150,8 +155,9 @@ const tstart = () => {
     &::after {
         content: '';
         position: absolute;
-        top: -20px;
+        top: 0;
         right: 5px;
+        transform: translateY(-100%);
         border: 10px solid transparent;
         border-bottom-color: rgba(22, 24, 35, 0.6);
     }

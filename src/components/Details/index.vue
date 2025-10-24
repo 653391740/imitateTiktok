@@ -14,7 +14,9 @@ const hasMore = ref(true)
 const attrs = useAttrs()
 const handleScroll = async () => {
     try {
-        const res = await attrs.onLoad(LoginStore.userinfo.userId, page.value)
+        const id = route.params.id !== 'me' ? route.params.id : LoginStore.userinfo.userId
+        console.log(id);
+        const res = await attrs.onLoad(id, page.value)
         if (res.length === 0) return hasMore.value = false
         const updatedRes = await Promise.allSettled(res.map(async e => {
             if (!e.Video) return e

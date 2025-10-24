@@ -1,5 +1,11 @@
 <script setup>
-import { ref } from 'vue';
+import { onUpdated, ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
+const route = useRoute();
+const isUserPage = computed(() => {
+    return route.path.includes('/user') && route.params.id && route.params.id !== 'me';
+})
+
 import CommentPopup from '@/components/comment/commentPopup.vue'
 
 const navItems = [
@@ -31,7 +37,7 @@ const navItems = [
             <component :is="Component" />
         </keep-alive>
     </router-view>
-    <nav>
+    <nav v-show="!isUserPage">
         <router-link v-for="(item, index) in navItems" :to="item.path" @click="activeIndex = index">{{ item.name }}
             <div v-if="!item.name">
             </div>

@@ -91,6 +91,11 @@ const router = createRouter({
       path: '/chatWith',
       name: 'ChatWith',
       component: () => import('@/views/Message/ChatWith.vue')
+    },
+    {
+      path: '/UpdateUserInfo',
+      name: 'UpdateUserInfo',
+      component: () => import('@/views/User/UpdateUserInfo.vue')
     }
   ],
 })
