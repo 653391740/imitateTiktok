@@ -3,6 +3,13 @@ import { defineStore } from 'pinia'
 import { login, getUserInfo } from '@/api/login'
 import { getPopularVideo, isLiked } from '@/api/video'
 import { FanUnreadNum, byLikeUnreadNum, byCommentUnreadNum, getAtUnreadNum } from '@/api/Chat'
+export const searchStore = defineStore('search', () => {
+  const inputvalue = ref('')
+  return {
+    inputvalue
+  }
+})
+
 export const chatStore = defineStore('chat', () => {
   const chatList = ref(JSON.parse(localStorage.getItem('chatList')) || [])
   const addChat = (chat) => {
@@ -66,13 +73,18 @@ export const homeStore = defineStore('home', () => {
         return e
       }))
       VideoList.value.push(...updatedData)
+      console.log(VideoList.value);
     } catch (error) {
       console.log(error);
     }
   }
+  const falseVideoList = () => {
+    VideoList.value.map(e => e.isLiked = false)
+  }
   return {
     VideoList,
-    getVideoList
+    getVideoList,
+    falseVideoList
   }
 })
 export const commentStore = defineStore('comment', () => {
@@ -81,7 +93,9 @@ export const commentStore = defineStore('comment', () => {
   const commentId = ref('')
   const replyId = ref('') // 未开发
   const openCommentPopup = (id, num) => {
+    console.log(1);
     if (!loginStore().userinfo) return loginStore().loginShow = true
+    console.log(1);
     showPopup.value = true
     commentNum.value = num
     commentId.value = id
@@ -110,6 +124,13 @@ export const loginStore = defineStore('login', () => {
       password: ''
     }
   }
+
+  const logout = () => {
+    localStorage.removeItem('tiktok_userinfo')
+    homeStore().falseVideoList()
+    userinfo.value = {}
+  }
+
   const updateUserInfo = (newUserinfo) => {
     userinfo.value = { ...newUserinfo }
     localStorage.setItem('tiktok_userinfo', JSON.stringify(newUserinfo))
@@ -145,6 +166,7 @@ export const loginStore = defineStore('login', () => {
     closeLogin,
     Login,
     updateUserInfo,
+    logout,
     formData
   }
 })

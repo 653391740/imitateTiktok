@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineEmits, defineExpose, nextTick, onActivated, defineProps } from 'vue';
+import { ref, defineEmits, defineExpose, nextTick, computed, onActivated, defineProps } from 'vue';
 import { useRoute } from 'vue-router'
 import Videoitem from '@/components/video/video.vue'
 import Side from '@/components/video/side-desc.vue'
@@ -21,10 +21,10 @@ const props = defineProps({
         default: true
     }
 })
-
 onActivated(() => {
     nextTick(() => {
         toIndex(activeIndex.value, false)
+        console.log(VideoList.value);
     })
 })
 
@@ -39,8 +39,15 @@ const handleVideoEnd = (index) => {
 // 切换到指定索引的视频
 const toIndex = (index, smooth = true) => {
     activeIndex.value = index;
-    swiper.value.swipeTo(index, smooth)
-    video.value[index].togglePlayback();
+    if (swiper.value) {
+        swiper.value.swipeTo(index, smooth);
+    }
+    // 使用nextTick确保DOM更新完成后再调用togglePlayback
+    nextTick(() => {
+        if (video.value && video.value[index]) {
+            video.value[index].togglePlayback();
+        }
+    });
 }
 
 const newDom = ref(null)
@@ -51,6 +58,7 @@ const HomeStore = homeStore()
 const loadMore = () => {
     if (route.path === '/home') HomeStore.getVideoList()
 }
+const VideoList = computed(() => props.VideoList.map(item => item.value || item))
 defineExpose({
     toIndex
 })
@@ -58,13 +66,13 @@ defineExpose({
 
 <template>
     <Pullupload ref="pulluploadRef" @pullup="loadMore" :newDom="newDom" :hasMore="true">
-        <swipper ref="swiper" vertical :length="props.VideoList.length" @scroll="handleSwiperScroll"
+        <swipper ref="swiper" vertical :length="VideoList.length" @scroll="handleSwiperScroll"
             @change="handleSwiperChange">
-            <div class="swipper-item" v-for="item, index in props.VideoList" :key="item.id">
-                <Videoitem ref="video" :item="item.value" :activeIndex="activeIndex" :index="index"
-                    :autoPlay="props.autoPlay" @ended="handleVideoEnd(index)" />
-                <Side :item="item.value"></Side>
-                <slot :item="item.value"></slot>
+            <div class="swipper-item" v-for="item, index in VideoList" :key="item.Video?.videoId || index">
+                <Videoitem ref="video" :item="item" :activeIndex="activeIndex" :index="index" :autoPlay="props.autoPlay"
+                    @ended="handleVideoEnd(index)" />
+                <Side :item="item"></Side>
+                <slot :item="item"></slot>
             </div>
         </swipper>
     </Pullupload>

@@ -96,6 +96,24 @@ const router = createRouter({
       path: '/UpdateUserInfo',
       name: 'UpdateUserInfo',
       component: () => import('@/views/User/UpdateUserInfo.vue')
+    },
+    {
+      path: '/search',
+      name: 'Search',
+      redirect: '/search/video',
+      component: () => import('@/views/Home/search.vue'),
+      children: [
+        {
+          path: 'video',
+          name: 'SearchVideo',
+          component: () => import('@/views/Home/search-video.vue')
+        },
+        {
+          path: 'user',
+          name: 'SearchUser',
+          component: () => import('@/views/Home/search-user.vue')
+        }
+      ]
     }
   ],
 })

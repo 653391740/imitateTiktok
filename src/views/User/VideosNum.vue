@@ -6,7 +6,7 @@ const loadMore = async (userId, page) => {
 }
 </script>
 <template>
-    <Videoslist @loadmore="loadMore" />
+    <Videoslist @loadmore="loadMore" :showDeleteIcon="true" />
 </template>
 
 <style lang="scss" scoped></style>

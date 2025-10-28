@@ -5,9 +5,6 @@ const route = useRoute();
 const isUserPage = computed(() => {
     return route.path.includes('/user') && route.params.id && route.params.id !== 'me';
 })
-
-import CommentPopup from '@/components/comment/commentPopup.vue'
-
 const navItems = [
     {
         name: '首页',
@@ -43,7 +40,6 @@ const navItems = [
             </div>
         </router-link>
     </nav>
-    <CommentPopup></CommentPopup>
 </template>
 <style lang="scss" scoped>
 nav {
@@ -67,6 +63,17 @@ nav {
 
         &.router-link-active {
             color: #fff;
+
+            &::after {
+                content: '';
+                position: absolute;
+                bottom: 3px;
+                left: 50%;
+                width: 3 0px;
+                height: 2px;
+                transform: translateX(-50%);
+                background-color: #fff;
+            }
         }
 
         div {

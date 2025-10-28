@@ -83,7 +83,7 @@ const sendComment = async (content) => {
 
 <style lang="scss" scoped>
 .commentPopupbox {
-    z-index: 999;
+    z-index: 999 !important;
 }
 
 .commentPopup {

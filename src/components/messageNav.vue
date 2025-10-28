@@ -1,47 +1,23 @@
 <script setup>
 import { ref, useAttrs } from 'vue'
 import Title from '@/components/title.vue'
-
+import { loginStore } from '@/stores/counter'
+const { userinfo } = loginStore()
 const attrs = useAttrs()
 const pulluploadRef = ref(null)
 const error = ref(false)
 const hasMore = ref(true)
 const page = ref(1)
 const List = ref([])
-
-/**
- * 判断两个对象内容是否完全相同
- * @param {Object} obj1 - 第一个对象
- * @param {Object} obj2 - 第二个对象
- * @returns {Boolean} - 如果两个对象内容完全相同返回 true，否则返回 false
- */
-const isObjectEqual = (obj1, obj2) => {
-    if (obj1 === obj2) return true;
-
-    if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) {
-        return false;
-    }
-
-    const keys1 = Object.keys(obj1);
-    const keys2 = Object.keys(obj2);
-
-    // 判断属性数量是否相同
-    if (keys1.length !== keys2.length) return false;
-
-    // 递归比较每个属性
-    for (const key of keys1) {
-        if (!keys2.includes(key)) return false;
-        if (!isObjectEqual(obj1[key], obj2[key])) return false;
-    }
-
-    return true;
-};
-
+const stop = ref(false)
 const loadmore = async () => {
+    if (stop.value) return
     try {
-        const data = await attrs.onLoadmore(page.value)
-        for (const item of List.value) {
-            if (isObjectEqual(item, data[0])) return
+        const data = await attrs.onLoadmore(userinfo.userId, page.value)
+        if (JSON.stringify(List.value) === JSON.stringify(data)) {
+            stop.value = true
+            hasMore.value = false
+            return
         }
         if (data.length === 0) return hasMore.value = false
         List.value.push(...data)

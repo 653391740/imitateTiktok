@@ -1,11 +1,9 @@
 <script setup>
 import { byComment } from '@/api/Chat'
-import { loginStore } from '@/stores/counter'
 import MessageNav from '@/components/messageNav.vue'
 
-const LoginStore = loginStore()
-const loadmore = async (page) => {
-    return await byComment(LoginStore.userinfo.userId, page)
+const loadmore = async (uid, page) => {
+    return await byComment(uid, page)
 }
 
 </script>

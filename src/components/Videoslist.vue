@@ -1,12 +1,12 @@
 <script setup>
 import Video from '@/components/video/index.vue';
 import Send from '@/components/send.vue';
-import { commentStore } from '@/stores/counter'
-import { ref, onMounted, useAttrs } from 'vue'
-import { loginStore } from '@/stores/counter';
+import { commentStore, loginStore } from '@/stores/counter'
+import { ref, onMounted, useAttrs, getCurrentInstance } from 'vue'
 import { isLiked } from '@/api/video'
 const { userinfo } = loginStore()
 
+const { proxy } = getCurrentInstance()
 const attrs = useAttrs()
 const CommentStore = commentStore()
 const page = ref(1)
@@ -17,7 +17,7 @@ const loadmore = async () => {
         const res = await attrs.onLoadmore(userinfo.userId, page.value)
         if (res.length === 0) return hasMore.value = false
         const formattedData = await Promise.allSettled(res.map(async e => {
-            if (!e.Video) return e
+            if (!e.Video) return null // Return null for items without Video
             try {
                 const likedRes = await isLiked(userinfo.userId, e.Video.videoId)
                 e.isLiked = likedRes
@@ -27,7 +27,8 @@ const loadmore = async () => {
             }
             return e
         }))
-        list.value.push(...formattedData)
+        // Filter out null values
+        list.value.push(...formattedData.filter(item => item !== null))
         page.value++
         error.value = false
     } catch (err) {
@@ -48,34 +49,52 @@ onMounted(() => {
     })
 })
 
-const videoRef = ref(null)
+const videoRefs = ref(null)
 const activeIndex = ref(0)
 const openPopup = (index) => {
-    console.log(1);
-    
-    activeIndex.value = index
-    showPopup.value = true
-    videoRef.value.toIndex(index, false)
+    if (index >= 0 && index < list.value.length) {
+        activeIndex.value = index
+        showPopup.value = true
+        videoRefs.value.toIndex(index, false)
+    }
 }
 const closePopup = () => {
     showPopup.value = false
-    videoRef.value.toIndex(activeIndex.value, false)
+    if (videoRefs.value && activeIndex.value >= 0 && activeIndex.value < list.value.length) {
+        videoRefs.value.toIndex(activeIndex.value, false)
+    }
+}
+const pulluploadRef = ref(null)
+const delshow = ref(false)
+const delactive = ref({})
+const showDelConfirm = (item) => {
+    delactive.value = item
+    delshow.value = true
+}
+const del = async () => {
+    proxy.$toast.show('暂不支持删除视频')
+    delshow.value = false
 }
 </script>
 <template>
+    <Dialog ref="dialogRef" :options="{ title: '是否删除该视频' }" @close="delshow = false" @confirm="del" :show="delshow">
+    </Dialog>
     <Pullupload class="pulluploadRef" ref="pulluploadRef" @pullup="loadmore" :newDom="newDom" :error="error"
         :hasMore="hasMore">
-        <li v-for="item, index in list" :key="item.value.Video.videoId" @click="openPopup(index)">
-            <img :src="item.value.Video.videoCover">
-            <div class="like iconfont icon-dianzan" :class="{'liked': item.isLiked}"></div>
+        <li v-for="item, index in list" :key="item.value.Video?.videoId || index" @click="openPopup(index)">
+            <img :src="item.value.Video?.videoCover || ''">
+            <div class="iconfont icon-aixin1">{{ item.value.WSLCNum?.likeNum || 0 }}</div>
+            <div class="iconfont icon-lajitong" v-if="attrs.showDeleteIcon" @click.stop="showDelConfirm(item.value)">
+            </div>
         </li>
     </Pullupload>
     <teleport to="body">
         <popup class="popupRef" position="right" background="#161622" :show="showPopup">
             <div class="close iconfont icon-zuojiantou" @click="closePopup"></div>
-            <Video ref="videoRef" :VideoList="list" :autoPlay="false">
+            <Video ref="videoRefs" :VideoList="list" :autoPlay="false">
                 <template #default="{ item }">
-                    <Send @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum.commentNum)"></Send>
+                    <Send @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
+                    </Send>
                 </template>
             </Video>
         </popup>
@@ -103,6 +122,22 @@ const closePopup = () => {
         border: 0.5px solid #000;
         height: 163px;
         position: relative;
+
+        .iconfont {
+            color: #fff;
+        }
+
+        .icon-aixin1 {
+            position: absolute;
+            bottom: 0px;
+            left: 5px;
+        }
+
+        .icon-lajitong {
+            position: absolute;
+            top: 0px;
+            right: 5px;
+        }
 
         img {
             width: 100%;

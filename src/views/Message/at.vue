@@ -1,11 +1,9 @@
 <script setup>
 import { getAt } from '@/api/Chat'
-import { loginStore } from '@/stores/counter'
 import MessageNav from '@/components/messageNav.vue'
 
-const LoginStore = loginStore()
-const loadmore = async (page) => {
-    return await getAt(LoginStore.userinfo.userId, page)
+const loadmore = async (uid, page) => {
+    return await getAt(uid, page)
 }
 
 </script>

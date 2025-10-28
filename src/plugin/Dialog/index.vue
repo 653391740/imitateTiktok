@@ -55,6 +55,7 @@ const props = defineProps({
     width: 100%;
     height: 100%;
     background-color: rgba(#000, 0.1);
+    z-index: 999;
 
     .box {
         top: 35%;

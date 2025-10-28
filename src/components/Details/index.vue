@@ -14,7 +14,7 @@ const hasMore = ref(true)
 const attrs = useAttrs()
 const handleScroll = async () => {
     try {
-        const id = route.params.id !== 'me' ? route.params.id : LoginStore.userinfo.userId
+        const id = route.params.id ? (route.params.id !== 'me' ? route.params.id : LoginStore.userinfo.userId) : LoginStore.userinfo.userId
         console.log(id);
         const res = await attrs.onLoad(id, page.value)
         if (res.length === 0) return hasMore.value = false

@@ -7,7 +7,7 @@ import { getUserInfo } from '@/api/user'
 
 const router = useRouter()
 const route = useRoute()
-const { userinfo } = loginStore()
+const { userinfo, logout } = loginStore()
 const userInfo = ref({ ...userinfo })
 const Followersnum = ref(0)
 const Fansnum = ref(0)
@@ -90,10 +90,25 @@ onMounted(async () => {
     byLikesnum.value = await byLikesNum(id)
     Videosnum.value = await VideosNum(id)
 })
+
+const showDialog = ref(false)
+const Logout = () => {
+    logout()
+    router.push({ path: '/home' })
+}
 </script>
 <template>
-    <img src="/src/assets/bg.jpg" class="bg" ref="bg">
+    <Dialog :show="showDialog" :options="{ title: '是否保存修改' }" @close="showDialog = false" @confirm="Logout" />
+    <div class="backbtn-wrap">
+        <div class="r" v-if="route.params.id == 'me'" @click="showMenu = !showMenu">...</div>
+        <div class="l iconfont icon-zuojiantou" v-else @click="router.back()"></div>
+        <ul class="more-menu" :class="{ 'show': showMenu }">
+            <li @click="toUpdateUserInfo">修改个人资料</li>
+            <li @click="showDialog = true">注销</li>
+        </ul>
+    </div>
     <div class="userinfo-container" ref="userinfoContainer" :class="{ 'pb': route.params.id === 'me' }">
+        <img src="/src/assets/bg.jpg" class="bg" ref="bg">
         <div class="userinfo" ref="userinfoDom">
             <div class="avatar">
                 <img :src="$imgSrc(userInfo.userAvatar)">
@@ -129,44 +144,70 @@ onMounted(async () => {
         </nav>
         <router-view></router-view>
     </div>
-    <div class="r" v-if="route.params.id == 'me'" @click="showMenu = !showMenu">...</div>
-    <div class="l iconfont icon-zuojiantou" v-else @click="router.back()"></div>
-    <ul class="more-menu" :class="{ 'show': showMenu }">
-        <li @click="toUpdateUserInfo">修改个人资料</li>
-        <li @click="logout">注销</li>
-    </ul>
 </template>
 <style lang="scss" scoped>
-.more-menu {
+.backbtn-wrap {
     position: fixed;
-    top: 55px;
-    right: 10px;
-    width: 80px;
-    background: rgba(22, 24, 35, 0.6);
-    transform: translateY(100px);
-    transition: all 0.4s ease;
-    opacity: 0;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    height: 48px;
 
-    &.show {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    &::after {
-        content: '';
+    .more-menu {
         position: absolute;
-        top: 0;
-        right: 5px;
-        transform: translateY(-100%);
-        border: 10px solid transparent;
-        border-bottom-color: rgba(22, 24, 35, 0.6);
+        top: 55px;
+        right: 10px;
+        width: 80px;
+        background: rgba(22, 24, 35, 0.6);
+        transform: translateY(100px);
+        transition: all 0.4s ease;
+        opacity: 0;
+
+        &.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 5px;
+            transform: translateY(-100%);
+            border: 10px solid transparent;
+            border-bottom-color: rgba(22, 24, 35, 0.6);
+        }
+
+        li {
+            line-height: 44px;
+            text-align: center;
+            color: #e8e8e9;
+            font-size: 12px;
+        }
     }
 
-    li {
-        line-height: 44px;
+    @mixin lr-btn {
+        position: absolute;
+        top: 10px;
+        border-radius: 50%;
+        color: #fff;
         text-align: center;
-        color: #e8e8e9;
-        font-size: 12px;
+        width: 28px;
+        height: 28px;
+        background: rgba(22, 24, 35, 0.6);
+    }
+
+    .r {
+        right: 10px;
+        @include lr-btn;
+    }
+
+    .l {
+        font-size: 10px;
+        line-height: 28px;
+        left: 10px;
+        @include lr-btn;
     }
 }
 
@@ -295,28 +336,5 @@ onMounted(async () => {
     position: fixed;
     top: 0;
     left: 0;
-}
-
-@mixin lr-btn {
-    position: fixed;
-    top: 10px;
-    border-radius: 50%;
-    color: #fff;
-    text-align: center;
-    width: 28px;
-    height: 28px;
-    background: rgba(22, 24, 35, 0.6);
-}
-
-.r {
-    right: 10px;
-    @include lr-btn;
-}
-
-.l {
-    font-size: 10px;
-    line-height: 28px;
-    left: 10px;
-    @include lr-btn;
 }
 </style>
