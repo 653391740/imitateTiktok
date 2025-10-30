@@ -26,7 +26,7 @@ service.interceptors.response.use(res => {
         window.location.href = '#/login'
         Toast.show('登录过期，请重新登录')
     } else {
-        return data ? data : res.data;
+        return data;
     }
 }, error => {
     return Promise.reject(error)

@@ -16,8 +16,10 @@
     "pinia": "^3.0.3",
     "postcss-px-to-viewport": "^1.1.1",
     "sass": "^1.93.2",
+    "socket.io-client": "^2.2.0",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
+    "vue-socket.io": "^3.0.10",
     "wl-pinyin": "^1.0.1"
   },
   "devDependencies": {

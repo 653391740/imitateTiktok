@@ -10,6 +10,7 @@ const router = useRouter()
         <nav class="message-header">
             <ul>
                 <li @click="router.push('/fan')">
+                    
                     <div style="background-color: #4f88fb;" class="iconfont icon-fensishu"></div>
                     <p>粉丝</p>
                 </li>
@@ -51,6 +52,8 @@ const router = useRouter()
 
             li {
                 text-align: center;
+                position: relative;
+
 
                 div {
                     width: 40px;

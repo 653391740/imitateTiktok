@@ -44,6 +44,11 @@ const handleScroll = async () => {
     }
 }
 const sendComment = async (content) => {
+    if (!LoginStore.userinfo.userId) {
+        LoginStore.loginShow = true
+        CommentStore.showPopup = false
+        return
+    }
     if (!content) return
     try {
         const { id, updatedAt, isRead, version, ...item } = await sendVideoComment({

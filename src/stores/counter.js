@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { login, getUserInfo } from '@/api/login'
 import { getPopularVideo, isLiked } from '@/api/video'
 import { FanUnreadNum, byLikeUnreadNum, byCommentUnreadNum, getAtUnreadNum } from '@/api/Chat'
+
 export const searchStore = defineStore('search', () => {
   const inputvalue = ref('')
   return {
@@ -11,24 +12,48 @@ export const searchStore = defineStore('search', () => {
 })
 
 export const chatStore = defineStore('chat', () => {
+  const socket = inject("socket");
   const chatList = ref(JSON.parse(localStorage.getItem('chatList')) || [])
   const addChat = (chat) => {
-    const index = chatList.value.findIndex(e => e.userId === chat.userId)
+    const index = chatList.value.findIndex(e => e.info.userId === chat.userId)
     if (index !== -1) {
-      chatList.value[index].content = chat.content
+      chatList.value[index].info.privateLetterContent = chat.privateLetterContent
+      chatList.value[index].info.createdAt = chat.createdAt
     } else {
-      chatList.value.push(chat)
+      chatList.value.push({
+        info: { ...chat },
+        newMsg: 0
+      })
+    }
+    localStorage.setItem('chatList', JSON.stringify(chatList.value))
+  }
+  const receiveChat = (chat) => {
+    const index = chatList.value.findIndex(e => e.info.userId === chat.fromId)
+    if (index !== -1) {
+      chatList.value[index].info.privateLetterContent = chat.privateLetterContent
+      chatList.value[index].info.createdAt = chat.createdAt
+      chatList.value[index].newMsg++
+    } else {
+      const { fromId, ...item } = chat
+      chatList.value.push({
+        info: { ...item, userId: fromId },
+        newMsg: 0
+      })
     }
     localStorage.setItem('chatList', JSON.stringify(chatList.value))
   }
   const deleteChat = (userId) => {
-    const index = chatList.value.findIndex(e => e.userId === userId)
+    const index = chatList.value.findIndex(e => e.info.userId === userId)
     if (index !== -1) {
       chatList.value.splice(index, 1)
       localStorage.setItem('chatList', JSON.stringify(chatList.value))
     }
   }
-
+  const receive = () => {
+    socket.on('receivePrivateLetter', data => {
+      receiveChat(data)
+    })
+  }
 
   const FanUnreadNumRes = ref(0)
   const byLikeUnreadNumRes = ref(0)
@@ -40,6 +65,7 @@ export const chatStore = defineStore('chat', () => {
       byLikeUnreadNumRes.value = await byLikeUnreadNum(loginStore().userinfo.userId)
       byCommentUnreadNumRes.value = await byCommentUnreadNum(loginStore().userinfo.userId)
       getAtUnreadNumRes.value = await getAtUnreadNum(loginStore().userinfo.userId)
+      console.log(FanUnreadNumRes.value, byLikeUnreadNumRes.value, byCommentUnreadNumRes.value, getAtUnreadNumRes.value);
     } catch (error) {
       console.log(error);
     }
@@ -52,7 +78,8 @@ export const chatStore = defineStore('chat', () => {
     byLikeUnreadNumRes,
     byCommentUnreadNumRes,
     getAtUnreadNumRes,
-    getAllrequest
+    getAllrequest,
+    receive
   }
 })
 export const homeStore = defineStore('home', () => {
@@ -109,6 +136,7 @@ export const commentStore = defineStore('comment', () => {
   }
 })
 export const loginStore = defineStore('login', () => {
+  const socket = inject("socket");
   const loginShow = ref(false)
   const registerShow = ref(false)
   const registerTime = ref(60)
@@ -136,24 +164,29 @@ export const loginStore = defineStore('login', () => {
     localStorage.setItem('tiktok_userinfo', JSON.stringify(newUserinfo))
   }
 
-  const formData = ref({
-    email: '583514368@qq.com',
-    password: '123456'
+  const formData = ref(JSON.parse(localStorage.getItem('userinfo')) || {
+    email: '',
+    password: ''
   })
 
   const Login = async (proxy) => {
+    console.log(formData.value);
+    if (formData.value.email === '') return loginShow.value = true
     try {
       proxy.$toast.loading('')
       await new Promise(resolve => setTimeout(resolve, 1000));
       const { userId } = await login(formData.value) // 登录
       const res = await getUserInfo(userId) // 获取到个人信息
+      socket.emit('login', userId)
+      chatStore().getAllrequest()
+      localStorage.setItem('userinfo', JSON.stringify(formData.value))
       updateUserInfo(res)
       proxy.$toast.show('登录成功')
       closeLogin(res)
     } catch (error) {
+      console.log(error);
       if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) proxy.$toast.show('请求超时，请检查网络连接后重试')
-      const errorMessage = error.response.data.message === 'email or password error'
-      if (errorMessage) proxy.$toast.show(errorMessage)
+      if (error.response.data.message === 'email or password error') proxy.$toast.show('邮箱或密码错误')
     }
   }
   return {

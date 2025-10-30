@@ -1,15 +1,18 @@
 <script setup>
 import Title from '@/components/title.vue'
 import Send from '@/components/send.vue'
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, inject, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { getPrivateLetter, readPrivateLetter, sendPrivateLetter } from '@/api/Chat'
 import { loginStore, chatStore } from '@/stores/counter'
-
-const LoginStore = loginStore()
+const { userinfo } = loginStore()
 const ChatStore = chatStore()
 const route = useRoute()
-
+const socket = inject("socket");
+socket.on('receivePrivateLetter', data => {
+    console.log(data);
+    letterList.value.push(data)
+})
 const letterList = ref([])
 const chatContainer = ref(null)
 
@@ -18,9 +21,9 @@ const scrollToBottom = () => {
 }
 
 onMounted(async () => {
-    letterList.value = await getPrivateLetter(LoginStore.userinfo.userId, route.query.userId)
+    letterList.value = await getPrivateLetter(userinfo.userId, route.query.userId)
     scrollToBottom()
-    await readPrivateLetter(LoginStore.userinfo.userId, route.query.userId)
+    await readPrivateLetter(userinfo.userId, route.query.userId)
 })
 
 // 判断是否与上一条消息在同一十分钟内
@@ -39,20 +42,28 @@ const isSameTenMinuteAsPrevious = (index) => {
         currentDate.getDate() === previousDate.getDate() &&
         currentDate.getHours() === previousDate.getHours() &&
         currentDate.getMinutes() <= previousDate.getMinutes() + 10
-    // 如果当前时间的分钟数在上一条消息的分钟数加10内，那么就认为是在同一十分钟内
 }
 
 const sendComment = async (content) => {
-    const { updatedAt, version, id, ...item } = await sendPrivateLetter(LoginStore.userinfo.userId, route.query.userId, {
+    const { updatedAt, version, id, ...item } = await sendPrivateLetter(userinfo.userId, route.query.userId, {
         content,
-        fromUserId: LoginStore.userinfo.userId,
+        fromUserId: userinfo.userId,
         toUserId: route.query.userId
     })
+    let obj = {
+        fromId: userinfo.userId,
+        toId: route.query.userId,
+        privateLetterContent: content,
+        createdAt: new Date().getTime(),
+        userAvatar: userinfo.userAvatar,
+        userNickname: userinfo.userNickname
+    }
+    socket.emit('sendPrivateLetter', obj);
     letterList.value.push({ ...item, isRead: 0 })
     const createdAt = new Date().getTime()
     ChatStore.addChat({
         ...route.query,
-        content,
+        privateLetterContent: content,
         createdAt
     })
     scrollToBottom()
@@ -67,10 +78,9 @@ const sendComment = async (content) => {
             <div v-if="!isSameTenMinuteAsPrevious(index)" class="time">
                 {{ $formatTime2(item.createdAt) }}
             </div>
-            <div class="content" :class="item.fromId === LoginStore.userinfo.userId ? 'right' : 'left'">
+            <div class="content" :class="item.fromId === userinfo.userId ? 'right' : 'left'">
                 <div class="msg">{{ item.privateLetterContent }}</div>
-                <img
-                    :src="$imgSrc(item.fromId === LoginStore.userinfo.userId ? LoginStore.userinfo.userAvatar : route.query.userAvatar)">
+                <img :src="$imgSrc(item.fromId === userinfo.userId ? userinfo.userAvatar : route.query.userAvatar)">
             </div>
         </li>
     </ul>
@@ -81,7 +91,7 @@ const sendComment = async (content) => {
 ul {
     padding-top: 44px;
     height: calc(100vh - 44px);
-    overflow: auto;
+    overflow-y: auto;
     color: #fff;
     border-bottom: $bordB;
     scrollbar-width: 0;
@@ -113,7 +123,7 @@ ul {
                 border-radius: 7px;
                 background-color: #fff;
                 color: #000;
-                display: inline-block;
+                text-align: left;
             }
 
             img {

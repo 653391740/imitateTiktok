@@ -89,6 +89,8 @@ onMounted(async () => {
     Likesnum.value = await LikesNum(id)
     byLikesnum.value = await byLikesNum(id)
     Videosnum.value = await VideosNum(id)
+    console.log(Followersnum.value, Fansnum.value, Likesnum.value, byLikesnum.value, Videosnum.value);
+
 })
 
 const showDialog = ref(false)

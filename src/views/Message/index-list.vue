@@ -49,23 +49,27 @@ const deleteChatItem = (userId) => {
     ChatStore.deleteChat(userId)
     delete slideStates.value[userId]
 }
+
+const toRouterchat = (item) => {
+    router.push({ path: 'chatWith', query: { ...item.info } })
+}
 </script>
 
 <template>
     <div class="message-content">
         <ul v-if="ChatStore.chatList.length > 0" @touchstart="clearStatus">
-            <li v-for="item in ChatStore.chatList" :key="item.userId"
-                :class="{ 'slide-active': slideStates[item.userId] }"
-                @touchstart="handleTouchStart($event, item.userId)" @touchmove="handleTouchMove($event, item.userId)"
-                @touchend="handleTouchEnd($event, item.userId)"
-                @click="router.push({ path: 'chatWith', query: { ...item } })">
-                <img :src="$imgSrc(item.userAvatar)" alt="">
+            <li v-for="item in ChatStore.chatList" :key="item.info.userId"
+                :class="{ 'slide-active': slideStates[item.info.userId] }"
+                @touchstart="handleTouchStart($event, item.info.userId)"
+                @touchmove.prevent="handleTouchMove($event, item.info.userId)"
+                @touchend="handleTouchEnd($event, item.info.userId)" @click="toRouterchat(item)">
+                <img :src="$imgSrc(item.info.userAvatar)" alt="">
                 <div class="info">
-                    <p class="user-name">{{ item.userNickname }}</p>
-                    <p class="time">{{ $formatTime2(item.createdAt) }}</p>
+                    <p class="user-name">{{ item.info.userNickname }}</p>
+                    <p class="time">{{ $formatTime2(item.info.createdAt) }}</p>
                 </div>
-                <div class="newMsg">{{ item.content }}</div>
-                <div class="delete-btn" @click="deleteChatItem(item.userId)">删除</div>
+                <div class="newMsg">{{ item.info.privateLetterContent }}</div>
+                <div class="delete-btn" @click="deleteChatItem(item.info.userId)">删除</div>
             </li>
         </ul>
         <img v-else class="no-message" src="/src/assets/0.jpg">

@@ -24,7 +24,6 @@ const AsyncPullup = async () => {
     } finally {
         loading.value = false
     }
-
 }
 onMounted(async () => {
     const res = await AsyncPullup()

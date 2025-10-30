@@ -149,15 +149,21 @@ const saveCrop = () => {
         const response = await fetch(fieldName)
         const blob = await response.blob()
         const blobSizeInKB = parseFloat((blob.size / 1024).toFixed(2))
-        if (blobSizeInKB > 2 * 1024 * 1024) return proxy.$toast.show('图片文件过大，请选择更小的裁切区域')
+        console.log(blobSizeInKB);
+
+        if (blobSizeInKB > 1024) return proxy.$toast.show('图片文件过大，请选择更小的裁切区域')
         croppedSrc.value = ''
         try {
             proxy.$toast.loading('修改头像中...')
             await uploadAvatar(userInfo.value.userId, { fieldName })
+            const info = { ...userInfo.value, userAvatar: `/assets/avatar/${userinfo.userId}.png` }
+            await modifyUserInfo(userinfo.userId, info)
+            updateUserInfo(info)
             croppedCompleted.value = fieldName
             proxy.$toast.show('修改成功')
         } catch (error) {
             console.log(error);
+            proxy.$toast.show('修改失败')
         }
     }
 }
@@ -236,7 +242,7 @@ const close = () => {
     left: 0;
     right: 0;
     background: #fff;
-    z-index: 10000;
+    z-index: 1000;
 
     .save-btn {
         position: absolute;

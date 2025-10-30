@@ -6,7 +6,8 @@ const { proxy } = getCurrentInstance()
 const LoginStore = loginStore()
 LoginStore.Login(proxy)
 const ChatStore = chatStore()
-ChatStore.getAllrequest()
+// ChatStore.getAllrequest()
+ChatStore.receive()
 
 </script>
 
