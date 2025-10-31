@@ -27,6 +27,9 @@ const emit = defineEmits(['ended'])
 
 
 onMounted(() => {
+    if (autoPlay.value && activeIndex.value === index.value) {
+        togglePlayback();
+    }
 })
 
 const playPromise = () => {
@@ -41,19 +44,6 @@ const playPromise = () => {
 
 
 const togglePlayback = () => {
-    console.log('VideoDom.value:', VideoDom.value);
-    console.log('item.Video?.videoPath:', item.value?.Video?.videoPath);
-
-    if (!VideoDom.value) {
-        console.error('VideoDom is null');
-        return;
-    }
-
-    if (!VideoDom.value.src) {
-        console.error('video src is empty');
-        return;
-    }
-
     if (VideoDom.value.paused) {
         playPromise();
     } else {
@@ -68,17 +58,7 @@ defineExpose({
 
 watch(() => activeIndex.value, (newCurrentIndex, oldCurrentIndex) => {
     if (!VideoDom.value) return;
-
-    if (newCurrentIndex === index.value) {
-        // 当组件首次挂载且是当前活动视频时，或者当索引改变时
-        if (oldCurrentIndex === undefined || oldCurrentIndex !== newCurrentIndex) {
-            if (autoPlay.value) {
-                nextTick(() => {
-                    playPromise();
-                });
-            }
-        }
-    } else {
+    if (newCurrentIndex !== index.value) {
         VideoDom.value.pause();
         VideoDom.value.currentTime = 0;
         isPlaying.value = false;

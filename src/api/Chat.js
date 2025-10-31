@@ -58,3 +58,15 @@ export const LikesNum = (userId) => {
 export const VideosNum = (userId) => {
     return http.get(`/user/${userId}/VideosNum`)
 }
+export const readAllFanMsg = (uid) => {
+    return http.get(`user/${uid}/readAllFanMsg`)
+}
+export const readAllByLikeMsg = (uid) => {
+    return http.get(`user/${uid}/readAllByLikeMsg`)
+}
+export const readAllAt = (uid) => {
+    return http.get(`user/${uid}/readAllAt`)
+}
+export const readAllByCommentMsg = (uid) => {
+    return http.get(`user/${uid}/readAllByCommentMsg`)
+}

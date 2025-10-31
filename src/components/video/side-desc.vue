@@ -39,8 +39,8 @@ const isLiked = computed(() => localItem.isLiked || false)
 const Routeruser = () => {
     if (Video.value?.userId) {
         router.push({
-            path: '/user',
-            query: { userId: Video.value.userId }
+            name: 'user',
+            params: { id: Video.value.userId }
         })
     }
 }
@@ -51,11 +51,8 @@ const toggleLike = proxy.$throttle(async () => {
 
     try {
         const msg = await triggerLike(LoginStore.userinfo.userId, Video.value.videoId)
-        console.log(props.item);
-
         if (msg === '喜欢成功') {
-            // 修改本地副本而不是props
-            WSLCNum.value.likeNum = (WSLCNum.value.likeNum || 0) + 1
+            WSLCNum.value.likeNum = (parseInt(WSLCNum.value.likeNum) || 0) + 1
             localItem.isLiked = true
         } else {
             WSLCNum.value.likeNum = Math.max((WSLCNum.value.likeNum || 0) - 1, 0)

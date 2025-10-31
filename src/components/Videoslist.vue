@@ -1,20 +1,33 @@
 <script setup>
+import { ref, onMounted, getCurrentInstance, computed } from 'vue'
 import Video from '@/components/video/index.vue';
 import Send from '@/components/send.vue';
 import { commentStore, loginStore } from '@/stores/counter'
-import { ref, onMounted, useAttrs, getCurrentInstance } from 'vue'
 import { isLiked } from '@/api/video'
+import { useRoute } from 'vue-router';
 const { userinfo } = loginStore()
-
 const { proxy } = getCurrentInstance()
-const attrs = useAttrs()
+const route = useRoute()
+
+// 声明接收的 props，包含父组件传入的加载函数 onLoadmore
+const props = defineProps({
+    showDeleteIcon: {
+        type: Boolean,
+        default: false
+    },
+    onLoadmore: {
+        type: Function,
+        required: true
+    }
+})
 const CommentStore = commentStore()
 const page = ref(1)
 const list = ref([])
-
+const id = computed(() => route.params.id === 'me' ? userinfo.userId : route.params.id)
 const loadmore = async () => {
     try {
-        const res = await attrs.onLoadmore(userinfo.userId, page.value)
+        // 使用明确传入的 props.onLoadmore 函数（父组件通过 :onLoadmore 传入）
+        const res = await props.onLoadmore(id.value, page.value)
         if (res.length === 0) return hasMore.value = false
         const formattedData = await Promise.allSettled(res.map(async e => {
             if (!e.Video) return null // Return null for items without Video
@@ -84,21 +97,19 @@ const del = async () => {
         <li v-for="item, index in list" :key="item.value.Video?.videoId || index" @click="openPopup(index)">
             <img :src="item.value.Video?.videoCover || ''">
             <div class="iconfont icon-aixin1">{{ item.value.WSLCNum?.likeNum || 0 }}</div>
-            <div class="iconfont icon-lajitong" v-if="attrs.showDeleteIcon" @click.stop="showDelConfirm(item.value)">
+            <div class="iconfont icon-lajitong" v-if="props.showDeleteIcon" @click.stop="showDelConfirm(item.value)">
             </div>
         </li>
     </Pullupload>
-    <teleport to="body">
-        <popup class="popupRef" position="right" background="#161622" :show="showPopup">
-            <div class="close iconfont icon-zuojiantou" @click="closePopup"></div>
-            <Video ref="videoRefs" :VideoList="list" :autoPlay="false">
-                <template #default="{ item }">
-                    <Send @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
-                    </Send>
-                </template>
-            </Video>
-        </popup>
-    </teleport>
+    <popup class="popupRef" position="right" background="#161622" :show="showPopup">
+        <div class="close iconfont icon-zuojiantou" @click="closePopup"></div>
+        <Video ref="videoRefs" :VideoList="list" :autoPlay="false">
+            <template #default="{ item }">
+                <Send @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
+                </Send>
+            </template>
+        </Video>
+    </popup>
 </template>
 
 <style lang="scss" scoped>

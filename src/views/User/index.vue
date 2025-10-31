@@ -1,13 +1,14 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
-import { loginStore } from '@/stores/counter';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, onMounted, nextTick, onActivated, onUnmounted } from 'vue'
+import { loginStore } from '@/stores/counter'
+import { useRouter, useRoute } from 'vue-router'
 import { FollowersNum, FansNum, byLikesNum, LikesNum, VideosNum } from '@/api/Chat'
 import { getUserInfo } from '@/api/user'
 
 const router = useRouter()
 const route = useRoute()
 const { userinfo, logout } = loginStore()
+
 const userInfo = ref({ ...userinfo })
 const Followersnum = ref(0)
 const Fansnum = ref(0)
@@ -15,18 +16,26 @@ const Likesnum = ref(0)
 const byLikesnum = ref(0)
 const Videosnum = ref(0)
 
-
 const showMenu = ref(false)
+const showDialog = ref(false)
+
+//  DOM 引用 
 const userinfoContainer = ref(null)
 const userinfoDom = ref(null)
 const bg = ref(null)
+
+//  拖拽/滚动相关状态 
 const y = ref(0)
 const diffY = ref(0)
 const timer = ref(null)
+const scrollTops = ref(0)
+
 const tmove = (e) => {
     const { scrollTop, clientHeight, scrollHeight } = userinfoContainer.value
     if (clientHeight == scrollHeight) return
+
     const max = 150 + diffY.value + (y.value === 0 ? 0 : e.touches[0].pageY) - y.value
+
     if (scrollTop === 0) {
         scrollTops.value = 0
         if (y.value === 0) y.value = e.touches[0].pageY
@@ -43,7 +52,7 @@ const tmove = (e) => {
         bg.value.style.height = `${max < 150 ? 150 : max}px`
     }
 }
-const scrollTops = ref(0)
+
 const tend = (e) => {
     const mtop = parseFloat(window.getComputedStyle(userinfoDom.value).marginTop)
     if (mtop < 150) {
@@ -54,17 +63,21 @@ const tend = (e) => {
             behavior: 'instant'
         })
     }
+
     userinfoDom.value.style.transition = mtop < 150 ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
     userinfoDom.value.style.marginTop = '150px'
     bg.value.style.transition = 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
     bg.value.style.height = '150px'
+
     y.value = 0
     diffY.value = 0
+
     timer.value = setTimeout(() => {
         userinfoDom.value.style.transition = 'none'
         bg.value.style.transition = 'none'
     }, 700)
 }
+
 const tstart = () => {
     if (timer.value) clearTimeout(timer.value)
     userinfoContainer.value.addEventListener('touchmove', tmove)
@@ -73,37 +86,56 @@ const tstart = () => {
     userinfoDom.value.style.transition = 'none'
     bg.value.style.height = height
     bg.value.style.transition = 'none'
+
     diffY.value = parseFloat(height) - 150
 }
+
 const toUpdateUserInfo = () => {
     router.push({ name: 'UpdateUserInfo' })
 }
-onMounted(async () => {
+
+const Logout = () => {
+    logout()
+    router.push({ path: '/home' })
+    window.location.reload()
+}
+
+const count = ref(1)
+let removeAfter = null
+onMounted(() => {
+    removeAfter = router.afterEach(() => {
+        count.value++
+        console.log(count.value);
+    })
+})
+
+onUnmounted(() => {
+    if (removeAfter) removeAfter()
+})
+
+onActivated(async () => {
+    count.value = 1
     userinfoContainer.value.addEventListener('touchstart', tstart)
     userinfoContainer.value.addEventListener('touchend', tend)
+
     const id = route.params.id === 'me' ? userinfo.userId : route.params.id
     if (id !== userinfo.userId) userInfo.value = await getUserInfo(id, userinfo.userId)
-    console.log(id);
+    console.log(id)
+
     Followersnum.value = await FollowersNum(id)
     Fansnum.value = await FansNum(id)
     Likesnum.value = await LikesNum(id)
     byLikesnum.value = await byLikesNum(id)
     Videosnum.value = await VideosNum(id)
-    console.log(Followersnum.value, Fansnum.value, Likesnum.value, byLikesnum.value, Videosnum.value);
 
+    console.log(Followersnum.value, Fansnum.value, Likesnum.value, byLikesnum.value, Videosnum.value)
 })
-
-const showDialog = ref(false)
-const Logout = () => {
-    logout()
-    router.push({ path: '/home' })
-}
 </script>
 <template>
     <Dialog :show="showDialog" :options="{ title: '是否保存修改' }" @close="showDialog = false" @confirm="Logout" />
     <div class="backbtn-wrap">
         <div class="r" v-if="route.params.id == 'me'" @click="showMenu = !showMenu">...</div>
-        <div class="l iconfont icon-zuojiantou" v-else @click="router.back()"></div>
+        <div class="l iconfont icon-zuojiantou" v-else @click="router.go(-count)"></div>
         <ul class="more-menu" :class="{ 'show': showMenu }">
             <li @click="toUpdateUserInfo">修改个人资料</li>
             <li @click="showDialog = true">注销</li>

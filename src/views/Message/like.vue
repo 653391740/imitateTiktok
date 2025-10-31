@@ -1,7 +1,14 @@
 <script setup>
-import { byLike } from '@/api/Chat'
+import { onMounted } from 'vue'
+import { byLike, readAllByLikeMsg } from '@/api/Chat'
 import MessageNav from '@/components/messageNav.vue'
-
+import { chatStore, loginStore } from '@/stores/counter'
+const ChatStore = chatStore()
+const LoginStore = loginStore()
+onMounted(async () => {
+    await readAllByLikeMsg(LoginStore.userinfo.userId)
+    ChatStore.FanUnreadNumRes = 0
+})
 
 const loadmore = async (uid, page) => {
     return await byLike(uid, page)

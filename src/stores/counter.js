@@ -1,4 +1,4 @@
-import { ref, inject } from 'vue'
+import { ref, inject, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { login, getUserInfo } from '@/api/login'
 import { getPopularVideo, isLiked } from '@/api/video'
@@ -17,7 +17,7 @@ export const chatStore = defineStore('chat', () => {
   const addChat = (chat) => {
     const index = chatList.value.findIndex(e => e.info.userId === chat.userId)
     if (index !== -1) {
-      chatList.value[index].info.privateLetterContent = chat.privateLetterContent
+      chatList.value[index].info.content = chat.content
       chatList.value[index].info.createdAt = chat.createdAt
     } else {
       chatList.value.push({
@@ -30,7 +30,7 @@ export const chatStore = defineStore('chat', () => {
   const receiveChat = (chat) => {
     const index = chatList.value.findIndex(e => e.info.userId === chat.fromId)
     if (index !== -1) {
-      chatList.value[index].info.privateLetterContent = chat.privateLetterContent
+      chatList.value[index].info.content = chat.content
       chatList.value[index].info.createdAt = chat.createdAt
       chatList.value[index].newMsg++
     } else {
@@ -52,20 +52,38 @@ export const chatStore = defineStore('chat', () => {
   const receive = () => {
     socket.on('receivePrivateLetter', data => {
       receiveChat(data)
+      console.log(data);
+      
     })
   }
+  const dot = computed(() => {
+    return Array.from([FanUnreadNumRes.value, byLikeUnreadNumRes.value, byCommentUnreadNumRes.value, getAtUnreadNumRes.value]).some(e => e > 0)
+  })
 
   const FanUnreadNumRes = ref(0)
   const byLikeUnreadNumRes = ref(0)
   const byCommentUnreadNumRes = ref(0)
   const getAtUnreadNumRes = ref(0)
+  const socketAccept = () => {
+    socket.on('receiveComment', async data => {
+      console.log(data);
+      byCommentUnreadNumRes.value++
+    })
+    socket.on('receiveTriggerLike', async data => {
+      console.log(data);
+      byLikeUnreadNumRes.value++
+    })
+    socket.on('receiveTriggerFollow', async data => {
+      console.log(data);
+      FanUnreadNumRes.value++
+    })
+  }
   const getAllrequest = async () => {
     try {
       FanUnreadNumRes.value = await FanUnreadNum(loginStore().userinfo.userId)
       byLikeUnreadNumRes.value = await byLikeUnreadNum(loginStore().userinfo.userId)
       byCommentUnreadNumRes.value = await byCommentUnreadNum(loginStore().userinfo.userId)
       getAtUnreadNumRes.value = await getAtUnreadNum(loginStore().userinfo.userId)
-      console.log(FanUnreadNumRes.value, byLikeUnreadNumRes.value, byCommentUnreadNumRes.value, getAtUnreadNumRes.value);
     } catch (error) {
       console.log(error);
     }
@@ -79,7 +97,9 @@ export const chatStore = defineStore('chat', () => {
     byCommentUnreadNumRes,
     getAtUnreadNumRes,
     getAllrequest,
-    receive
+    receive,
+    socketAccept,
+    dot
   }
 })
 export const homeStore = defineStore('home', () => {
@@ -154,7 +174,7 @@ export const loginStore = defineStore('login', () => {
   }
 
   const logout = () => {
-    localStorage.removeItem('tiktok_userinfo')
+    localStorage.removeItem('userinfo')
     homeStore().falseVideoList()
     userinfo.value = {}
   }
@@ -170,23 +190,23 @@ export const loginStore = defineStore('login', () => {
   })
 
   const Login = async (proxy) => {
-    console.log(formData.value);
     if (formData.value.email === '') return loginShow.value = true
     try {
       proxy.$toast.loading('')
       await new Promise(resolve => setTimeout(resolve, 1000));
       const { userId } = await login(formData.value) // 登录
       const res = await getUserInfo(userId) // 获取到个人信息
-      socket.emit('login', userId)
-      chatStore().getAllrequest()
-      localStorage.setItem('userinfo', JSON.stringify(formData.value))
       updateUserInfo(res)
+      chatStore().getAllrequest()
+      chatStore().socketAccept()
+      socket.emit('login', userId)
+      localStorage.setItem('userinfo', JSON.stringify(formData.value))
       proxy.$toast.show('登录成功')
       closeLogin(res)
     } catch (error) {
       console.log(error);
       if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) proxy.$toast.show('请求超时，请检查网络连接后重试')
-      if (error.response.data.message === 'email or password error') proxy.$toast.show('邮箱或密码错误')
+      if (error.response?.data.message === 'email or password error') proxy.$toast.show('邮箱或密码错误')
     }
   }
   return {

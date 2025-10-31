@@ -1,12 +1,16 @@
 <script setup>
-import { ref, getCurrentInstance } from 'vue'
-import { getFans, triggerFollow } from '@/api/Chat'
+import { ref, getCurrentInstance, onMounted } from 'vue'
+import { getFans, triggerFollow, readAllFanMsg } from '@/api/Chat'
 import { loginStore } from '@/stores/counter'
 import MessageNav from '@/components/messageNav.vue'
-
+import { chatStore } from '@/stores/counter'
+const ChatStore = chatStore()
+onMounted(async () => {
+    await readAllFanMsg(LoginStore.userinfo.userId)
+    ChatStore.FanUnreadNumRes = 0
+})
 const { proxy } = getCurrentInstance()
 const LoginStore = loginStore()
-
 const loadmore = async (page) => {
     return await getFans(LoginStore.userinfo.userId, page)
 }

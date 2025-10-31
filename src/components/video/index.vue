@@ -67,7 +67,7 @@ defineExpose({
 <template>
     <Pullupload ref="pulluploadRef" @pullup="loadMore" :newDom="newDom" :hasMore="true">
         <swipper ref="swiper" vertical :length="VideoList.length" @scroll="handleSwiperScroll"
-            @change="handleSwiperChange">
+            @change="toIndex">
             <div class="swipper-item" v-for="item, index in VideoList" :key="item.Video?.videoId || index">
                 <Videoitem ref="video" :item="item" :activeIndex="activeIndex" :index="index" :autoPlay="props.autoPlay"
                     @ended="handleVideoEnd(index)" />

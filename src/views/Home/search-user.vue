@@ -1,34 +1,57 @@
 <script setup>
+import { ref, watch, toRefs } from 'vue'
 import { searchUser } from '@/api/video'
 import { triggerFollow } from '@/api/Chat'
-import ListTemplate from './list-template.vue'
-import { loginStore } from '@/stores/counter'
+import { loginStore, searchStore } from '@/stores/counter'
+const { inputvalue } = toRefs(searchStore())
 const { userinfo } = loginStore()
-const loading = async (id, page, data) => {
-    return await searchUser(id, page, data)
+
+const list = ref([])
+const error = ref(false)
+const hasMore = ref(true)
+const page = ref(1)
+const loading = async () => {
+    try {
+        const res = await searchUser(userinfo.userId, page.value, { key: inputvalue.value })
+        if (res.length === 0) return hasMore.value = false
+        if (page.value === 1 && list.value.length > 0) {
+            list.value = res
+        } else {
+            list.value.push(...res)
+        }
+        page.value++
+    } catch (err) {
+        console.log(err);
+        error.value = true
+    }
 }
 const handleFollow = async (item) => {
     await triggerFollow(userinfo.userId, item.userId)
     item.myRelation = item.myRelation === 'fan' ? 'both' : item.myRelation === 'none' ? 'follow' : item.myRelation === 'both' ? 'fan' : 'none'
 }
+watch(inputvalue, (newValue, oldValue) => {
+    if (newValue !== oldValue) {
+        page.value = 1
+        hasMore.value = true
+        loading()
+    }
+}, { flush: 'post', immediate: true })
 </script>
 
 <template>
-    <ListTemplate @load="loading">
-        <template #default="{ list }">
-            <div v-for="item in list" :key="item.userId" class="item">
-                <img :src="$imgSrc(item.userAvatar)" alt="">
-                <div class="info">
-                    <p class="name">{{ item.userNickname }}</p>
-                    <p class="desc">{{ item.userDesc }}</p>
-                </div>
-                <div class="btn" @click="handleFollow(item)"
-                    :class="{ 'active': !(item.myRelation === 'none' || item.myRelation === 'fan') }">
-                    {{ item.myRelation === 'none' || item.myRelation === 'fan' ? '关注' : item.myRelation === 'follow' ?
-                        '已关注' : '互相关注' }}</div>
+    <Pullupload ref="pulluploadRef" @pullup="loading" :error="error" :hasMore="hasMore" :onMount="true">
+        <div v-for="item in list" :key="item.userId" class="item">
+            <img :src="$imgSrc(item.userAvatar)" alt="">
+            <div class="info">
+                <p class="name">{{ item.userNickname }}</p>
+                <p class="desc">{{ item.userDesc }}</p>
             </div>
-        </template>
-    </ListTemplate>
+            <div class="btn" @click="handleFollow(item)"
+                :class="{ 'active': !(item.myRelation === 'none' || item.myRelation === 'fan') }">
+                {{ item.myRelation === 'none' || item.myRelation === 'fan' ? '关注' : item.myRelation === 'follow' ?
+                    '已关注' : '互相关注' }}</div>
+        </div>
+    </Pullupload>
 </template>
 
 

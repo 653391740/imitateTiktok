@@ -1,7 +1,14 @@
 <script setup>
+import { onMounted } from 'vue'
 import { getAt } from '@/api/Chat'
 import MessageNav from '@/components/messageNav.vue'
-
+import { chatStore, loginStore } from '@/stores/counter'
+const ChatStore = chatStore()
+const LoginStore = loginStore()
+onMounted(async () => {
+    await readAllFanMsg(LoginStore.userinfo.userId)
+    ChatStore.FanUnreadNumRes = 0
+})
 const loadmore = async (uid, page) => {
     return await getAt(uid, page)
 }

@@ -10,8 +10,9 @@ const ChatStore = chatStore()
 const route = useRoute()
 const socket = inject("socket");
 socket.on('receivePrivateLetter', data => {
-    console.log(data);
-    letterList.value.push(data)
+    const { content, ...item } = data
+    letterList.value.push({ ...item, privateLetterContent: content })
+    scrollToBottom()
 })
 const letterList = ref([])
 const chatContainer = ref(null)
@@ -53,7 +54,7 @@ const sendComment = async (content) => {
     let obj = {
         fromId: userinfo.userId,
         toId: route.query.userId,
-        privateLetterContent: content,
+        content,
         createdAt: new Date().getTime(),
         userAvatar: userinfo.userAvatar,
         userNickname: userinfo.userNickname
@@ -63,7 +64,7 @@ const sendComment = async (content) => {
     const createdAt = new Date().getTime()
     ChatStore.addChat({
         ...route.query,
-        privateLetterContent: content,
+        content,
         createdAt
     })
     scrollToBottom()

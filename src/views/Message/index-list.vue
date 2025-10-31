@@ -68,7 +68,7 @@ const toRouterchat = (item) => {
                     <p class="user-name">{{ item.info.userNickname }}</p>
                     <p class="time">{{ $formatTime2(item.info.createdAt) }}</p>
                 </div>
-                <div class="newMsg">{{ item.info.privateLetterContent }}</div>
+                <div class="newMsg">{{ item.info.content }}</div>
                 <div class="delete-btn" @click="deleteChatItem(item.info.userId)">删除</div>
             </li>
         </ul>

@@ -1,7 +1,14 @@
 <script setup>
-import { byComment } from '@/api/Chat'
+import { onMounted } from 'vue'
+import { byComment, readAllByCommentMsg } from '@/api/Chat'
 import MessageNav from '@/components/messageNav.vue'
-
+import { chatStore, loginStore } from '@/stores/counter'
+const LoginStore = loginStore()
+const ChatStore = chatStore()
+onMounted(async () => {
+    await readAllByCommentMsg(LoginStore.userinfo.userId)
+    ChatStore.FanUnreadNumRes = 0
+})
 const loadmore = async (uid, page) => {
     return await byComment(uid, page)
 }

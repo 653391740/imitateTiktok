@@ -1,13 +1,31 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, toRefs } from 'vue'
 import { searchVideo } from '@/api/video'
-import { commentStore } from '@/stores/counter'
-import ListTemplate from './list-template.vue'
+import { commentStore, loginStore, searchStore } from '@/stores/counter'
 import Video from '@/components/video/index.vue';
 import Send from '@/components/send.vue';
 const CommentStore = commentStore()
-const loading = async (userId, page, data) => {
-    return await searchVideo(userId, page, data)
+const LoginStore = loginStore()
+const { inputvalue } = toRefs(searchStore())
+
+const list = ref([])
+const error = ref(false)
+const hasMore = ref(true)
+const page = ref(1)
+const loading = async () => {
+    try {
+        const res = await searchVideo(LoginStore.userinfo.userId, page.value, { key: inputvalue.value })
+        if (res.length === 0) return hasMore.value = false
+        if (page.value === 1 && list.value.length > 0) {
+            list.value = res
+        } else {
+            list.value.push(...res)
+        }
+        page.value++
+    } catch (err) {
+        console.log(err);
+        error.value = true
+    }
 }
 const showPopup = ref(false)
 const videoRef = ref(null)
@@ -34,38 +52,33 @@ const closePopup = (list) => {
 </script>
 
 <template>
-    <ListTemplate @load="loading">
-        <template #default="{ list }">
-            <div class="list">
-                <div class="item" v-for="(item, index) in list" :key="item.Video?.userId" @click="openPopup(index)"
-                    :style="{ backgroundImage: `url(${$imgSrc(item.Video?.videoCover)})` }">
-                    <div class="img"></div>
-                    <div class="info">
-                        <div class="desc">{{ item.Video?.videoDesc }}</div>
-                        <div class="userAndLike">
-                            <div class="user">
-                                <img :src="$imgSrc(item.Video?.userAvatar)">
-                                <p>{{ item.Video?.userNickname }}</p>
-                            </div>
-                            <div class="like iconfont icon-aixin1">{{ item.WSLCNum?.likeNum }}</div>
+    <Pullupload ref="pulluploadRef" @pullup="loading" :error="error" :hasMore="hasMore">
+        <div class="list">
+            <div class="item" v-for="(item, index) in list" :key="item.Video?.userId" @click="openPopup(index)"
+                :style="{ backgroundImage: `url(${$imgSrc(item.Video?.videoCover)})` }">
+                <div class="img"></div>
+                <div class="info">
+                    <div class="desc">{{ item.Video?.videoDesc }}</div>
+                    <div class="userAndLike">
+                        <div class="user">
+                            <img :src="$imgSrc(item.Video?.userAvatar)">
+                            <p>{{ item.Video?.userNickname }}</p>
                         </div>
+                        <div class="like iconfont icon-aixin1">{{ item.WSLCNum?.likeNum }}</div>
                     </div>
                 </div>
             </div>
-            <teleport to="body">
-                <popup class="popupRef" position="right" background="#161622" :show="showPopup">
-                    <div class="close iconfont icon-zuojiantou" @click="closePopup(list)"></div>
-                    <Video ref="videoRef" :VideoList="list" :autoPlay="false">
-                        <template #default="{ item }">
-                            <Send
-                                @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
-                            </Send>
-                        </template>
-                    </Video>
-                </popup>
-            </teleport>
-        </template>
-    </ListTemplate>
+        </div>
+        <popup class="popupRef" position="right" background="#161622" :show="showPopup">
+            <div class="close iconfont icon-zuojiantou" @click="closePopup(list)"></div>
+            <Video ref="videoRef" :VideoList="list" :autoPlay="false">
+                <template #default="{ item }">
+                    <Send @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
+                    </Send>
+                </template>
+            </Video>
+        </popup>
+    </Pullupload>
 </template>
 
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUpdated, onMounted } from 'vue'
+import { ref, onUpdated, onMounted, onBeforeUnmount } from 'vue'
 const props = defineProps({
     vertical: {
         type: Boolean,
@@ -15,16 +15,29 @@ const emit = defineEmits(['change', 'scroll'])
 const container = ref(null)
 const activeIndex = ref(0)
 
-onUpdated(() => {
+// 使用单个可移除的滚动处理器，避免在每次更新时重复绑定
+let scrollTimeout = null
+const onScroll = () => {
+    clearTimeout(scrollTimeout)
+    scrollTimeout = setTimeout(() => {
+        scrollToIndex()
+    }, 100)
+}
+
+onMounted(() => {
     if (container.value) {
-        let scrollTimeout
-        container.value.addEventListener('scroll', () => {
-            clearTimeout(scrollTimeout)
-            scrollTimeout = setTimeout(() => {
-                scrollToIndex()
-            }, 100)
-        })
+        container.value.addEventListener('scroll', onScroll)
     }
+})
+
+onBeforeUnmount(() => {
+    if (container.value) {
+        container.value.removeEventListener('scroll', onScroll)
+    }
+})
+
+onUpdated(() => {
+    if (!container.value) return
     const { scrollTop, clientHeight, scrollHeight } = container.value
     const scrollInfo = { scrollTop, clientHeight, scrollHeight }
     emit('scroll', scrollInfo)

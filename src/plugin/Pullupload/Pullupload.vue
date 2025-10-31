@@ -26,10 +26,12 @@ const AsyncPullup = async () => {
     }
 }
 onMounted(async () => {
-    const res = await AsyncPullup()
-    if (!res) return
-    await nextTick()
-    if (pullupload.value.scrollHeight === pullupload.value.clientHeight) await AsyncPullup()
+    if (!attrs.onMount) {
+        const res = await AsyncPullup()
+        if (!res) return
+        await nextTick()
+        if (pullupload.value.scrollHeight === pullupload.value.clientHeight) await AsyncPullup()
+    }
 })
 const scrollToTop = () => {
     if (pullupload.value) {

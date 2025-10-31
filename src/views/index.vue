@@ -1,6 +1,8 @@
 <script setup>
 import { onUpdated, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { chatStore } from '@/stores/counter'
+const ChatStore = chatStore()
 const route = useRoute();
 const isUserPage = computed(() => {
     return route.path.includes('/user') && route.params.id && route.params.id !== 'me';
@@ -36,8 +38,9 @@ const navItems = [
     </router-view>
     <nav v-show="!isUserPage">
         <router-link v-for="(item, index) in navItems" :to="item.path" @click="activeIndex = index">{{ item.name }}
-            <div v-if="!item.name">
+            <div v-if="!item.name" class="upfile">
             </div>
+            <div v-if="index === 3 && ChatStore.dot" class="dot"></div>
         </router-link>
     </nav>
 </template>
@@ -61,6 +64,18 @@ nav {
         color: #888;
         position: relative;
 
+        .dot {
+            top: 50%;
+            right: 10px;
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: red;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+
+
         &.router-link-active {
             color: #fff;
 
@@ -76,7 +91,7 @@ nav {
             }
         }
 
-        div {
+        .upfile {
             @include position-center;
             width: 40px;
             height: 24px;
