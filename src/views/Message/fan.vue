@@ -1,41 +1,30 @@
 <script setup>
-import { ref, getCurrentInstance, onMounted } from 'vue'
-import { getFans, triggerFollow, readAllFanMsg } from '@/api/Chat'
+import { ref, onMounted } from 'vue'
+import { getFans, readAllFanMsg } from '@/api/Chat'
 import { loginStore } from '@/stores/counter'
-import MessageNav from '@/components/messageNav.vue'
 import { chatStore } from '@/stores/counter'
+import MessageNav from '@/components/messageNav.vue'
+import Followbtn from '@/components/Followbtn.vue'
 const ChatStore = chatStore()
 onMounted(async () => {
     await readAllFanMsg(LoginStore.userinfo.userId)
     ChatStore.FanUnreadNumRes = 0
 })
-const { proxy } = getCurrentInstance()
 const LoginStore = loginStore()
-const loadmore = async (page) => {
-    return await getFans(LoginStore.userinfo.userId, page)
-}
-
-const handleFollow = async (item) => {
-    try {
-        item.bothStatus = item.bothStatus === 1 ? 0 : 1
-        proxy.$toast.show(item.bothStatus ? '关注成功' : '取关成功')
-        await triggerFollow(LoginStore.userinfo.userId, item.userId)
-    } catch (err) {
-        item.bothStatus = item.bothStatus === 1 ? 0 : 1
-        proxy.$toast.show(item.bothStatus ? '关注成功' : '取关成功')
-        console.log(err);
-    }
+const loadmore = async (id, page) => {
+    await getFans(id, page)
+    return await getFans(id, page)
 }
 </script>
 <template>
     <MessageNav @loadmore="loadmore" title="粉丝" nomsgTitle="您还没有粉丝哦" nomsgDesc="赶快互动添加好友吧">
         <template #left="{ item }">
+            <div class="newdot" v-if="!item.isRead"></div>
             <p>关注了你</p>
             <p class="time">{{ $formatTime(item.createdAt) }}</p>
         </template>
         <template #right="{ item }">
-            <div class="btn" @click="handleFollow(item)" :class="{ 'active': item.bothStatus }">{{ item.bothStatus ?
-                '互相关注' : '关注' }}</div>
+            <Followbtn :item="item" :myUserId="LoginStore.userinfo.userId"></Followbtn>
         </template>
     </MessageNav>
 </template>
@@ -56,4 +45,5 @@ const handleFollow = async (item) => {
 }
 
 @include time;
+@include newdot;
 </style>

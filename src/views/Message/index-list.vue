@@ -69,7 +69,7 @@ const toRouterchat = (item) => {
                     <p class="time">{{ $formatTime2(item.info.createdAt) }}</p>
                 </div>
                 <div class="newMsg">{{ item.info.content }}</div>
-                <div class="delete-btn" @click="deleteChatItem(item.info.userId)">删除</div>
+                <div class="delete-btn" @click.stop="deleteChatItem(item.info.userId)">删除</div>
             </li>
         </ul>
         <img v-else class="no-message" src="/src/assets/0.jpg">

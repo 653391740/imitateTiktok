@@ -33,7 +33,7 @@ export const FollowerVideo = (userId, page) => {
 }
 
 export const uploadFile = (data) => {
-  return http.post(`user/uploadFile`, data)
+  return http.post(`user/uploadFile`, data, { timeout: 30000 }) // 设置30秒超时
 }
 
 export const uploadCover = (data) => {

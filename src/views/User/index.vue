@@ -4,6 +4,7 @@ import { loginStore } from '@/stores/counter'
 import { useRouter, useRoute } from 'vue-router'
 import { FollowersNum, FansNum, byLikesNum, LikesNum, VideosNum } from '@/api/Chat'
 import { getUserInfo } from '@/api/user'
+import Followbtn from '@/components/Followbtn.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -23,6 +24,8 @@ const showDialog = ref(false)
 const userinfoContainer = ref(null)
 const userinfoDom = ref(null)
 const bg = ref(null)
+const nav = ref(null)
+const navObserver = ref(null)
 
 //  拖拽/滚动相关状态 
 const y = ref(0)
@@ -86,7 +89,6 @@ const tstart = () => {
     userinfoDom.value.style.transition = 'none'
     bg.value.style.height = height
     bg.value.style.transition = 'none'
-
     diffY.value = parseFloat(height) - 150
 }
 
@@ -111,6 +113,10 @@ onMounted(() => {
 
 onUnmounted(() => {
     if (removeAfter) removeAfter()
+    // 清理滚动事件监听器
+    if (navObserver.value && userinfoContainer.value) {
+        userinfoContainer.value.removeEventListener('scroll', navObserver.value)
+    }
 })
 
 onActivated(async () => {
@@ -129,21 +135,46 @@ onActivated(async () => {
     Videosnum.value = await VideosNum(id)
 
     console.log(Followersnum.value, Fansnum.value, Likesnum.value, byLikesnum.value, Videosnum.value)
+
+    nextTick(() => {
+        // 使用滚动事件检测导航栏是否处于吸附状态
+        const handleScroll = () => {
+            if (!nav.value || !userinfoContainer.value) return
+
+            // 获取导航栏的位置信息
+            const { top } = nav.value.getBoundingClientRect()
+            // 如果导航栏顶部距离视口顶部的距离大于等于0，说明处于吸附状态
+            if (top <= 45) {
+                nav.value.classList.add('is-stuck')
+            } else {
+                nav.value.classList.remove('is-stuck')
+            }
+        }
+
+        // 添加滚动事件监听
+        if (userinfoContainer.value) {
+            userinfoContainer.value.addEventListener('scroll', handleScroll)
+            navObserver.value = handleScroll
+        }
+    })
 })
 </script>
 <template>
     <Dialog :show="showDialog" :options="{ title: '是否保存修改' }" @close="showDialog = false" @confirm="Logout" />
-    <div class="backbtn-wrap">
-        <div class="r" v-if="route.params.id == 'me'" @click="showMenu = !showMenu">...</div>
-        <div class="l iconfont icon-zuojiantou" v-else @click="router.go(-count)"></div>
-        <ul class="more-menu" :class="{ 'show': showMenu }">
-            <li @click="toUpdateUserInfo">修改个人资料</li>
-            <li @click="showDialog = true">注销</li>
-        </ul>
+    <div class="r" v-if="route.params.id == 'me'" @click="showMenu = !showMenu">...
+        <transition name="fade">
+            <ul class="more-menu" v-if="showMenu">
+                <li @click="toUpdateUserInfo">修改个人资料</li>
+                <li @click="showDialog = true">注销</li>
+            </ul>
+        </transition>
     </div>
+    <div class="l iconfont icon-zuojiantou" v-else @click="router.go(-count)"></div>
     <div class="userinfo-container" ref="userinfoContainer" :class="{ 'pb': route.params.id === 'me' }">
         <img src="/src/assets/bg.jpg" class="bg" ref="bg">
         <div class="userinfo" ref="userinfoDom">
+            <Followbtn v-if="route.params.id !== 'me'" class="Followbtn" :item="userInfo" :myUserId="userinfo.userId">
+            </Followbtn>
             <div class="avatar">
                 <img :src="$imgSrc(userInfo.userAvatar)">
             </div>
@@ -171,7 +202,7 @@ onActivated(async () => {
                 </div>
             </div>
         </div>
-        <nav>
+        <nav ref="nav" :data-name="userInfo.userNickname">
             <router-link :to="`/user/${route.params.id}/videos`">作品{{ Videosnum }}</router-link>
             <router-link :to="`/user/${route.params.id}/videoAndDesc`">动态{{ Videosnum }}</router-link>
             <router-link :to="`/user/${route.params.id}/likes`">喜欢{{ Likesnum }}</router-link>
@@ -180,28 +211,40 @@ onActivated(async () => {
     </div>
 </template>
 <style lang="scss" scoped>
-.backbtn-wrap {
+@mixin lr-btn {
     position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    width: 100%;
-    height: 48px;
+    top: 10px;
+    border-radius: 50%;
+    color: #fff;
+    text-align: center;
+    width: 28px;
+    height: 28px;
+    background: rgba(22, 24, 35, 0.6);
+    z-index: 3;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: all 0.4s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+    z-index: -1;
+    transform: translateY(100px);
+}
+
+.r {
+    right: 10px;
+    @include lr-btn;
 
     .more-menu {
         position: absolute;
-        top: 55px;
-        right: 10px;
+        top: 45px;
+        right: 0px;
         width: 80px;
         background: rgba(22, 24, 35, 0.6);
-        transform: translateY(100px);
-        transition: all 0.4s ease;
-        opacity: 0;
-
-        &.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
 
         &::after {
             content: '';
@@ -220,29 +263,13 @@ onActivated(async () => {
             font-size: 12px;
         }
     }
+}
 
-    @mixin lr-btn {
-        position: absolute;
-        top: 10px;
-        border-radius: 50%;
-        color: #fff;
-        text-align: center;
-        width: 28px;
-        height: 28px;
-        background: rgba(22, 24, 35, 0.6);
-    }
-
-    .r {
-        right: 10px;
-        @include lr-btn;
-    }
-
-    .l {
-        font-size: 10px;
-        line-height: 28px;
-        left: 10px;
-        @include lr-btn;
-    }
+.l {
+    font-size: 10px;
+    line-height: 28px;
+    left: 10px;
+    @include lr-btn;
 }
 
 .userinfo-container {
@@ -264,6 +291,25 @@ onActivated(async () => {
 
     nav {
         display: flex;
+        position: sticky;
+        top: 44px;
+        left: 0;
+        z-index: 2;
+
+        &.is-stuck {
+            &::after {
+                content: attr(data-name);
+                position: absolute;
+                top: -44px;
+                left: 0;
+                width: 100%;
+                height: 44px;
+                line-height: 44px;
+                text-align: center;
+                color: #fff;
+                background-color: $backcolor;
+            }
+        }
 
         a {
             z-index: 2;
@@ -286,6 +332,12 @@ onActivated(async () => {
         padding: 0 10px;
         position: relative;
         background-color: $backcolor;
+
+        .Followbtn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
 
         .info {
             padding: 75px 10px 10px;

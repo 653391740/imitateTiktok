@@ -8,6 +8,19 @@ $bordB: 0.5px solid rgba(41, 40, 37, 0.8);
     transform: translate(-50%, -50%);
 }
 
+@mixin newdot {
+    .newdot {
+        position: absolute;
+        top: 50%;
+        left: 0px;
+        transform: translateY(-50%);
+        width: 10px;
+        height: 10px;
+        background-color: #f8355f;
+        border-radius: 50%;
+    }
+}
+
 @mixin Control-style {
     height: 44px;
     border: 0;

@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { chatStore } from '@/stores/counter'
 const ChatStore = chatStore()
 const router = useRouter()
+
 </script>
 <template>
     <div class="message">

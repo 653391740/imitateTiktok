@@ -1,8 +1,9 @@
 <script setup>
-import { ref, defineProps, toRefs } from 'vue'
+import { ref, defineProps, toRefs,getCurrentInstance } from 'vue'
 import { loginStore, commentStore } from '@/stores/counter'
 import { triggerLike } from '@/api/video'
-
+const { proxy } = getCurrentInstance()
+const socket = proxy.$socket
 const LoginStore = loginStore()
 const CommentStore = commentStore()
 const props = defineProps({
@@ -18,6 +19,9 @@ const handleLike = async () => {
         isLiked.value = !isLiked.value
         isLiked.value ? WSLCNum.value.likeNum++ : WSLCNum.value.likeNum--
         await triggerLike(LoginStore.userinfo.userId, Video.value.videoId)
+        socket.emit('sendTriggerLike', {
+            toUserId: Video.value.userId
+        })
     } catch (error) {
         console.log(error);
         isLiked.value = !isLiked.value
@@ -55,7 +59,7 @@ const playVideo = () => {
     padding-bottom: 20px;
     color: #fff;
     border-bottom: 1px solid rgba(41, 40, 37, 0.8);
-    
+
 
     .icon-aixin.active {
         color: #f00;

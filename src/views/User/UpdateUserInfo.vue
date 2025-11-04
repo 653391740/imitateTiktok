@@ -149,7 +149,6 @@ const saveCrop = () => {
         const response = await fetch(fieldName)
         const blob = await response.blob()
         const blobSizeInKB = parseFloat((blob.size / 1024).toFixed(2))
-        console.log(blobSizeInKB);
 
         if (blobSizeInKB > 1024) return proxy.$toast.show('图片文件过大，请选择更小的裁切区域')
         croppedSrc.value = ''

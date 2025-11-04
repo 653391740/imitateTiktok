@@ -1,10 +1,11 @@
 <script setup>
-import { ref, defineEmits, defineExpose, nextTick, computed, onActivated, defineProps } from 'vue';
+import { ref, defineEmits, defineExpose, nextTick, computed, onActivated, defineProps, watch, getCurrentInstance } from 'vue';
+import { homeStore } from '@/stores/counter'
 import { useRoute } from 'vue-router'
 import Videoitem from '@/components/video/video.vue'
 import Side from '@/components/video/side-desc.vue'
-import { homeStore } from '@/stores/counter'
 
+const { proxy } = getCurrentInstance()
 const route = useRoute()
 const activeIndex = ref(0); // 当前播放视频索引
 const swiper = ref(null)
@@ -21,16 +22,23 @@ const props = defineProps({
         default: true
     }
 })
+
+const HomeStore = homeStore()
+
+watch(() => HomeStore.isLoading, (newVal) => {
+    if (newVal) {
+        proxy.$toast.loading(HomeStore.VideoList.length ? '加载更多视频中...' : '视频加载中...')
+    } else {
+        proxy.$toast.clear()
+    }
+})
+
 onActivated(() => {
     nextTick(() => {
         toIndex(activeIndex.value, false)
-        console.log(VideoList.value);
     })
 })
 
-const handleSwiperChange = (index) => {
-    activeIndex.value = index;
-}
 const handleVideoEnd = (index) => {
     activeIndex.value = index + 1;
     swiper.value.swipeTo(activeIndex.value)
@@ -54,7 +62,7 @@ const newDom = ref(null)
 const handleSwiperScroll = (dom) => {
     newDom.value = dom
 }
-const HomeStore = homeStore()
+
 const loadMore = () => {
     if (route.path === '/home') HomeStore.getVideoList()
 }
@@ -66,8 +74,7 @@ defineExpose({
 
 <template>
     <Pullupload ref="pulluploadRef" @pullup="loadMore" :newDom="newDom" :hasMore="true">
-        <swipper ref="swiper" vertical :length="VideoList.length" @scroll="handleSwiperScroll"
-            @change="toIndex">
+        <swipper ref="swiper" vertical :length="VideoList.length" @scroll="handleSwiperScroll" @change="toIndex">
             <div class="swipper-item" v-for="item, index in VideoList" :key="item.Video?.videoId || index">
                 <Videoitem ref="video" :item="item" :activeIndex="activeIndex" :index="index" :autoPlay="props.autoPlay"
                     @ended="handleVideoEnd(index)" />

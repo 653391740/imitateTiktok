@@ -22,6 +22,7 @@ const handleFileChange = (e) => {
     currvideoUrl.value = url
     publishData.value.videoFile = file // 保存原始文件对象
     publishData.value.videoUrl = url
+
     video.value.addEventListener('loadeddata', () => {
         const canvas = document.createElement('canvas')
         canvas.width = video.value.videoWidth
@@ -54,11 +55,13 @@ const publish = async () => {
         const { videoFile, videoUrl, videoDesc, coverUrl } = publishData.value
         const fileData = new FormData()
         fileData.append('videoPath', videoFile ? videoFile : videoUrl)
+        console.log(fileData);
         const file = await uploadFile(fileData)
         proxy.$toast.show('视频上传成功')
 
         const coverData = new FormData()
-        const videoId = file.filename.split('.')[0]
+        const videoId = file?.filename.split('.')[0]
+        
         coverData.append('videoId', videoId)
         // 将Data URL转换为Blob对象
         const decodedString = atob(coverUrl.split(',')[1])
@@ -72,10 +75,10 @@ const publish = async () => {
         proxy.$toast.show('封面上传成功')
 
         const publishVideoData = {
-            videoCover: `http://43.138.15.137:3000/assets/videoCover/${cover.filename}`,
+            videoCover: `http://43.138.15.137:3000/assets/videoCover/${cover?.filename}`,
             videoDesc,
             videoId,
-            videoPath: `http://43.138.15.137:3000/assets/videoPath/${file.filename}`,
+            videoPath: `http://43.138.15.137:3000/assets/videoPath/${file?.filename}`,
         }
         await publishVideo(userinfo.userId, publishVideoData)
         proxy.$toast.show('发布成功')
@@ -96,8 +99,7 @@ const showDialog = ref(false)
             <input v-if="!publishData.videoUrl" type="file" accept="video/*" @change="handleFileChange">
         </div>
         <div class="item">
-            <input type="text" placeholder="请输入视频链接（如本地上传可不填）" v-show="publishData.videoUrl == currvideoUrl"
-                v-model="publishData.videoUrl">
+            <input type="text" placeholder="请输入视频链接（如本地上传可不填）" v-model="publishData.videoUrl">
         </div>
         <div class="item" v-show="!publishData.videoFile">
             <input type="text" placeholder="请输入封面链接（如本地上传默认第一帧）" v-model="publishData.coverUrl">

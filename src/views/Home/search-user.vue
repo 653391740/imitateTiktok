@@ -1,10 +1,10 @@
 <script setup>
-import { ref, watch, toRefs } from 'vue'
+import { ref, watch, toRefs, inject } from 'vue'
 import { searchUser } from '@/api/video'
-import { triggerFollow } from '@/api/Chat'
 import { loginStore, searchStore } from '@/stores/counter'
 const { inputvalue } = toRefs(searchStore())
 const { userinfo } = loginStore()
+import Followbtn from '@/components/Followbtn.vue'
 
 const list = ref([])
 const error = ref(false)
@@ -25,10 +25,6 @@ const loading = async () => {
         error.value = true
     }
 }
-const handleFollow = async (item) => {
-    await triggerFollow(userinfo.userId, item.userId)
-    item.myRelation = item.myRelation === 'fan' ? 'both' : item.myRelation === 'none' ? 'follow' : item.myRelation === 'both' ? 'fan' : 'none'
-}
 watch(inputvalue, (newValue, oldValue) => {
     if (newValue !== oldValue) {
         page.value = 1
@@ -46,30 +42,13 @@ watch(inputvalue, (newValue, oldValue) => {
                 <p class="name">{{ item.userNickname }}</p>
                 <p class="desc">{{ item.userDesc }}</p>
             </div>
-            <div class="btn" @click="handleFollow(item)"
-                :class="{ 'active': !(item.myRelation === 'none' || item.myRelation === 'fan') }">
-                {{ item.myRelation === 'none' || item.myRelation === 'fan' ? '关注' : item.myRelation === 'follow' ?
-                    '已关注' : '互相关注' }}</div>
+            <Followbtn :item="item" :myUserId="userinfo.userId"></Followbtn>
         </div>
     </Pullupload>
 </template>
 
 
 <style lang="scss" scoped>
-.btn {
-    background-color: #f8355f;
-    text-align: center;
-    line-height: 25px;
-    font-size: 12px;
-    width: 70px;
-    height: 25px;
-    color: #fff;
-
-    &.active {
-        background-color: #383b44;
-    }
-}
-
 .item {
     display: flex;
     align-items: center;

@@ -67,9 +67,9 @@ defineExpose({
     max-width: 70%;
     padding: 16px;
     position: fixed;
-    top: 50%;
+    top: 60%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     background-color: rgba(0, 0, 0, 0.7);
     color: #fff;
     border-radius: 8px;

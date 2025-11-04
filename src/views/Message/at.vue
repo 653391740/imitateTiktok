@@ -1,13 +1,13 @@
 <script setup>
 import { onMounted } from 'vue'
-import { getAt } from '@/api/Chat'
+import { getAt ,readAllAt} from '@/api/Chat'
 import MessageNav from '@/components/messageNav.vue'
 import { chatStore, loginStore } from '@/stores/counter'
 const ChatStore = chatStore()
 const LoginStore = loginStore()
 onMounted(async () => {
-    await readAllFanMsg(LoginStore.userinfo.userId)
-    ChatStore.FanUnreadNumRes = 0
+    await readAllAt(LoginStore.userinfo.userId)
+    ChatStore.getAtUnreadNumRes = 0
 })
 const loadmore = async (uid, page) => {
     return await getAt(uid, page)
@@ -31,6 +31,5 @@ img {
     width: 60px;
     height: 60px;
 }
-
 @include time;
 </style>

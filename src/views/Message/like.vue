@@ -7,7 +7,7 @@ const ChatStore = chatStore()
 const LoginStore = loginStore()
 onMounted(async () => {
     await readAllByLikeMsg(LoginStore.userinfo.userId)
-    ChatStore.FanUnreadNumRes = 0
+    ChatStore.byLikeUnreadNumRes = 0
 })
 
 const loadmore = async (uid, page) => {
@@ -18,6 +18,7 @@ const loadmore = async (uid, page) => {
 <template>
     <MessageNav @loadmore="loadmore" title="点赞了你" nomsgTitle="您还没有被赞哦" nomsgDesc="赶快和好友互动起来吧">
         <template #left="{ item }">
+            <div class="newdot" v-if="!item.isRead"></div>
             <p>{{ item?.videoCover ? '赞了你的视频' : '赞了你的评论' }}</p>
             <p class="time">{{ $formatTime(item.createdAt) }}</p>
         </template>
@@ -30,7 +31,7 @@ const loadmore = async (uid, page) => {
 
 <style lang="scss" scoped>
 @include time;
-
+@include newdot;
 img {
     width: 60px;
     height: 60px;

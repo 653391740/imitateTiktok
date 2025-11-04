@@ -7,7 +7,7 @@ const LoginStore = loginStore()
 const ChatStore = chatStore()
 onMounted(async () => {
     await readAllByCommentMsg(LoginStore.userinfo.userId)
-    ChatStore.FanUnreadNumRes = 0
+    ChatStore.byCommentUnreadNumRes = 0
 })
 const loadmore = async (uid, page) => {
     return await byComment(uid, page)
@@ -17,6 +17,7 @@ const loadmore = async (uid, page) => {
 <template>
     <MessageNav @loadmore="loadmore" title="评论" nomsgTitle="您还没有作品被评论哦" nomsgDesc="赶快分享你的视频给好友吧！">
         <template #left="{ item }">
+            <div class="newdot" v-if="!item.isRead"></div>
             <p>{{ item.commentContent }}</p>
             <p class="time">评论了你的评论 {{ $formatTime(item.createdAt) }}</p>
         </template>
@@ -31,6 +32,6 @@ img {
     width: 60px;
     height: 60px;
 }
-
+@include newdot;
 @include time;
 </style>

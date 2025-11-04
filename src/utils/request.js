@@ -3,7 +3,7 @@ import { Toast } from '@/plugin/Toast/index.js';
 
 const service = axios.create({
     baseURL: '/api',
-    timeout: 5000,
+    timeout: 10000,
     withCredentials: true,
 });
 
@@ -26,7 +26,7 @@ service.interceptors.response.use(res => {
         window.location.href = '#/login'
         Toast.show('登录过期，请重新登录')
     } else {
-        return data;
+        return data !== undefined ? data : res.data;
     }
 }, error => {
     return Promise.reject(error)

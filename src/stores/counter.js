@@ -52,8 +52,6 @@ export const chatStore = defineStore('chat', () => {
   const receive = () => {
     socket.on('receivePrivateLetter', data => {
       receiveChat(data)
-      console.log(data);
-      
     })
   }
   const dot = computed(() => {
@@ -66,16 +64,15 @@ export const chatStore = defineStore('chat', () => {
   const getAtUnreadNumRes = ref(0)
   const socketAccept = () => {
     socket.on('receiveComment', async data => {
-      console.log(data);
-      byCommentUnreadNumRes.value++
+      byCommentUnreadNumRes.value = await byCommentUnreadNum(loginStore().userinfo.userId)
     })
     socket.on('receiveTriggerLike', async data => {
       console.log(data);
-      byLikeUnreadNumRes.value++
+      byLikeUnreadNumRes.value = await byLikeUnreadNum(loginStore().userinfo.userId)
     })
     socket.on('receiveTriggerFollow', async data => {
       console.log(data);
-      FanUnreadNumRes.value++
+      FanUnreadNumRes.value = await FanUnreadNum(loginStore().userinfo.userId)
     })
   }
   const getAllrequest = async () => {
@@ -104,25 +101,33 @@ export const chatStore = defineStore('chat', () => {
 })
 export const homeStore = defineStore('home', () => {
   const VideoList = ref([])
+  const isLoading = ref(false)
   const getVideoList = async () => {
     try { // 获取首页视频内容
+      isLoading.value = true
       const res = await getPopularVideo();
       const data = res.map(e => JSON.parse(e))
-      const updatedData = await Promise.allSettled(data.map(async e => {
-        if (!e.Video) return e
-        try {
-          const likedRes = await isLiked(loginStore().userinfo.userId, e.Video.videoId)
-          e.isLiked = likedRes
-        } catch (error) {
-          console.error(`获取视频 ${e.Video.videoId} 点赞状态失败:`, error);
-          e.isLiked = false; // 设置默认值
-        }
-        return e
-      }))
-      VideoList.value.push(...updatedData)
-      console.log(VideoList.value);
+      if (!loginStore()?.userinfo.userId) {
+        data.forEach(e => e.isLiked = false)
+        VideoList.value.push(...data)
+      } else {
+        const updatedData = await Promise.allSettled(data.map(async e => {
+          if (!e.Video) return e
+          try {
+            const likedRes = await isLiked(loginStore().userinfo.userId, e.Video.videoId)
+            e.isLiked = likedRes
+          } catch (error) {
+            console.error(`获取视频 ${e.Video.videoId} 点赞状态失败:`, error);
+            e.isLiked = false; // 设置默认值
+          }
+          return e
+        }))
+        VideoList.value.push(...updatedData)
+      }
     } catch (error) {
       console.log(error);
+    } finally {
+      isLoading.value = false
     }
   }
   const falseVideoList = () => {
@@ -130,6 +135,7 @@ export const homeStore = defineStore('home', () => {
   }
   return {
     VideoList,
+    isLoading,
     getVideoList,
     falseVideoList
   }
@@ -140,9 +146,7 @@ export const commentStore = defineStore('comment', () => {
   const commentId = ref('')
   const replyId = ref('') // 未开发
   const openCommentPopup = (id, num) => {
-    console.log(1);
     if (!loginStore().userinfo) return loginStore().loginShow = true
-    console.log(1);
     showPopup.value = true
     commentNum.value = num
     commentId.value = id
@@ -190,7 +194,7 @@ export const loginStore = defineStore('login', () => {
   })
 
   const Login = async (proxy) => {
-    if (formData.value.email === '') return loginShow.value = true
+    if (formData.value.email === '') return
     try {
       proxy.$toast.loading('')
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -199,6 +203,7 @@ export const loginStore = defineStore('login', () => {
       updateUserInfo(res)
       chatStore().getAllrequest()
       chatStore().socketAccept()
+      chatStore().receive()
       socket.emit('login', userId)
       localStorage.setItem('userinfo', JSON.stringify(formData.value))
       proxy.$toast.show('登录成功')

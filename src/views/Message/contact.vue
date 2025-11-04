@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick, onBeforeUnmount, watch } from 'vue'
 import { searchUser } from '@/api/user'
 import { loginStore } from '@/stores/counter'
 import { useRouter } from 'vue-router'
@@ -28,6 +28,32 @@ onMounted(async () => {
     })
     quchong.sort()
     firstnameList.value = [...quchong, '#'];
+
+    await nextTick()
+    const container = stickyElm.value
+    if (!container) return
+    const uls = Array.from(container.querySelectorAll('.title'))
+    observer = new IntersectionObserver((entries) => {
+        console.log(entries[0].boundingClientRect.top, entries[0].target, entries[0].isIntersecting);
+        if (entries[0].boundingClientRect.top < 110 && searchText.value === '') {
+            if (entries[0].isIntersecting) {
+                activeLetter.value = entries[0].target.textContent
+            } else {
+                activeLetter.value = entries[0].target.parentElement.nextElementSibling.querySelector('.title').textContent
+            }
+        }
+
+    }, { root: container, threshold: [1] })
+    uls.forEach(t => observer.observe(t))
+})
+
+onBeforeUnmount(() => {
+    if (observer) observer.disconnect()
+})
+
+watch(searchText, (val) => {
+    if (val) activeLetter.value = ''
+    else activeLetter.value = firstnameList.value[0] || ''
 })
 const pushChatWith = (item) => {
     const { userDesc, ...query } = item
@@ -36,6 +62,20 @@ const pushChatWith = (item) => {
         query
     })
 }
+const scrollToLetter = (val) => {
+    const container = stickyElm.value
+    if (!container) return
+    const titles = Array.from(container.querySelectorAll('.title'))
+    const target = titles.find(t => t.textContent.trim() === val)
+    if (target) {
+        const offsetTop = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop
+        container.scrollTo({ top: offsetTop, behavior: 'smooth' })
+    }
+    activeLetter.value = val
+}
+const stickyElm = ref(null)
+const activeLetter = ref('')
+let observer = null
 </script>
 <template>
     <Title title="选择联系人" back></Title>
@@ -44,9 +84,9 @@ const pushChatWith = (item) => {
             <span class="iconfont icon-sousuo"></span>
             <input type="text" placeholder="搜索用户昵称" v-model.trim="searchText">
         </div>
-        <div class="contact-list">
+        <div class="contact-list" ref="stickyElm">
             <ul v-for="value in firstnameList" :key="value">
-                <p v-if="!searchText">{{ value }}</p>
+                <div class="title" v-if="!searchText">{{ value }}</div>
                 <li @click="router.push({ name: 'user', params: { id: item.userId } })" v-for="item in filterList"
                     :key="item.userId" :class="{ 'include-search-text': searchText }"
                     v-show="firstName(item.userNickname) === value || (!/^[A-Za-z]$/.test(firstName(item.userNickname)) && value === '#')">
@@ -61,7 +101,8 @@ const pushChatWith = (item) => {
         </div>
         <ul class="aside">
             <li class="iconfont icon-sousuo"></li>
-            <li v-for="item in firstnameList" :key="item">{{ item }}</li>
+            <li v-for="item in firstnameList" :key="item" :class="{ active: item === activeLetter }"
+                @click="scrollToLetter(item)">{{ item }}</li>
         </ul>
     </div>
 </template>
@@ -84,6 +125,11 @@ const pushChatWith = (item) => {
         color: #face15;
         font-size: 12px;
     }
+
+    li.active {
+        color: #face15;
+        font-weight: 600;
+    }
 }
 
 .content {
@@ -91,16 +137,20 @@ const pushChatWith = (item) => {
 }
 
 .contact-list {
-    padding: 10px 30px 10px 20px;
+    padding: 0 30px 10px 20px;
     height: calc(100vh - 109px);
     overflow: auto;
 
     ul {
-        padding-bottom: 10px;
+        margin-bottom: 10px;
 
-        p {
+        .title {
             color: #fff;
             line-height: 30px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background-color: $backcolor;
         }
 
         li {
