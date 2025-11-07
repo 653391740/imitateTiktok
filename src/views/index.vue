@@ -37,7 +37,8 @@ const navItems = [
         </keep-alive>
     </router-view>
     <nav v-show="!isUserPage">
-        <router-link v-for="(item, index) in navItems" :to="item.path" @click="activeIndex = index">{{ item.name }}
+        <router-link v-for="(item, index) in navItems" :to="item.path" @click="activeIndex = index">
+            <p>{{ item.name }}</p>
             <div v-if="!item.name" class="upfile">
             </div>
             <div v-if="index === 3 && ChatStore.dot" class="dot"></div>
@@ -54,12 +55,10 @@ nav {
     display: flex;
     align-items: center;
     border-top: 1px solid #333;
+    height: 50px;
 
     a {
         flex: 0 0 20%;
-        line-height: 50px;
-        height: 50px;
-        text-align: center;
         cursor: pointer;
         color: #888;
         position: relative;
@@ -75,19 +74,18 @@ nav {
             transform: translateY(-50%);
         }
 
+        p {
+            width: fit-content;
+            margin: 0 auto;
+            padding: 5px 0;
+            border-bottom: 2px solid transparent;
+        }
 
         &.router-link-active {
             color: #fff;
 
-            &::after {
-                content: '';
-                position: absolute;
-                bottom: 3px;
-                left: 50%;
-                width: 3 0px;
-                height: 2px;
-                transform: translateX(-50%);
-                background-color: #fff;
+            p {
+                border-color: #fff
             }
         }
 

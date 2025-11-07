@@ -20,14 +20,8 @@ service.interceptors.request.use(config => {
 
 //响应拦截器
 service.interceptors.response.use(res => {
-    const { code, data } = res.data
-    if (code === 403) {
-        localStorage.removeItem('tiktok_userinfo')
-        window.location.href = '#/login'
-        Toast.show('登录过期，请重新登录')
-    } else {
-        return data !== undefined ? data : res.data;
-    }
+    const { data } = res.data
+    return data !== undefined ? data : res.data;
 }, error => {
     return Promise.reject(error)
 });

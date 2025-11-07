@@ -43,7 +43,7 @@ const props = defineProps({
     width: 100%;
     transition: all 0.5s;
     opacity: 0;
-    z-index: 101;
+    z-index: 10;
 
     &.show {
         opacity: 1;

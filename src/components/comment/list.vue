@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, toRefs, getCurrentInstance } from 'vue'
+import { ref, defineProps, getCurrentInstance } from 'vue'
 import { commentStore, loginStore } from '@/stores/counter'
 import { triggerLikeComment } from '@/api/video'
 const { proxy } = getCurrentInstance()
@@ -11,10 +11,10 @@ const props = defineProps({
         default: () => ({})
     }
 })
-props.obj.isLiked = false
 
-// 解构 obj 对象，获取 Comment 和 likeNum
-const { Comment, likeNum, isLiked } = toRefs(props.obj)
+const likeNum = ref(props.obj.likeNum || 0)
+const Comment = ref(props.obj.Comment || {})
+const isLiked = ref(props.obj.isLiked || false)
 const handleLikeComment = proxy.$throttle(async () => {
     if (!LoginStore.userinfo.userId) {
         LoginStore.loginShow = true

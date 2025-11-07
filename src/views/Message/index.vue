@@ -41,7 +41,6 @@ const router = useRouter()
 .message {
     height: 100vh;
     overflow: hidden;
-    padding-top: 44px;
     padding-bottom: 50px;
     display: flex;
     flex-direction: column;

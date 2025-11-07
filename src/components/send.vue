@@ -1,6 +1,6 @@
 <script setup>
-import { ref, defineEmits, defineProps } from 'vue'
-const emit = defineEmits(['sendComment'])
+import { ref, defineEmits, defineProps, defineExpose } from 'vue'
+const emit = defineEmits(['sendComment', 'sendat'])
 const props = defineProps({
     msg: {
         type: String,
@@ -16,11 +16,18 @@ const send = () => {
     emit('sendComment', commentInput.value)
     commentInput.value = ''
 }
+const addcommentInput = (str) => {
+    commentInput.value += str
+}
+defineExpose({
+    addcommentInput,
+    commentInput
+})
 </script>
 <template>
     <div class="send" :style="{ backgroundColor: props.backgroundC }">
         <input type="text" :placeholder="props.msg" v-model.trim="commentInput" @keyup.enter="send">
-        <span class="@">@</span>
+        <span class="@" @click="emit('sendat')">@</span>
         <span class="sendBtn iconfont icon-tick" @click="send"></span>
     </div>
 </template>

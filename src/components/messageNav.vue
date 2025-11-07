@@ -33,7 +33,7 @@ const loadmore = async () => {
 </script>
 <template>
     <Title :title="attrs.title" back></Title>
-    <Pullupload ref="pulluploadRef" @pullup="loadmore" :error="error" :hasMore="hasMore">
+    <Pullupload class="pullup" ref="pulluploadRef" @pullup="loadmore" :error="error" :hasMore="hasMore">
         <li v-for="item, index in List" :key="index">
             <img :src="$imgSrc(item.userAvatar)">
             <div class="info">
@@ -54,6 +54,9 @@ const loadmore = async () => {
 </template>
 
 <style lang="scss" scoped>
+.pullup {
+    height: calc(100% - 45px);
+}
 .noList {
     margin: 120px auto 0;
 
@@ -71,7 +74,6 @@ const loadmore = async () => {
 }
 
 .pullupload {
-    padding-top: 44px;
 
     li {
         padding: 10px;

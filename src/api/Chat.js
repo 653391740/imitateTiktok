@@ -70,3 +70,6 @@ export const readAllAt = (uid) => {
 export const readAllByCommentMsg = (uid) => {
     return http.get(`user/${uid}/readAllByCommentMsg`)
 }
+export const AtUser = (uid, data) => {
+    return http.post(`user/${uid}/AtUser`, data)
+}

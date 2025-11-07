@@ -64,6 +64,8 @@ export const chatStore = defineStore('chat', () => {
   const getAtUnreadNumRes = ref(0)
   const socketAccept = () => {
     socket.on('receiveComment', async data => {
+      console.log(data);
+
       byCommentUnreadNumRes.value = await byCommentUnreadNum(loginStore().userinfo.userId)
     })
     socket.on('receiveTriggerLike', async data => {
@@ -108,22 +110,26 @@ export const homeStore = defineStore('home', () => {
       isLoading.value = true
       const res = await getPopularVideo();
       const data = res.map(e => JSON.parse(e))
+      VideoList.value.push(...data)
       if (!loginStore()?.userinfo.userId) {
         data.forEach(e => e.isLiked = false)
         VideoList.value.push(...data)
       } else {
-        const updatedData = await Promise.allSettled(data.map(async e => {
+        VideoList.value.map(async e => {
           if (!e.Video) return e
           try {
             const likedRes = await isLiked(loginStore().userinfo.userId, e.Video.videoId)
             e.isLiked = likedRes
           } catch (error) {
-            console.error(`获取视频 ${e.Video.videoId} 点赞状态失败:`, error);
-            e.isLiked = false; // 设置默认值
+            if (error.response.data.code === 'auth:not logged in') {
+              loginStore().logout()
+              Toast.show('登录状态已失效，请重新登录')
+              return e
+            }
+            e.isLiked = false;
           }
           return e
-        }))
-        VideoList.value.push(...updatedData)
+        })
       }
     } catch (error) {
       console.log(error);
@@ -182,6 +188,7 @@ export const loginStore = defineStore('login', () => {
 
   const logout = () => {
     localStorage.removeItem('userinfo')
+    localStorage.removeItem('tiktok_userinfo')
     homeStore().falseVideoList()
     userinfo.value = {}
   }
@@ -209,12 +216,23 @@ export const loginStore = defineStore('login', () => {
       chatStore().receive()
       socket.emit('login', userId)
       localStorage.setItem('userinfo', JSON.stringify(formData.value))
+      formData.value.password = ''
       proxy.$toast.show('登录成功')
       closeLogin(res)
     } catch (error) {
       console.log(error);
       if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) proxy.$toast.show('请求超时，请检查网络连接后重试')
-      if (error.response?.data.message === 'email or password error') proxy.$toast.show('邮箱或密码错误')
+      if (error.response?.data.message === 'email or password error') {
+        if (userinfo.value.userId) {
+          logout()
+          proxy.$toast.show('登录状态已失效，请重新登录')
+          return
+        }
+        proxy.$toast.show('邮箱或密码错误')
+        loginShow.value = true
+        return 
+      }
+      proxy.$toast.show('无网络连接，请检查网络后重试')
     }
   }
   return {

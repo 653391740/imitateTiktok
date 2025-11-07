@@ -1,9 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { loginStore } from '@/stores/counter'
 
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
@@ -15,6 +15,11 @@ const router = createRouter({
           name: 'home',
           meta: { keepAlive: true },
           component: () => import('@/views/Home/index.vue'),
+        },
+        {
+          path: 'search',
+          name: 'Search',
+          component: () => import('@/views/Home/search.vue')
         },
         {
           path: '/concern',
@@ -97,11 +102,7 @@ const router = createRouter({
       name: 'UpdateUserInfo',
       component: () => import('@/views/User/UpdateUserInfo.vue')
     },
-    {
-      path: '/search',
-      name: 'Search',
-      component: () => import('@/views/Home/search.vue')
-    }
+
   ],
 })
 // // 白名单

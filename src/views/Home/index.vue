@@ -6,7 +6,6 @@ import Register from '@/views/Login/register.vue';
 import FindPassword from '@/views/Login/findPassword.vue';
 import { homeStore } from '@/stores/counter'
 import { useRouter } from 'vue-router'
-
 const HomeStore = homeStore()
 const router = useRouter()
 const toast = inject('toast')

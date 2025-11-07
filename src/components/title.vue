@@ -36,7 +36,7 @@ const emits = defineEmits(['click'])
     text-align: center;
     border-bottom: $bordB;
     background-color: #161622;
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     right: 0;

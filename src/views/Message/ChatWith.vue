@@ -90,8 +90,7 @@ const sendComment = async (content) => {
 
 <style lang="scss" scoped>
 ul {
-    padding-top: 44px;
-    height: calc(100vh - 44px);
+    height: calc(100vh - 88px);
     overflow-y: auto;
     color: #fff;
     border-bottom: $bordB;

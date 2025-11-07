@@ -1,10 +1,14 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, inject } from 'vue'
 import { commentStore, loginStore } from '@/stores/counter'
 import { getVideoComment, sendVideoComment } from '@/api/video'
+import { AtUser } from '@/api/Chat'
 import Send from '@/components/send.vue'
 import List from './list.vue'
+import Title from '@/components/title.vue'
+import both from '@/components/both.vue';
 
+const socket = inject('socket')
 const CommentStore = commentStore()
 const LoginStore = loginStore()
 const commentList = ref([])
@@ -19,15 +23,8 @@ watch(() => CommentStore.commentId, async (newVal, oldVal) => {
     error.value = false
     hasMore.value = true
     commentList.value = []
-    AsyncScrollToTop()
+    pulluploadRef.value.scrollToTop(true)
 })
-const AsyncScrollToTop = () => {
-    try {
-        pulluploadRef.value.scrollToTop()
-    } catch (err) {
-        error.value = true
-    }
-}
 const handleScroll = async () => {
     if (!CommentStore.commentId) return
     try {
@@ -43,6 +40,7 @@ const handleScroll = async () => {
         error.value = true
     }
 }
+
 const sendComment = async (content) => {
     if (!LoginStore.userinfo.userId) {
         LoginStore.loginShow = true
@@ -51,25 +49,57 @@ const sendComment = async (content) => {
     }
     if (!content) return
     try {
-        const { id, updatedAt, isRead, version, ...item } = await sendVideoComment({
+        const { commentId, videoId } = await sendVideoComment({
             fromUserId: LoginStore.userinfo.userId,
             replyId: CommentStore.replyId || '',
             content,
             toVideoId: CommentStore.commentId,
         })
+        socket.emit('sendComment', {
+            toVideoId: CommentStore.commentId,
+            replyId: CommentStore.replyId || ''
+        })
         page.value = 1
-        AsyncScrollToTop()
-        const { userAvatar, userNickname } = JSON.parse(localStorage.getItem('tiktok_userinfo'))
-        commentList.value.unshift({ userAvatar, userNickname, ...item })
-        console.log(commentList.value);
+        handleScroll()
+        if (atlist.value.length > 0) {
+            atlist.value.forEach(async userIdStr => {
+                await AtUser(LoginStore.userinfo.userId, {
+                    userIdStr,
+                    commentId,
+                    videoId
+                })
+            });
+            atlist.value = []
+        }
     } catch (err) {
         error.value = true
     }
 }
+
+const sendat = () => {
+    if (!LoginStore.userinfo.userId) {
+        LoginStore.loginShow = true
+        CommentStore.showPopup = false
+        return
+    }
+    atShow.value = true
+}
+const Commentfalse = () => {
+    CommentStore.showPopup = false
+    send.value.commentInput = ''
+}
+const atlist = ref([])
+const atShow = ref(false)
+const selected = ({ userNickname, userId }) => {
+    atShow.value = false
+    send.value.addcommentInput(`@${userNickname}`)
+    atlist.value.push(userId)
+}
+const send = ref(null)
 </script>
 
 <template>
-    <popup class="commentPopupbox" @click="CommentStore.showPopup = false" position="bottom" background="transparent"
+    <popup class="commentPopupbox" @click="Commentfalse" position="bottom" background="transparent"
         :show="CommentStore.showPopup">
         <div @click.stop class="commentPopup">
             <div class="header">
@@ -78,17 +108,25 @@ const sendComment = async (content) => {
             </div>
             <div class="list">
                 <Pullupload ref="pulluploadRef" @pullup="handleScroll" :error="error" :hasMore="hasMore">
-                    <List v-for="item, index in commentList" :key="index" :obj="item" />
+                    <List v-for="(item, index) in commentList" :key="index" :obj="item" />
                 </Pullupload>
             </div>
-            <Send @sendComment="sendComment"></Send>
+            <Send ref="send" @sendComment="sendComment" @sendat="sendat"></Send>
         </div>
+    </popup>
+    <popup class="atPopupbox" position="bottom" background="#161622" :show="atShow">
+        <Title @back="atShow = false" title="@好友"></Title>
+        <both @selected="selected"></both>
     </popup>
 </template>
 
 <style lang="scss" scoped>
+.atPopupbox {
+    z-index: 11 !important;
+}
+
 .commentPopupbox {
-    z-index: 999 !important;
+    z-index: 10 !important;
 }
 
 .commentPopup {

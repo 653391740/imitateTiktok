@@ -19,10 +19,11 @@ const loadmore = async (uid, page) => {
         <template #left="{ item }">
             <div class="newdot" v-if="!item.isRead"></div>
             <p>{{ item.commentContent }}</p>
-            <p class="time">评论了你的评论 {{ $formatTime(item.createdAt) }}</p>
+            <p class="time">{{ item.commentReplyID === LoginStore.userinfo.userId ? '评论了你的评论' : '评论了你的视频' }} {{
+                $formatTime(item.createdAt) }}</p>
         </template>
         <template #right="{ item }">
-            <img :src="item.videoCover" alt="">
+            <img :src="item.videoCover" :alt="item.videoId">
         </template>
     </MessageNav>
 </template>
@@ -32,6 +33,7 @@ img {
     width: 60px;
     height: 60px;
 }
+
 @include newdot;
 @include time;
 </style>

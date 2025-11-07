@@ -47,11 +47,14 @@ onMounted(() => {
         })
     }
 })
+
+const actveindex = ref(0)
 </script>
 <template>
     <div class="concern" :class="{ 'vh': isVideoAndDesc }">
         <Pullupload class="concern-list" @pullup="handleScroll" :newDom="newDom" :error="error" :hasMore="hasMore">
-            <ConcernItem v-for="item, index in List" :key="index" :obj="item.value" />
+            <ConcernItem v-for="item, index in List" :key="index" :obj="item.value" :index="index"
+                :actveindex="actveindex" />
         </Pullupload>
     </div>
 </template>

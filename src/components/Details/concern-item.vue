@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, toRefs,getCurrentInstance } from 'vue'
+import { ref, defineProps, watch, getCurrentInstance } from 'vue'
 import { loginStore, commentStore } from '@/stores/counter'
 import { triggerLike } from '@/api/video'
 const { proxy } = getCurrentInstance()
@@ -10,9 +10,25 @@ const props = defineProps({
     obj: {
         type: Object,
         default: () => ({})
+    },
+    index: {
+        type: Number,
+        default: 0
+    },
+    actveindex: {
+        type: Number,
+        default: 0
     }
 })
-const { Video, WSLCNum, isLiked } = toRefs(props.obj)
+watch(() => props.actveindex, (newVal) => {
+    if (newVal !== props.index) {
+        videoRef.value.pause()
+        videoRef.value.currentTime = 0
+    }
+})
+const Video = ref(props.obj.Video || {})
+const WSLCNum = ref(props.obj.WSLCNum || {})
+const isLiked = ref(props.obj.isLiked || false)
 
 const handleLike = async () => {
     try {
@@ -43,7 +59,8 @@ const playVideo = () => {
         <img :src="$imgSrc(Video.userAvatar)" alt="">
         <span class="nickname">@{{ Video.userNickname }}</span>
         <p class="desc">{{ Video.videoDesc }}</p>
-        <video ref="videoRef" :src="Video.videoPath" :poster="Video.videoCover" @click="playVideo()"></video>
+        <video ref="videoRef" :src="Video.videoPath" :poster="Video.videoCover" @click="playVideo()"
+            @ended="videoRef.play()"></video>
         <span @click="handleLike()" class="iconfont icon-aixin" :class="{ 'active': isLiked }"
             :data-count="WSLCNum.likeNum"></span>
         <span @click="CommentStore.openCommentPopup(Video.videoId, WSLCNum.commentNum)" class="iconfont icon-pinglun"

@@ -28,20 +28,18 @@ const nav = ref(null)
 const navObserver = ref(null)
 
 //  拖拽/滚动相关状态 
-const y = ref(0)
-const diffY = ref(0)
-const timer = ref(null)
+const starty = ref(0)
+const movey = ref(0)
 const scrollTops = ref(0)
 
 const tmove = (e) => {
     const { scrollTop, clientHeight, scrollHeight } = userinfoContainer.value
     if (clientHeight == scrollHeight) return
-
-    const max = 150 + diffY.value + (y.value === 0 ? 0 : e.touches[0].pageY) - y.value
-
+    const max = 150 + movey.value + (starty.value === 0 ? 0 : e.touches[0].pageY) - starty.value
+    
     if (scrollTop === 0) {
         scrollTops.value = 0
-        if (y.value === 0) y.value = e.touches[0].pageY
+        if (starty.value === 0) starty.value = e.touches[0].pageY
         if (max > 350) {
             userinfoContainer.value.removeEventListener('touchmove', tmove)
             tend()
@@ -58,6 +56,13 @@ const tmove = (e) => {
 
 const tend = (e) => {
     const mtop = parseFloat(window.getComputedStyle(userinfoDom.value).marginTop)
+    userinfoDom.value.style.transition = mtop < 150 ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
+    userinfoDom.value.style.marginTop = '150px'
+    bg.value.style.transition = 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
+    bg.value.style.height = '150px'
+
+    starty.value = 0
+    movey.value = 0
     if (mtop < 150) {
         scrollTops.value = 150 - mtop
         userinfoContainer.value.scrollTo({
@@ -66,30 +71,16 @@ const tend = (e) => {
             behavior: 'instant'
         })
     }
-
-    userinfoDom.value.style.transition = mtop < 150 ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
-    userinfoDom.value.style.marginTop = '150px'
-    bg.value.style.transition = 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
-    bg.value.style.height = '150px'
-
-    y.value = 0
-    diffY.value = 0
-
-    timer.value = setTimeout(() => {
-        userinfoDom.value.style.transition = 'none'
-        bg.value.style.transition = 'none'
-    }, 700)
 }
 
 const tstart = () => {
-    if (timer.value) clearTimeout(timer.value)
     userinfoContainer.value.addEventListener('touchmove', tmove)
     const height = window.getComputedStyle(bg.value).height
     userinfoDom.value.style.marginTop = height
     userinfoDom.value.style.transition = 'none'
     bg.value.style.height = height
     bg.value.style.transition = 'none'
-    diffY.value = parseFloat(height) - 150
+    movey.value = parseFloat(height) - 150
 }
 
 const toUpdateUserInfo = () => {
@@ -102,13 +93,14 @@ const Logout = () => {
     window.location.reload()
 }
 
-const count = ref(1)
+const count = ref(0)
 let removeAfter = null
+removeAfter = router.afterEach(() => {
+    count.value++
+})
 onMounted(() => {
-    removeAfter = router.afterEach(() => {
-        count.value++
-        console.log(count.value);
-    })
+    userinfoContainer.value.addEventListener('touchstart', tstart)
+    userinfoContainer.value.addEventListener('touchend', tend)
 })
 
 onUnmounted(() => {
@@ -121,13 +113,10 @@ onUnmounted(() => {
 
 onActivated(async () => {
     count.value = 1
-    userinfoContainer.value.addEventListener('touchstart', tstart)
-    userinfoContainer.value.addEventListener('touchend', tend)
     userInfo.value = userinfo
-
     const id = route.params.id === 'me' ? userinfo.userId : route.params.id
     if (id !== userinfo.userId) userInfo.value = await getUserInfo(id, userinfo.userId)
-    
+
     Followersnum.value = await FollowersNum(id)
     Fansnum.value = await FansNum(id)
     Likesnum.value = await LikesNum(id)
@@ -205,7 +194,11 @@ onActivated(async () => {
             <router-link :to="`/user/${route.params.id}/videoAndDesc`">动态{{ Videosnum }}</router-link>
             <router-link :to="`/user/${route.params.id}/likes`">喜欢{{ Likesnum }}</router-link>
         </nav>
-        <router-view></router-view>
+        <router-view v-slot="{ Component }">
+            <keep-alive>
+                <component :is="Component" :key="route.fullPath" />
+            </keep-alive>
+        </router-view>
     </div>
 </template>
 <style lang="scss" scoped>

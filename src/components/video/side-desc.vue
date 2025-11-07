@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, getCurrentInstance, toRefs } from 'vue'
+import { ref, defineProps, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 import { triggerLike } from '@/api/video'
 import { commentStore, loginStore } from '@/stores/counter'
@@ -15,7 +15,9 @@ const props = defineProps({
         default: () => ({})
     }
 })
-const { Video, WSLCNum, isLiked } = toRefs(props.item)
+const Video = ref(props.item.Video || {})
+const WSLCNum = ref(props.item.WSLCNum || {})
+const isLiked = ref(props.item.isLiked || false)
 
 const Routeruser = () => {
     if (Video.value?.userId) {
