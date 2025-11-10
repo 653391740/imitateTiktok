@@ -22,7 +22,6 @@ const showDialog = ref(false)
 
 //  DOM 引用 
 const userinfoContainer = ref(null)
-const userinfoDom = ref(null)
 const bg = ref(null)
 const nav = ref(null)
 const navObserver = ref(null)
@@ -33,15 +32,19 @@ const movey = ref(0)
 const scrollTops = ref(0)
 
 const tmove = (e) => {
+    e.preventDefault()
+    const { height, transform } = window.getComputedStyle(userinfoContainer.value)
+    console.log(height, transform);
+
     const { scrollTop, clientHeight, scrollHeight } = userinfoContainer.value
     if (clientHeight == scrollHeight) return
     const max = 150 + movey.value + (starty.value === 0 ? 0 : e.touches[0].pageY) - starty.value
-    
+
     if (scrollTop === 0) {
         scrollTops.value = 0
         if (starty.value === 0) starty.value = e.touches[0].pageY
         if (max > 350) {
-            userinfoContainer.value.removeEventListener('touchmove', tmove)
+            userinfoContainer.value.removeEventListener('touchmove', tmove, { passive: false })
             tend()
             return
         }
@@ -127,7 +130,6 @@ onActivated(async () => {
         // 使用滚动事件检测导航栏是否处于吸附状态
         const handleScroll = () => {
             if (!nav.value || !userinfoContainer.value) return
-
             // 获取导航栏的位置信息
             const { top } = nav.value.getBoundingClientRect()
             // 如果导航栏顶部距离视口顶部的距离大于等于0，说明处于吸附状态
@@ -195,7 +197,7 @@ onActivated(async () => {
             <router-link :to="`/user/${route.params.id}/likes`">喜欢{{ Likesnum }}</router-link>
         </nav>
         <router-view v-slot="{ Component }">
-            <keep-alive>
+            <keep-alive max="10">
                 <component :is="Component" :key="route.fullPath" />
             </keep-alive>
         </router-view>

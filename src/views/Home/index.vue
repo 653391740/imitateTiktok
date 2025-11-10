@@ -35,7 +35,7 @@ watch(() => HomeStore.status, (newV) => {
     right: 20px;
     top: 20px;
     font-size: 20px;
-    z-index: 99;
+    z-index: 9;
     color: #fff;
 }
 </style>

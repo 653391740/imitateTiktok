@@ -3,8 +3,8 @@ import Title from '@/components/title.vue'
 import both from '@/components/both.vue';
 import { useRouter } from 'vue-router';
 const router = useRouter()
-const selected = ({ id }) => {
-    router.push({ name: 'user', params: { id } })
+const selected = (obj) => {
+    router.push({ name: 'user', params: { id: obj.userId } })
 }
 </script>
 <template>

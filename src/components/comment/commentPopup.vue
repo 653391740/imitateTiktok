@@ -39,6 +39,7 @@ const handleScroll = async () => {
     } catch (err) {
         error.value = true
     }
+    console.log(commentList.value);
 }
 
 const sendComment = async (content) => {
@@ -108,7 +109,7 @@ const send = ref(null)
             </div>
             <div class="list">
                 <Pullupload ref="pulluploadRef" @pullup="handleScroll" :error="error" :hasMore="hasMore">
-                    <List v-for="(item, index) in commentList" :key="index" :obj="item" />
+                    <List v-for="(item, index) in commentList" :obj="item" />
                 </Pullupload>
             </div>
             <Send ref="send" @sendComment="sendComment" @sendat="sendat"></Send>

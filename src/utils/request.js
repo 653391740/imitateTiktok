@@ -1,8 +1,7 @@
 import axios from "axios";
-import { Toast } from '@/plugin/Toast/index.js';
 
 const service = axios.create({
-    baseURL: '/api',
+    baseURL: '/api', //http://43.138.15.137:3000/api
     timeout: 10000,
     withCredentials: true,
 });

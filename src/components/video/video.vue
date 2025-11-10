@@ -41,19 +41,24 @@ const playPromise = () => {
         if (error.message.includes(`play() failed because the user didn't interact with the document first.`)) isPlaying.value = true;
     });
 }
+const pausePromise = () => {
+    isPlaying.value = true;
+    VideoDom.value.pause();
+}
 
 
 const togglePlayback = () => {
     if (VideoDom.value.paused) {
         playPromise();
     } else {
-        VideoDom.value.pause();
-        isPlaying.value = true;
+        pausePromise();
     }
 }
 
 defineExpose({
-    togglePlayback
+    togglePlayback,
+    playPromise,
+    pausePromise
 })
 
 watch(() => activeIndex.value, (newCurrentIndex, oldCurrentIndex) => {

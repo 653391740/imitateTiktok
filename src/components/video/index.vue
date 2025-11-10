@@ -11,7 +11,7 @@ const activeIndex = ref(0); // 当前播放视频索引
 const swiper = ref(null)
 const video = ref(null)
 
-const emits = defineEmits(['pullup'])
+const emits = defineEmits(['pullup', 'updateactiveIndex'])
 const props = defineProps({
     VideoList: {
         type: Array,
@@ -47,28 +47,23 @@ const handleVideoEnd = (index) => {
 // 切换到指定索引的视频
 const toIndex = (index, smooth = true) => {
     activeIndex.value = index;
-    if (swiper.value) {
-        swiper.value.swipeTo(index, smooth);
-    }
-    // 使用nextTick确保DOM更新完成后再调用togglePlayback
+    emits('updateactiveIndex', index)
+    if (swiper.value) swiper.value.swipeTo(index, smooth);
     nextTick(() => {
-        if (video.value && video.value[index]) {
-            video.value[index].togglePlayback();
-        }
+        if (video.value && video.value[index]) video.value[index].playPromise();
     });
 }
-
+const pausePromise = (index) => {
+    video.value[index].pausePromise()
+}
 const newDom = ref(null)
-const handleSwiperScroll = (dom) => {
-    newDom.value = dom
-}
+const handleSwiperScroll = (dom) => { newDom.value = dom }
 
-const loadMore = () => {
-    if (route.path === '/home') HomeStore.getVideoList()
-}
+const loadMore = () => { if (route.path === '/home') HomeStore.getVideoList() }
 const VideoList = computed(() => props.VideoList.map(item => item.value || item))
 defineExpose({
-    toIndex
+    toIndex,
+    pausePromise,
 })
 </script>
 

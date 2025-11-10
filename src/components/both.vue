@@ -6,7 +6,6 @@ import { useRouter } from 'vue-router'
 import p from "wl-pinyin";
 
 const emit = defineEmits(['selected'])
-
 const LoginStore = loginStore()
 const router = useRouter()
 const searchText = ref('')
@@ -29,16 +28,15 @@ onMounted(async () => {
     })
     quchong.sort()
     firstnameList.value = [...quchong, '#'];
-
     await nextTick()
     const container = stickyElm.value
     if (!container) return
     const uls = Array.from(container.querySelectorAll('.title'))
     observer = new IntersectionObserver((entries) => {
         if (entries[0].boundingClientRect.top < 110 && searchText.value === '') {
-            if (entries[0].isIntersecting) {
+            if (entries[0].isIntersecting) { // 可全视
                 activeLetter.value = entries[0].target.textContent
-            } else {
+            } else { // 不可全视
                 activeLetter.value = entries[0].target.parentElement.nextElementSibling.querySelector('.title').textContent
             }
         }
@@ -57,18 +55,17 @@ watch(searchText, (val) => {
 })
 const pushChatWith = (item) => {
     const { userDesc, ...query } = item
-    router.push({
-        path: '/chatWith',
-        query
-    })
+    router.push({ path: '/chatWith', query })
 }
 const scrollToLetter = (val) => {
     const container = stickyElm.value
     if (!container) return
-    const titles = Array.from(container.querySelectorAll('.title'))
-    const target = titles.find(t => t.textContent.trim() === val)
+    const titles = Array.from(container.children)
+    const target = titles.find(t => t.children[0].textContent.trim() === val)
     if (target) {
-        const offsetTop = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop
+        const targetTop = target.getBoundingClientRect().top
+        const containerTop = container.getBoundingClientRect().top
+        const offsetTop = targetTop - containerTop + container.scrollTop
         container.scrollTo({ top: offsetTop, behavior: 'smooth' })
     }
     activeLetter.value = val
@@ -87,7 +84,7 @@ let observer = null
         <div class="contact-list" ref="stickyElm">
             <ul v-for="value in firstnameList" :key="value">
                 <div class="title" v-if="!searchText">{{ value }}</div>
-                <li @click="emit('selected', item)" v-for="item in filterList" :key="item.userId"
+                <li @click="emit('selected', item)" v-for="item in filterList"
                     :class="{ 'include-search-text': searchText }"
                     v-show="firstName(item.userNickname) === value || (!/^[A-Za-z]$/.test(firstName(item.userNickname)) && value === '#')">
                     <img :src="$imgSrc(item.userAvatar)">
@@ -110,7 +107,7 @@ let observer = null
 
 <style scoped lang="scss">
 .aside {
-    position: fixed;
+    position: absolute;
     color: #fff;
     top: 50%;
     right: 10px;

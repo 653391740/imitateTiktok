@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, getCurrentInstance } from 'vue'
+import { ref, defineProps, getCurrentInstance, watch } from 'vue'
 import { commentStore, loginStore } from '@/stores/counter'
 import { triggerLikeComment } from '@/api/video'
 const { proxy } = getCurrentInstance()
@@ -11,10 +11,16 @@ const props = defineProps({
         default: () => ({})
     }
 })
-
 const likeNum = ref(props.obj.likeNum || 0)
 const Comment = ref(props.obj.Comment || {})
 const isLiked = ref(props.obj.isLiked || false)
+
+watch(() => props.obj, (newObj) => {
+    likeNum.value = newObj?.likeNum || 0
+    Comment.value = newObj?.Comment || {}
+    isLiked.value = newObj?.isLiked || false
+}, { deep: true })
+
 const handleLikeComment = proxy.$throttle(async () => {
     if (!LoginStore.userinfo.userId) {
         LoginStore.loginShow = true
@@ -34,7 +40,6 @@ const handleLikeComment = proxy.$throttle(async () => {
         console.log(error)
     }
 })
-
 </script>
 <template>
     <li>
@@ -43,7 +48,7 @@ const handleLikeComment = proxy.$throttle(async () => {
         </div>
         <div class="desc">
             <p>@{{ Comment.userNickname }}</p>
-            <p style="color: #fff;">{{ Comment.commentContent }}</p>
+            <p class="comment">{{ Comment.commentContent }}</p>
             <p style="color: #626260;">{{ $formatTime(Comment.createdAt) }}</p>
         </div>
         <span class="iconfont icon-aixin" :data-content="likeNum" @click="handleLikeComment"
@@ -54,23 +59,28 @@ const handleLikeComment = proxy.$throttle(async () => {
 <style lang="scss" scoped>
 li {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding: 0 8px;
+    padding: 8px 8px 0;
 
     .avatar {
+        flex-shrink: 0;
         width: 40px;
         height: 40px;
         clip-path: circle(50% at 50% 50%);
     }
 
     .desc {
-        flex: 1;
+        width: calc(100% - 100px);
         font-size: 12px;
         color: #a6a5a4;
         border-bottom: 1px solid rgba(41, 40, 37, 0.8);
-        margin: 0 10px;
-        padding: 8px 0;
+        margin-left: 10px;
+        padding-bottom: 8px;
+
+        .comment {
+            color: #fff;
+            word-break: break-all;
+        }
     }
 
     &>span {
@@ -84,7 +94,7 @@ li {
         &::after {
             content: attr(data-content);
             position: absolute;
-            bottom: -20px;
+            top: 20px;
             font-size: 12px;
             left: 50%;
             transform: translateX(-50%);
