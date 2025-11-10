@@ -59,10 +59,10 @@ onMounted(() => {
     userinfoContainer.addEventListener('scroll', () => {
         const { scrollTop, clientHeight, scrollHeight } = userinfoContainer
         newDom.value = { scrollTop, clientHeight, scrollHeight }
-        console.log(scrollTop, clientHeight, scrollHeight);
+        // console.log(scrollTop, clientHeight, scrollHeight);
     })
     userinfoContainer.addEventListener('touchmove', () => {
-        console.log(window.getComputedStyle(userinfoContainer).transform);
+        // console.log(window.getComputedStyle(userinfoContainer).transform);
     })
 })
 
@@ -94,27 +94,47 @@ const del = async () => {
 }
 </script>
 <template>
-    <Dialog ref="dialogRef" :options="{ title: '是否删除该视频' }" @close="delshow = false" @confirm="del" :show="delshow">
+    <Dialog ref="dialogRef"
+        :options="{ title: '是否删除该视频' }"
+        @close="delshow = false"
+        @confirm="del"
+        :show="delshow">
     </Dialog>
-    <Pullupload class="pulluploadRef" ref="pulluploadRef" @pullup="loadmore" :newDom="newDom" :error="error"
+    <Pullupload class="pulluploadRef"
+        ref="pulluploadRef"
+        @pullup="loadmore"
+        :newDom="newDom"
+        :error="error"
         :hasMore="hasMore">
-        <li v-for="item, index in list" :key="item.value.Video?.videoId || index" @click="openPopup(index)">
+        <li v-for="item, index in list"
+            :key="item.value.Video?.videoId || index"
+            @click="openPopup(index)">
             <img :src="item.value.Video?.videoCover || ''">
             <div class="iconfont icon-aixin1">{{ item.value.WSLCNum?.likeNum || 0 }}</div>
-            <div class="iconfont icon-lajitong" v-if="props.showDeleteIcon && route.params.id == 'me'"
+            <div class="iconfont icon-lajitong"
+                v-if="props.showDeleteIcon && route.params.id == 'me'"
                 @click.stop="showDelConfirm(item.value)">
             </div>
         </li>
     </Pullupload>
-    <popup class="popupRef" position="right" background="#161622" :show="showPopup">
-        <div class="close iconfont icon-zuojiantou" @click="closePopup"></div>
-        <Video ref="videoRefs" :VideoList="list" :autoPlay="false" @updateactiveIndex="activeIndex = $event">
-            <template #default="{ item }">
-                <Send @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
-                </Send>
-            </template>
-        </Video>
-    </popup>
+    <teleport :to="body">
+        <popup class="popupRef"
+            position="right"
+            background="#161622"
+            :show="showPopup">
+            <div class="close iconfont icon-zuojiantou"
+                @click="closePopup"></div>
+            <Video ref="videoRefs"
+                :VideoList="list"
+                :autoPlay="false"
+                @updateactiveIndex="activeIndex = $event">
+                <template #default="{ item }">
+                    <Send @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
+                    </Send>
+                </template>
+            </Video>
+        </popup>
+    </teleport>
 </template>
 
 <style lang="scss" scoped>

@@ -24,67 +24,45 @@ const showDialog = ref(false)
 const userinfoContainer = ref(null)
 const bg = ref(null)
 const nav = ref(null)
-const navObserver = ref(null)
 
 //  拖拽/滚动相关状态 
-const starty = ref(0)
-const movey = ref(0)
-const scrollTops = ref(0)
+const DifY = ref(0)
+const StartY = ref(0)
+const moveY = ref(150)
+const down = ref(false)
 
+const updataY = () => {
+    userinfoContainer.value.style.transform = `translateY(${DifY.value}px)`
+}
+const tstart = (e) => {
+    down.value = true
+    StartY.value = e.touches[0].pageY
+    userinfoContainer.value.addEventListener('touchmove', tmove)
+
+}
 const tmove = (e) => {
     e.preventDefault()
-    const { height, transform } = window.getComputedStyle(userinfoContainer.value)
-    console.log(height, transform);
-
-    const { scrollTop, clientHeight, scrollHeight } = userinfoContainer.value
-    if (clientHeight == scrollHeight) return
-    const max = 150 + movey.value + (starty.value === 0 ? 0 : e.touches[0].pageY) - starty.value
-
-    if (scrollTop === 0) {
-        scrollTops.value = 0
-        if (starty.value === 0) starty.value = e.touches[0].pageY
-        if (max > 350) {
-            userinfoContainer.value.removeEventListener('touchmove', tmove, { passive: false })
-            tend()
-            return
-        }
-        userinfoDom.value.style.marginTop = `${max}px`
-        bg.value.style.height = `${max < 150 ? 150 : max}px`
-    } else {
-        if (scrollTops.value === 0) userinfoContainer.value.scrollTop = 0
-        userinfoDom.value.style.marginTop = `${max}px`
-        bg.value.style.height = `${max < 150 ? 150 : max}px`
+    const currentPageY = e.touches[0].pageY
+    DifY.value = moveY.value + currentPageY - StartY.value
+    updataY()
+    if (DifY.value > 150) {
+        bg.value.style.height = `${DifY.value}px`
     }
+    console.log(DifY.value);
 }
 
 const tend = (e) => {
-    const mtop = parseFloat(window.getComputedStyle(userinfoDom.value).marginTop)
-    userinfoDom.value.style.transition = mtop < 150 ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
-    userinfoDom.value.style.marginTop = '150px'
-    bg.value.style.transition = 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
-    bg.value.style.height = '150px'
-
-    starty.value = 0
-    movey.value = 0
-    if (mtop < 150) {
-        scrollTops.value = 150 - mtop
-        userinfoContainer.value.scrollTo({
-            top: scrollTops.value,
-            left: 0,
-            behavior: 'instant'
-        })
+    down.value = false
+    moveY.value = DifY.value
+    if (moveY.value > 150) {
+        bg.value.style.transition = 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
+        bg.value.style.height = `150px`
+        userinfoContainer.value.style.transition = 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)'
+        userinfoContainer.value.style.transform = `translateY(150px)`
+        moveY.value = 150
     }
 }
 
-const tstart = () => {
-    userinfoContainer.value.addEventListener('touchmove', tmove)
-    const height = window.getComputedStyle(bg.value).height
-    userinfoDom.value.style.marginTop = height
-    userinfoDom.value.style.transition = 'none'
-    bg.value.style.height = height
-    bg.value.style.transition = 'none'
-    movey.value = parseFloat(height) - 150
-}
 
 const toUpdateUserInfo = () => {
     router.push({ name: 'UpdateUserInfo' })
@@ -108,10 +86,6 @@ onMounted(() => {
 
 onUnmounted(() => {
     if (removeAfter) removeAfter()
-    // 清理滚动事件监听器
-    if (navObserver.value && userinfoContainer.value) {
-        userinfoContainer.value.removeEventListener('scroll', navObserver.value)
-    }
 })
 
 onActivated(async () => {
@@ -125,44 +99,42 @@ onActivated(async () => {
     Likesnum.value = await LikesNum(id)
     byLikesnum.value = await byLikesNum(id)
     Videosnum.value = await VideosNum(id)
-
-    nextTick(() => {
-        // 使用滚动事件检测导航栏是否处于吸附状态
-        const handleScroll = () => {
-            if (!nav.value || !userinfoContainer.value) return
-            // 获取导航栏的位置信息
-            const { top } = nav.value.getBoundingClientRect()
-            // 如果导航栏顶部距离视口顶部的距离大于等于0，说明处于吸附状态
-            if (top <= 45) {
-                nav.value.classList.add('is-stuck')
-            } else {
-                nav.value.classList.remove('is-stuck')
-            }
-        }
-
-        // 添加滚动事件监听
-        if (userinfoContainer.value) {
-            userinfoContainer.value.addEventListener('scroll', handleScroll)
-            navObserver.value = handleScroll
-        }
-    })
 })
 </script>
 <template>
-    <Dialog :show="showDialog" :options="{ title: '是否保存修改' }" @close="showDialog = false" @confirm="Logout" />
-    <div class="r" v-if="route.params.id == 'me'" @click="showMenu = !showMenu">...
+    <Dialog :show="showDialog"
+        :options="{ title: '是否保存修改' }"
+        @close="showDialog = false"
+        @confirm="Logout" />
+    <div class="r"
+        v-if="route.params.id == 'me'"
+        @click="showMenu = !showMenu">...
         <transition name="fade">
-            <ul class="more-menu" v-if="showMenu">
+            <ul class="more-menu"
+                v-if="showMenu">
                 <li @click="toUpdateUserInfo">修改个人资料</li>
                 <li @click="showDialog = true">注销</li>
             </ul>
         </transition>
     </div>
-    <div class="l iconfont icon-zuojiantou" v-else @click="router.go(-count)"></div>
-    <div class="userinfo-container" ref="userinfoContainer" :class="{ 'pb': route.params.id === 'me' }">
-        <img src="/src/assets/bg.jpg" class="bg" ref="bg">
-        <div class="userinfo" ref="userinfoDom">
-            <Followbtn v-if="route.params.id !== 'me'" class="Followbtn" :item="userInfo" :myUserId="userinfo.userId">
+    <div class="l iconfont icon-zuojiantou"
+        v-else
+        @click="router.go(-count)"></div>
+
+    <img src="/src/assets/bg.jpg"
+        :style="{ 'transition': down ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)' }"
+        class="bg"
+        ref="bg">
+    <div class="userinfo-container"
+        ref="userinfoContainer"
+        :style="{ 'transition': down ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)' }"
+        :class="{ 'pb': route.params.id === 'me' }">
+        <div class="userinfo"
+            ref="userinfoContainer">
+            <Followbtn v-if="route.params.id !== 'me'"
+                class="Followbtn"
+                :item="userInfo"
+                :myUserId="userinfo.userId">
             </Followbtn>
             <div class="avatar">
                 <img :src="$imgSrc(userInfo.userAvatar)">
@@ -172,7 +144,8 @@ onActivated(async () => {
                 <div class="uid">抖音号 : {{ userInfo.userId }}</div>
                 <div class="desc">{{ userInfo.userDesc }}</div>
                 <div class="gender">
-                    <div :class="userInfo.userGender === '男' ? 'icon-nan' : 'icon-nv'" class="iconfont"></div>
+                    <div :class="userInfo.userGender === '男' ? 'icon-nan' : 'icon-nv'"
+                        class="iconfont"></div>
                     <p>{{ userInfo.userAge }}岁</p>
                 </div>
                 <div class="num-wrap">
@@ -191,14 +164,16 @@ onActivated(async () => {
                 </div>
             </div>
         </div>
-        <nav ref="nav" :data-name="userInfo.userNickname">
+        <nav ref="nav"
+            :data-name="userInfo.userNickname">
             <router-link :to="`/user/${route.params.id}/videos`">作品{{ Videosnum }}</router-link>
             <router-link :to="`/user/${route.params.id}/videoAndDesc`">动态{{ Videosnum }}</router-link>
             <router-link :to="`/user/${route.params.id}/likes`">喜欢{{ Likesnum }}</router-link>
         </nav>
         <router-view v-slot="{ Component }">
             <keep-alive max="10">
-                <component :is="Component" :key="route.fullPath" />
+                <component :is="Component"
+                    :key="route.fullPath" />
             </keep-alive>
         </router-view>
     </div>
@@ -266,11 +241,8 @@ onActivated(async () => {
 }
 
 .userinfo-container {
-    position: relative;
     width: 100%;
-    height: 100vh;
-    overflow: auto;
-    scrollbar-width: none;
+    transform: translateY(150px);
 
     &.pb {
         padding-bottom: 50px;
@@ -284,9 +256,9 @@ onActivated(async () => {
 
     nav {
         display: flex;
-        position: sticky;
-        top: 44px;
-        left: 0;
+        // position: sticky;
+        // top: 44px;
+        // left: 0;
         z-index: 2;
 
         &.is-stuck {
@@ -320,7 +292,6 @@ onActivated(async () => {
 
     .userinfo {
         z-index: 2;
-        margin-top: 150px;
         color: #fff;
         padding: 0 10px;
         position: relative;
