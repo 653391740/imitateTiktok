@@ -1,11 +1,11 @@
 <script setup>
-import { ref, onMounted, nextTick, onActivated, onUnmounted } from 'vue'
+import { ref, onMounted, defineOptions, onUnmounted, nextTick } from 'vue'
 import { loginStore } from '@/stores/counter'
 import { useRouter, useRoute } from 'vue-router'
 import { FollowersNum, FansNum, byLikesNum, LikesNum, VideosNum } from '@/api/Chat'
 import { getUserInfo } from '@/api/user'
 import Followbtn from '@/components/Followbtn.vue'
-
+defineOptions({ name: 'User' })
 const router = useRouter()
 const route = useRoute()
 const { userinfo, logout } = loginStore()
@@ -33,11 +33,25 @@ const down = ref(false)
 const speed = ref(0) // 速度
 const Time = ref(0) // 时间
 
+const isStuck = ref(false)
 const updataY = (DifY) => {
     requestAnimationFrame(() => {
         if (DifY > 150) bg.value.style.height = `${DifY}px`
         userinfoContainer.value.style.transform = `translateY(${DifY}px)`
     })
+    let checkCount = 0
+    let lastPosition = null
+    const checkNavPosition = () => {
+        const { top } = nav.value.getBoundingClientRect()
+        isStuck.value = top < 44
+        if (Math.abs(lastPosition - top) < 0.1) {
+            checkCount++
+            if (checkCount >= 4) return
+        }
+        lastPosition = top
+        requestAnimationFrame(checkNavPosition)
+    }
+    requestAnimationFrame(checkNavPosition)
 }
 const maxtransform = () => {
     const { height } = userinfoContainer.value.getBoundingClientRect()
@@ -55,10 +69,10 @@ const tstart = (e) => {
 const tmove = (e) => {
     const currentPageY = e.touches[0].pageY
     const max = maxtransform()
+    isStuck.value = nav.value.getBoundingClientRect().top < 44
 
-    const { height } = userinfoContainer.value.getBoundingClientRect()
     const time = Date.now()
-    const movey = height - window.innerHeight > 0 ? Math.max(moveY.value + currentPageY - StartY.value, max) : 150
+    const movey = userinfoContainer.value.getBoundingClientRect().height - window.innerHeight > 0 ? Math.max(moveY.value + currentPageY - StartY.value, max) : 150
     speed.value = (movey - DifY.value) / (time - Time.value)
 
     updataY(movey)
@@ -83,7 +97,6 @@ const tend = (e) => {
         userinfoContainer.value.removeEventListener('touchmove', tmove)
     }
 }
-
 const toUpdateUserInfo = () => {
     router.push({ name: 'UpdateUserInfo' })
 }
@@ -94,22 +107,14 @@ const Logout = () => {
     window.location.reload()
 }
 
-const count = ref(0)
+const count = ref(1)
 let removeAfter = null
-removeAfter = router.afterEach(() => {
+removeAfter = router.afterEach((e) => {
     count.value++
+    moveY.value = 150
+    updataY(moveY.value)
 })
-onMounted(() => {
-    userinfoContainer.value.addEventListener('touchstart', tstart)
-    userinfoContainer.value.addEventListener('touchend', tend)
-})
-
-onUnmounted(() => {
-    if (removeAfter) removeAfter()
-})
-
-onActivated(async () => {
-    count.value = 1
+onMounted(async () => {
     userInfo.value = userinfo
     const id = route.params.id === 'me' ? userinfo.userId : route.params.id
     if (id !== userinfo.userId) userInfo.value = await getUserInfo(id, userinfo.userId)
@@ -119,6 +124,12 @@ onActivated(async () => {
     Likesnum.value = await LikesNum(id)
     byLikesnum.value = await byLikesNum(id)
     Videosnum.value = await VideosNum(id)
+    userinfoContainer.value.addEventListener('touchstart', tstart)
+    userinfoContainer.value.addEventListener('touchend', tend)
+})
+
+onUnmounted(() => {
+    if (removeAfter) removeAfter()
 })
 </script>
 <template>
@@ -132,6 +143,18 @@ onActivated(async () => {
         </transition>
     </div>
     <div class="l iconfont icon-zuojiantou" v-else @click="router.go(-count)"></div>
+    <teleport to="#app">
+        <transition name="stuck">
+            <div class="abs-nav" v-if="isStuck">
+                <p> {{ userInfo.userNickname }} </p>
+                <nav>
+                    <router-link :to="`/user/${route.params.id}/videos`">作品{{ Videosnum }}</router-link>
+                    <router-link :to="`/user/${route.params.id}/videoAndDesc`">动态{{ Videosnum }}</router-link>
+                    <router-link :to="`/user/${route.params.id}/likes`">喜欢{{ Likesnum }}</router-link>
+                </nav>
+            </div>
+        </transition>
+    </teleport>
 
     <img src="/src/assets/bg.jpg"
         :style="{ 'transition': down ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)' }" class="bg" ref="bg">
@@ -142,7 +165,7 @@ onActivated(async () => {
             <Followbtn v-if="route.params.id !== 'me'" class="Followbtn" :item="userInfo" :myUserId="userinfo.userId">
             </Followbtn>
             <div class="avatar">
-                <img :src="$imgSrc(userInfo.userAvatar)">
+                <img v-lazy="$imgSrc(userInfo.userAvatar)">
             </div>
             <div class="info">
                 <div class="name">{{ userInfo.userNickname }}</div>
@@ -168,7 +191,7 @@ onActivated(async () => {
                 </div>
             </div>
         </div>
-        <nav ref="nav" :data-name="userInfo.userNickname">
+        <nav ref="nav">
             <router-link :to="`/user/${route.params.id}/videos`">作品{{ Videosnum }}</router-link>
             <router-link :to="`/user/${route.params.id}/videoAndDesc`">动态{{ Videosnum }}</router-link>
             <router-link :to="`/user/${route.params.id}/likes`">喜欢{{ Likesnum }}</router-link>
@@ -181,6 +204,26 @@ onActivated(async () => {
     </div>
 </template>
 <style lang="scss" scoped>
+.stuck-enter-from,
+.stuck-leave-to {
+    opacity: 0;
+    transform: translateY(-88px);
+}
+
+.abs-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    p {
+        line-height: 44px;
+        text-align: center;
+        color: #fff;
+        background-color: $backcolor;
+    }
+}
+
 @mixin lr-btn {
     position: fixed;
     top: 10px;
@@ -242,6 +285,23 @@ onActivated(async () => {
     @include lr-btn;
 }
 
+nav {
+    display: flex;
+    width: 100%;
+
+    a {
+        flex: 1;
+        line-height: 42px;
+        text-align: center;
+        color: #fff;
+        background-color: $backcolor;
+
+        &.router-link-active {
+            border-bottom: 2px solid yellow;
+        }
+    }
+}
+
 .userinfo-container {
     width: 100%;
     transform: translateY(150px);
@@ -255,42 +315,6 @@ onActivated(async () => {
         z-index: 2;
     }
 
-
-    nav {
-        display: flex;
-        // position: sticky;
-        // top: 44px;
-        // left: 0;
-        z-index: 2;
-
-        &.is-stuck {
-            &::after {
-                content: attr(data-name);
-                position: absolute;
-                top: -44px;
-                left: 0;
-                width: 100%;
-                height: 44px;
-                line-height: 44px;
-                text-align: center;
-                color: #fff;
-                background-color: $backcolor;
-            }
-        }
-
-        a {
-            z-index: 2;
-            flex: 1;
-            line-height: 42px;
-            text-align: center;
-            color: #fff;
-            background-color: $backcolor;
-
-            &.router-link-active {
-                border-bottom: 2px solid yellow;
-            }
-        }
-    }
 
     .userinfo {
         z-index: 2;

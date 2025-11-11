@@ -56,7 +56,7 @@ const playVideo = () => {
 
 <template>
     <div class="video-item">
-        <img :src="$imgSrc(Video.userAvatar)" alt="">
+        <img v-lazy="$imgSrc(Video.userAvatar)" alt="">
         <span class="nickname">@{{ Video.userNickname }}</span>
         <p class="desc">{{ Video.videoDesc }}</p>
         <video ref="videoRef" :src="Video.videoPath" :poster="Video.videoCover" @click="playVideo()"

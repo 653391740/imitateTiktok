@@ -23,7 +23,7 @@ const loadmore = async (uid, page) => {
                 $formatTime(item.createdAt) }}</p>
         </template>
         <template #right="{ item }">
-            <img :src="item.videoCover" :alt="item.videoId">
+            <img v-lazy="item.videoCover" :alt="item.videoId">
         </template>
     </MessageNav>
 </template>

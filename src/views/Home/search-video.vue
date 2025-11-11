@@ -61,7 +61,7 @@ const closePopup = (list) => {
                     <div class="desc">{{ item.Video?.videoDesc }}</div>
                     <div class="userAndLike">
                         <div class="user">
-                            <img :src="$imgSrc(item.Video?.userAvatar)">
+                            <img v-lazy="$imgSrc(item.Video?.userAvatar)">
                             <p>{{ item.Video?.userNickname }}</p>
                         </div>
                         <div class="like iconfont icon-aixin1">{{ item.WSLCNum?.likeNum }}</div>

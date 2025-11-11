@@ -19,10 +19,11 @@ const props = defineProps({
     },
     autoPlay: {
         type: Boolean,
-        default: true
+        default: false
     }
 })
 const { item, activeIndex, index, autoPlay } = toRefs(props)
+
 const emit = defineEmits(['ended'])
 
 

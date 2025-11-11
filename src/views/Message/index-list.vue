@@ -63,7 +63,7 @@ const toRouterchat = (item) => {
                 @touchstart="handleTouchStart($event, item.info.userId)"
                 @touchmove.prevent="handleTouchMove($event, item.info.userId)"
                 @touchend="handleTouchEnd($event, item.info.userId)" @click="toRouterchat(item)">
-                <img :src="$imgSrc(item.info.userAvatar)" alt="">
+                <img v-lazy="$imgSrc(item.info.userAvatar)" alt="">
                 <div class="info">
                     <p class="user-name">{{ item.info.userNickname }}</p>
                     <p class="time">{{ $formatTime2(item.info.createdAt) }}</p>
@@ -90,6 +90,7 @@ const toRouterchat = (item) => {
             margin-top: 10px;
             position: relative;
             transition: all 0.3s ease-in-out;
+            min-height: 50px;
 
             &.slide-active {
                 transform: translateX(-80px);
@@ -133,9 +134,10 @@ const toRouterchat = (item) => {
             }
 
             .newMsg {
-                margin-top: 5px;
+                margin: 5px 0 0 60px;
                 color: #8b8c96;
                 font-size: 10px;
+                word-break: break-all;
             }
         }
     }

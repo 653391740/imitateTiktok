@@ -87,7 +87,7 @@ let observer = null
                 <li @click="emit('selected', item)" v-for="item in filterList"
                     :class="{ 'include-search-text': searchText }"
                     v-show="firstName(item.userNickname) === value || (!/^[A-Za-z]$/.test(firstName(item.userNickname)) && value === '#')">
-                    <img :src="$imgSrc(item.userAvatar)">
+                    <img v-lazy="$imgSrc(item.userAvatar)">
                     <div class="contact-info">
                         <div class="nickname">{{ item.userNickname }}</div>
                         <div class="desc">{{ item.userDesc }}</div>

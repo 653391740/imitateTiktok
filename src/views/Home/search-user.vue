@@ -37,7 +37,7 @@ watch(inputvalue, (newValue, oldValue) => {
 <template>
     <Pullupload ref="pulluploadRef" @pullup="loading" :error="error" :hasMore="hasMore" :onMount="true">
         <div v-for="item in list" :key="item.userId" class="item">
-            <img :src="$imgSrc(item.userAvatar)" alt="">
+            <img v-lazy="$imgSrc(item.userAvatar)" alt="">
             <div class="info">
                 <p class="name">{{ item.userNickname }}</p>
                 <p class="desc">{{ item.userDesc }}</p>

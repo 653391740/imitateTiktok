@@ -32,7 +32,7 @@ const navItems = [
 </script>
 <template>
     <router-view v-slot="{ Component }">
-        <keep-alive>
+        <keep-alive exclude="User">
             <component :is="Component" />
         </keep-alive>
     </router-view>

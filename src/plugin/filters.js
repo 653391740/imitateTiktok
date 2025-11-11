@@ -3,13 +3,13 @@
  */
 
 // 格式化时间（yyyy-MM-dd）
-export const formatTime = (value) => {
+const formatTime = (value) => {
   if (!value) return ''
   const date = new Date(value)
   return date.toLocaleDateString().split('/').join('-')
 }
 // 格式化时间（MM-dd HH:mm）
-export const formatTime2 = (value) => {
+const formatTime2 = (value) => {
   if (!value) return ''
   const date = new Date(value)
   const month = date.toLocaleDateString().split('/').slice(1, 3).join('-')
@@ -17,15 +17,19 @@ export const formatTime2 = (value) => {
   return month + ' ' + time
 }
 
-export const imgSrc = (value) => {
+const imgSrc = (value) => {
   if (!value) return ''
   return value.includes('http') ? value : 'http://43.138.15.137:3000' + value
 }
+const install = (app) => {
+  // 全局挂载 $toast 方法
+  app.config.globalProperties.$formatTime = formatTime
+  app.config.globalProperties.$formatTime2 = formatTime2
+  app.config.globalProperties.$imgSrc = imgSrc
 
-
-// 导出所有过滤器
-export default {
-  formatTime,
-  formatTime2,
-  imgSrc,
+  // 提供全局注入
+  app.provide('formatTime', formatTime)
+  app.provide('formatTime2', formatTime2)
+  app.provide('imgSrc', imgSrc)
 }
+export default install

@@ -44,7 +44,7 @@ const handleLikeComment = proxy.$throttle(async () => {
 <template>
     <li>
         <div class="avatar">
-            <img :src="$imgSrc(Comment.userAvatar)">
+            <img v-lazy="$imgSrc(Comment.userAvatar)">
         </div>
         <div class="desc">
             <p>@{{ Comment.userNickname }}</p>

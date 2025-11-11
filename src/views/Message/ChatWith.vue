@@ -81,7 +81,7 @@ const sendComment = async (content) => {
             </div>
             <div class="content" :class="item.fromId === userinfo.userId ? 'right' : 'left'">
                 <div class="msg">{{ item.privateLetterContent }}</div>
-                <img :src="$imgSrc(item.fromId === userinfo.userId ? userinfo.userAvatar : route.query.userAvatar)">
+                <img v-lazy="$imgSrc(item.fromId === userinfo.userId ? userinfo.userAvatar : route.query.userAvatar)">
             </div>
         </li>
     </ul>
@@ -124,6 +124,7 @@ ul {
                 background-color: #fff;
                 color: #000;
                 text-align: left;
+                word-break: break-all;
             }
 
             img {

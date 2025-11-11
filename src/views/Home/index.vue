@@ -21,7 +21,7 @@ watch(() => HomeStore.status, (newV) => {
 
 <template>
     <div class="iconfont icon-sousuo" @click="toSearch"></div>
-    <Video :VideoList="HomeStore.VideoList">
+    <Video :VideoList="HomeStore.VideoList" :autoPlay="true">
         <template></template>
     </Video>
     <Login></Login>

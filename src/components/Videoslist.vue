@@ -99,15 +99,15 @@ const del = async () => {
     <Pullupload class="pulluploadRef" ref="pulluploadRef" @pullup="loadmore" :newDom="newDom" :error="error"
         :hasMore="hasMore">
         <li v-for="item, index in list" :key="item.value.Video?.videoId || index" @click="openPopup(index)">
-            <img :src="item.value.Video?.videoCover || ''">
+            <img v-lazy="item.value.Video?.videoCover || ''">
             <div class="iconfont icon-aixin1">{{ item.value.WSLCNum?.likeNum || 0 }}</div>
             <div class="iconfont icon-lajitong" v-if="props.showDeleteIcon && route.params.id == 'me'"
                 @click.stop="showDelConfirm(item.value)">
             </div>
         </li>
     </Pullupload>
-    <teleport to="body">
-        <popup class="popupRef" position="right" background="#161622" :show="showPopup">
+    <teleport to="#app">
+        <popup position="right" background="#161622" :show="showPopup">
             <div class="close iconfont icon-zuojiantou" @click="closePopup"></div>
             <Video ref="videoRefs" :VideoList="list" :autoPlay="false" @updateactiveIndex="activeIndex = $event">
                 <template #default="{ item }">

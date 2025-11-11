@@ -19,7 +19,7 @@ const props = defineProps({
     },
     autoPlay: {
         type: Boolean,
-        default: true
+        default: false
     }
 })
 

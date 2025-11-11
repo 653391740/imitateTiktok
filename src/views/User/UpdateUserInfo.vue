@@ -199,7 +199,7 @@ const close = () => {
     <Title title="修改个人资料" @back="back" />
     <Dialog :show="showDialog" :options="{ title: '是否保存修改' }" @close="close" @confirm="save" />
     <div class="inputfile">
-        <img :src="croppedCompleted ? croppedCompleted : $imgSrc(userInfo.userAvatar)" alt="">
+        <img v-lazy="croppedCompleted ? croppedCompleted : $imgSrc(userInfo.userAvatar)" alt="">
         <input type="file" ref="fileInput" @change="handleChange" accept="image/*" />
         <div class="desc">点击更换头像</div>
     </div>
@@ -224,7 +224,7 @@ const close = () => {
         </li>
     </ul>
     <div class="cropper" v-show="croppedSrc">
-        <img ref="img" :src="croppedSrc" alt="">
+        <img ref="img" v-lazy="croppedSrc" alt="">
         <div class="can" ref="canvasContainer" @touchstart="handleTouchStart" @touchmove="handleTouchMove">
             <div class="rb" @touchstart="canvasSizeTouchStart" @touchmove="canvasSizeTouchMove"
                 @touchend="isDragging = false"></div>

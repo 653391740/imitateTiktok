@@ -35,7 +35,7 @@ const loadmore = async () => {
     <Title :title="attrs.title" back></Title>
     <Pullupload class="pullup" ref="pulluploadRef" @pullup="loadmore" :error="error" :hasMore="hasMore">
         <li v-for="item, index in List" :key="index">
-            <img :src="$imgSrc(item.userAvatar)">
+            <img v-lazy="$imgSrc(item.userAvatar)">
             <div class="info">
                 <p class="user-name">{{ item.userNickname }}</p>
                 <slot name="left" :item="item"></slot>

@@ -28,7 +28,7 @@ const Routeruser = () => {
     }
 }
 
-const toggleLike = proxy.$throttle(async () => {
+const toggleLike = async () => {
     if (!LoginStore.userinfo.userId) return LoginStore.loginShow = true
     if (!Video.value?.videoId) return
     try {
@@ -43,15 +43,15 @@ const toggleLike = proxy.$throttle(async () => {
         isLiked.value = !isLiked.value
         isLiked.value ? WSLCNum.value.likeNum++ : WSLCNum.value.likeNum--
     }
-})
+}
 
 
 </script>
 
 <template>
     <div class="side">
-        <img @click="Routeruser" :src="proxy.$imgSrc(Video?.userAvatar)" alt="">
-        <span @click="toggleLike" :data-count="WSLCNum?.likeNum" :class="{ 'active': isLiked }"
+        <img @click="Routeruser" v-lazy="$imgSrc(Video?.userAvatar)" alt="">
+        <span v-throttle="toggleLike" :data-count="WSLCNum?.likeNum" :class="{ 'active': isLiked }"
             class="like iconfont icon-aixin"></span>
         <span @click="CommentStore.openCommentPopup(Video?.videoId, WSLCNum?.commentNum)"
             :data-count="WSLCNum?.commentNum" class="iconfont icon-pinglun"></span>

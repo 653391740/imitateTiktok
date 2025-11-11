@@ -4,7 +4,7 @@ import App from './App.vue'
 import router from './router'
 import './styles/global.scss'
 import plugins from '@/plugin/index.js'
-import filters from '@/filters/index.js'
+import filters from '@/plugin/filters.js'
 import SocketIO from './plugin/io.js'
 
 
