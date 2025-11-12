@@ -6,8 +6,10 @@ import { FanUnreadNum, byLikeUnreadNum, byCommentUnreadNum, getAtUnreadNum } fro
 import { Toast } from '@/plugin/Toast/index.js';
 export const searchStore = defineStore('search', () => {
   const inputvalue = ref('')
+  const searchType = ref('video')
   return {
-    inputvalue
+    inputvalue,
+    searchType
   }
 })
 
@@ -230,7 +232,7 @@ export const loginStore = defineStore('login', () => {
         }
         proxy.$toast.show('邮箱或密码错误')
         loginShow.value = true
-        return 
+        return
       }
       proxy.$toast.show('无网络连接，请检查网络后重试')
     }

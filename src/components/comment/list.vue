@@ -21,7 +21,7 @@ watch(() => props.obj, (newObj) => {
     isLiked.value = newObj?.isLiked || false
 }, { deep: true })
 
-const handleLikeComment = proxy.$throttle(async () => {
+const handleLikeComment = async () => {
     if (!LoginStore.userinfo.userId) {
         LoginStore.loginShow = true
         CommentStore.showPopup = false
@@ -39,7 +39,7 @@ const handleLikeComment = proxy.$throttle(async () => {
     } catch (error) {
         console.log(error)
     }
-})
+}
 </script>
 <template>
     <li>
@@ -51,7 +51,7 @@ const handleLikeComment = proxy.$throttle(async () => {
             <p class="comment">{{ Comment.commentContent }}</p>
             <p style="color: #626260;">{{ $formatTime(Comment.createdAt) }}</p>
         </div>
-        <span class="iconfont icon-aixin" :data-content="likeNum" @click="handleLikeComment"
+        <span class="iconfont icon-aixin" :data-content="likeNum" v-throttle="handleLikeComment"
             :class="{ 'active': isLiked }"></span>
     </li>
 </template>

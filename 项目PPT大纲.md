@@ -118,33 +118,12 @@
   - 添加速度计算实现惯性滚动
   - 使用requestAnimationFrame优化动画
 - **效果提升**: 60fps流畅动画，消除闪屏
-- **代码示例**: 
-  ```javascript
-  const updataY = (DifY) => {
-      requestAnimationFrame(() => {
-          if (DifY > 150) bg.value.style.height = `${DifY}px`
-          userinfoContainer.value.style.transform = `translateY(${DifY}px)`
-      })
-  }
-  ```
 
 ### 4.3 Sticky定位滚动问题
 **问题**: 字母索引定位不准确
 - **问题原因**: sticky元素高度未考虑
 - **解决方案**: 动态计算偏移量，减去sticky元素高度
 - **技术要点**: getBoundingClientRect应用
-- **代码示例**:
-  ```javascript
-  const scrollToLetter = (val) => {
-      // ...
-      const titleHeight = target.children[0].offsetHeight
-      const targetTop = target.getBoundingClientRect().top
-      const containerTop = container.getBoundingClientRect().top
-      const offsetTop = targetTop - containerTop + container.scrollTop - titleHeight
-      container.scrollTo({ top: offsetTop, behavior: 'smooth' })
-      // ...
-  }
-  ```
 
 ### 4.4 Transform导致的固定定位层级问题 (问题 #003)
 **问题**: Transform创建新的层叠上下文，影响固定定位
@@ -159,14 +138,6 @@
   - 使用Vue 3 Teleport特性将弹窗提升到根节点
   - 调整z-index层级关系
 - **层级设计**: 评论弹窗(z-index: 10) > 视频弹窗(z-index: 9)
-- **代码示例**:
-  ```vue
-  <teleport to="#app">
-      <popup position="right" background="#161622" :show="showPopup">
-          <!-- 弹窗内容 -->
-      </popup>
-  </teleport>
-  ```
 
 ### 4.5 Transform导致的CSS粘性定位(sticky)失效问题 (问题 #004)
 **问题**: Transform父元素导致子元素sticky定位失效
@@ -184,21 +155,6 @@
 - **性能优化**: 
   - 使用requestAnimationFrame优化动画
   - 添加位置变化检测避免无限循环
-- **代码示例**:
-  ```javascript
-  const checkNavPosition = () => {
-      const { top } = nav.value.getBoundingClientRect()
-      isStuck.value = top < 44
-
-      // 优化性能，避免无限循环
-      if (Math.abs(lastPosition - top) < 0.1) {
-          checkCount++
-          if (checkCount >= 4) return
-      }
-      lastPosition = top
-      requestAnimationFrame(checkNavPosition)
-  }
-  ```
 
 ### 4.6 性能优化策略
 - **图片懒加载**: 提升首屏加载速度
@@ -232,39 +188,13 @@
 - **功能完善**: 短视频平台核心功能
 - **性能稳定**: 流畅的使用体验
 
-## 6. 未来规划 (2-3页)
+## 6. 总结 (1-2页)
 
-### 6.1 技术扩展
-- **视频处理**: 上传、压缩、格式转换
-- **实时通信**: WebRTC视频通话功能
-- **智能推荐**: 基于用户行为的内容推荐算法
-- **数据分析**: 用户交互数据收集与分析
-
-### 6.2 技术升级
-- **后端服务**: Node.js/Python后端
-- **数据库**: MongoDB/PostgreSQL
-- **CDN优化**: 静态资源加速
-- **微服务**: 服务架构拆分
-
-### 6.3 性能优化
-- **服务器端渲染**: SSR提升SEO
-- **预加载策略**: 进一步优化体验
-- **缓存策略**: 智能缓存机制
-- **监控告警**: 性能监控体系
-
-## 7. 总结 (1-2页)
-
-### 7.1 项目总结
+### 6.1 项目总结
 - **技术收获**: Vue3生态系统深度应用
 - **架构经验**: 现代化前端项目架构
 - **性能优化**: 移动端性能优化实践
 - **用户体验**: 短视频产品用户体验设计
-- **问题解决**: Transform相关技术问题的深度探索与解决
-
-### 7.2 致谢
-- **团队协作**: 开发团队的努力
-- **技术社区**: 开源项目的支持
-- **用户反馈**: 用户体验的持续改进
 
 ---
 
@@ -275,16 +205,4 @@
 2. **字体选择**: 现代化无衬线字体
 3. **图表使用**: 技术架构图、流程图
 4. **动效设计**: 适当的页面切换动画
-5. **代码展示**: 关键代码片段高亮
-
-### 演讲要点
-1. **开场吸引**: 用项目亮点开场
-2. **技术深度**: 突出技术难点解决，特别是Transform相关问题
-3. **成果展示**: 量化项目成果
-4. **未来规划**: 展现项目潜力
-5. **互动问答**: 准备技术问题回答
-
-### 演示时长
-- **总时长**: 20-25分钟
-- **每个章节**: 3-5分钟
-- **问答环节**: 5-10分钟
+5. **代码展示**: 图片展示留白即可

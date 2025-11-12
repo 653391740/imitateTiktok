@@ -1,16 +1,17 @@
 <script setup>
 import { ref, defineEmits, defineExpose, nextTick, computed, onActivated, defineProps, watch, getCurrentInstance } from 'vue';
-import { homeStore } from '@/stores/counter'
+import { homeStore, commentStore } from '@/stores/counter'
 import { useRoute } from 'vue-router'
 import Videoitem from '@/components/video/video.vue'
 import Side from '@/components/video/side-desc.vue'
+import Send from '@/components/send.vue';
 
 const { proxy } = getCurrentInstance()
 const route = useRoute()
 const activeIndex = ref(0); // 当前播放视频索引
 const swiper = ref(null)
 const video = ref(null)
-
+const CommentStore = commentStore()
 const emits = defineEmits(['pullup', 'updateactiveIndex'])
 const props = defineProps({
     VideoList: {
@@ -74,7 +75,9 @@ defineExpose({
                 <Videoitem ref="video" :item="item" :activeIndex="activeIndex" :index="index" :autoPlay="props.autoPlay"
                     @ended="handleVideoEnd(index)" />
                 <Side :item="item"></Side>
-                <slot :item="item"></slot>
+                <Send v-if="route.path !== '/home'"
+                    @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
+                </Send>
             </div>
         </swipper>
     </Pullupload>

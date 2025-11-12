@@ -1,8 +1,8 @@
 <script setup>
-import { ref, watch, toRefs, inject } from 'vue'
+import { ref, watch, toRefs, nextTick } from 'vue'
 import { searchUser } from '@/api/video'
 import { loginStore, searchStore } from '@/stores/counter'
-const { inputvalue } = toRefs(searchStore())
+const { inputvalue, searchType } = toRefs(searchStore())
 const { userinfo } = loginStore()
 import Followbtn from '@/components/Followbtn.vue'
 
@@ -12,13 +12,10 @@ const hasMore = ref(true)
 const page = ref(1)
 const loading = async () => {
     try {
+        if (page.value === 1 && list.value.length > 0) list.value = []
         const res = await searchUser(userinfo.userId, page.value, { key: inputvalue.value })
         if (res.length === 0) return hasMore.value = false
-        if (page.value === 1 && list.value.length > 0) {
-            list.value = res
-        } else {
-            list.value.push(...res)
-        }
+        nextTick(() => { list.value.push(...res) })
         page.value++
     } catch (err) {
         console.log(err);
@@ -26,12 +23,12 @@ const loading = async () => {
     }
 }
 watch(inputvalue, (newValue, oldValue) => {
-    if (newValue !== oldValue) {
+    if (newValue !== oldValue && searchType.value === 'user') {
         page.value = 1
         hasMore.value = true
         loading()
     }
-}, { flush: 'post', immediate: true })
+}, { flush: 'post' })
 </script>
 
 <template>

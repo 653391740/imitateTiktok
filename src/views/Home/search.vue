@@ -5,14 +5,9 @@ import { searchStore } from '@/stores/counter'
 import searchUser from './search-user.vue'
 import searchVideo from './search-video.vue'
 
-const { inputvalue } = toRefs(searchStore())
+const SearchStore = searchStore()
 const router = useRouter()
 const route = useRoute()
-const searchType = ref('video')
-
-watch(() => searchType.value, (newPath, oldPath) => {
-    
-})
 
 </script>
 
@@ -21,17 +16,17 @@ watch(() => searchType.value, (newPath, oldPath) => {
         <a @click="router.back()" class="iconfont icon-zuojiantou"></a>
         <div class="input">
             <span class="iconfont icon-sousuo"></span>
-            <input type="text" v-model="inputvalue"
+            <input type="text" v-model="SearchStore.inputvalue"
                 :placeholder="`输入关键字进行搜索${route.path === 'search/video' ? '(视频描述)' : '(昵称、id)'}`">
         </div>
     </div>
     <div class="tab">
-        <a @touchstart="searchType = 'video'" :class="{ 'active': searchType === 'video' }">视频</a>
-        <a @touchstart="searchType = 'user'" :class="{ 'active': searchType === 'user' }">用户</a>
+        <a @touchstart="SearchStore.searchType = 'video'" :class="{ 'active': SearchStore.searchType === 'video' }">视频</a>
+        <a @touchstart="SearchStore.searchType = 'user'" :class="{ 'active': SearchStore.searchType === 'user' }">用户</a>
     </div>
     <div class="content">
-        <searchVideo v-show="searchType === 'video'"></searchVideo>
-        <searchUser v-show="searchType === 'user'"></searchUser>
+        <searchVideo v-show="SearchStore.searchType === 'video'"></searchVideo>
+        <searchUser v-show="SearchStore.searchType === 'user'"></searchUser>
     </div>
 </template>
 

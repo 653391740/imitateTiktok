@@ -1,14 +1,6 @@
 <script setup>
 import { defineProps } from 'vue';
 const props = defineProps({
-    message: {
-        type: String,
-        default: ''
-    },
-    backType: {
-        type: Boolean,
-        default: true // true是x  false是<
-    },
     height: {
         type: String,
         default: '100%'
@@ -29,44 +21,73 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="popup" :class="{ 'show': props.show }" :style="{
-        height: props.height,
-        background: props.background
-    }" :data-position="props.position">
-        <slot></slot>
-    </div>
+    <transition name="fade">
+        <div class="popup" v-if="props.show" :style="{
+            height: props.height,
+            background: props.background
+        }" :data-position="props.position">
+            <slot></slot>
+        </div>
+    </transition>
 </template>
 
 <style lang="scss" scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: all 0.5s;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+    opacity: 1;
+    transform: translate(0);
+}
+
+.fade-enter-from[data-position="right"],
+.fade-leave-to[data-position="right"] {
+    transform: translate(100%, 0);
+}
+
+.fade-enter-from[data-position="left"],
+.fade-leave-to[data-position="left"] {
+    transform: translate(-100%, 0);
+}
+
+.fade-enter-from[data-position="top"],
+.fade-leave-to[data-position="top"] {
+    transform: translate(0, -100%);
+}
+
+.fade-enter-from[data-position="bottom"],
+.fade-leave-to[data-position="bottom"] {
+    transform: translate(0, 100%);
+}
+
 .popup {
     position: fixed;
     width: 100%;
-    transition: all 0.5s;
-    opacity: 0;
+    top: 0;
+    left: 0;
     z-index: 9;
 
-    &.show {
-        opacity: 1;
-        left: 0 !important;
-        top: 0 !important;
-        bottom: 0 !important;
-        right: 0 !important;
-    }
+    .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        border-radius: 50%;
+        font-size: 20px;
+        color: #fff;
+        background: #ccc;
+        cursor: pointer;
+        z-index: 10;
 
-    &[data-position="right"] {
-        left: 100%;
-    }
-
-    &[data-position="left"] {
-        left: -100%;
-    }
-
-    &[data-position="top"] {
-        top: -100%;
-    }
-
-    &[data-position="bottom"] {
-        top: 100%;
+        &.back {
+            font-size: 16px;
+        }
     }
 }
 </style>

@@ -10,7 +10,7 @@ const router = useRouter()
 const route = useRoute()
 const { userinfo, logout } = loginStore()
 
-const userInfo = ref({ ...userinfo })
+const userInfo = ref({})
 const Followersnum = ref(0)
 const Fansnum = ref(0)
 const Likesnum = ref(0)
@@ -115,9 +115,11 @@ removeAfter = router.afterEach((e) => {
     updataY(moveY.value)
 })
 onMounted(async () => {
-    userInfo.value = userinfo
+    // userInfo.value = userinfo
     const id = route.params.id === 'me' ? userinfo.userId : route.params.id
-    if (id !== userinfo.userId) userInfo.value = await getUserInfo(id, userinfo.userId)
+    nextTick(async() => {
+        id !== userinfo.userId ? userInfo.value = await getUserInfo(id, userinfo.userId) : userInfo.value = userinfo
+    })
 
     Followersnum.value = await FollowersNum(id)
     Fansnum.value = await FansNum(id)
@@ -165,7 +167,7 @@ onUnmounted(() => {
             <Followbtn v-if="route.params.id !== 'me'" class="Followbtn" :item="userInfo" :myUserId="userinfo.userId">
             </Followbtn>
             <div class="avatar">
-                <img v-lazy="$imgSrc(userInfo.userAvatar)">
+                <img :src="$imgSrc(userInfo?.userAvatar)">
             </div>
             <div class="info">
                 <div class="name">{{ userInfo.userNickname }}</div>

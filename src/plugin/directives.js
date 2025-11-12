@@ -1,22 +1,19 @@
 // 自定义指令集合
 import { nextTick } from 'vue'
-
+import slotdefaultsrc from '@/assets/slotdefault.svg'
+import defaultsrc from '@/assets/default.png'
 /**
  * 图片懒加载指令
  * 使用方法: <img v-lazy="src" />
  */
 const lazy = {
   mounted(el, binding) {
-    // 初始化时设置占位图
-    el.src = '/src/assets/placeholder.svg' // 确保项目中存在这个占位图
-
-    // 创建IntersectionObserver实例
+    const { src, slot = slotdefaultsrc, error = defaultsrc } = binding.value || {}
+    el.src = slot
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        // 当图片进入视口时
         if (entry.isIntersecting) {
-          // 加载真实图片
-          el.src = binding.value
+          el.src = binding.value || src
 
           // 图片加载完成后取消观察
           el.onload = () => {
@@ -25,7 +22,7 @@ const lazy = {
 
           // 图片加载失败处理
           el.onerror = () => {
-            el.src = '/src/assets/default.png' // 确保项目中存在这个错误占位图
+            el.src = error
             observer.unobserve(el)
           }
         }
@@ -42,6 +39,11 @@ const lazy = {
     el._lazyObserver = observer
   },
 
+  updated(el, binding) {
+    if (binding.value !== binding.oldValue) {
+      el.src = binding.value
+    }
+  },
   // 元素卸载时取消观察，避免内存泄漏
   unmounted(el) {
     if (el._lazyObserver) {

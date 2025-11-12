@@ -1,12 +1,12 @@
 <script setup>
-import { ref, nextTick, toRefs } from 'vue'
+import { ref, nextTick, toRefs, watch } from 'vue'
 import { searchVideo } from '@/api/video'
 import { commentStore, loginStore, searchStore } from '@/stores/counter'
 import Video from '@/components/video/index.vue';
 import Send from '@/components/send.vue';
 const CommentStore = commentStore()
 const LoginStore = loginStore()
-const { inputvalue } = toRefs(searchStore())
+const { inputvalue, searchType } = toRefs(searchStore())
 
 const list = ref([])
 const error = ref(false)
@@ -14,13 +14,10 @@ const hasMore = ref(true)
 const page = ref(1)
 const loading = async () => {
     try {
+        if (page.value === 1 && list.value.length > 0) list.value = []
         const res = await searchVideo(LoginStore.userinfo.userId, page.value, { key: inputvalue.value })
         if (res.length === 0) return hasMore.value = false
-        if (page.value === 1 && list.value.length > 0) {
-            list.value = res
-        } else {
-            list.value.push(...res)
-        }
+        nextTick(() => { list.value.push(...res) })
         page.value++
     } catch (err) {
         console.log(err);
@@ -49,6 +46,13 @@ const closePopup = (list) => {
         videoRef.value.toIndex(activeIndex.value, false)
     }
 }
+watch(inputvalue, (newValue, oldValue) => {
+    if (newValue !== oldValue && searchType.value === 'video') {
+        page.value = 1
+        hasMore.value = true
+        loading()
+    }
+}, { flush: 'post' })
 </script>
 
 <template>

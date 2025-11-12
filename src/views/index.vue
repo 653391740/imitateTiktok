@@ -1,11 +1,11 @@
 <script setup>
-import { onUpdated, ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { chatStore } from '@/stores/counter'
 const ChatStore = chatStore()
 const route = useRoute();
 const isUserPage = computed(() => {
-    return route.path.includes('/user') && route.params.id && route.params.id !== 'me';
+    return (route.path.includes('/user') && route.params.id && route.params.id !== 'me') || route.path.includes('/search');
 })
 const navItems = [
     {
