@@ -1,8 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { getFans, readAllFanMsg } from '@/api/Chat'
-import { loginStore } from '@/stores/counter'
-import { chatStore } from '@/stores/counter'
+import { loginStore, chatStore } from '@/stores/counter'
 import MessageNav from '@/components/messageNav.vue'
 import Followbtn from '@/components/Followbtn.vue'
 const ChatStore = chatStore()
@@ -11,9 +10,8 @@ onMounted(async () => {
     ChatStore.FanUnreadNumRes = 0
 })
 const LoginStore = loginStore()
-const loadmore = async (id, page) => {
-    await getFans(id, page)
-    return await getFans(id, page)
+const loadmore = async (id, page, toid) => {
+    return await getFans(id, page, toid)
 }
 </script>
 <template>

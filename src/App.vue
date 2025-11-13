@@ -1,6 +1,6 @@
 <script setup>
-import CommentPopup from '@/components/comment/commentPopup.vue'
-import { getCurrentInstance, inject } from 'vue'
+import CommentPopup from '@/views/comment/commentPopup.vue'
+import { getCurrentInstance } from 'vue'
 import { loginStore } from '@/stores/counter'
 const { proxy } = getCurrentInstance()
 const LoginStore = loginStore()

@@ -12,8 +12,8 @@ export const sendPrivateLetter = (userId, formId, data) => {
     return http.post(`/user/${userId}/privateLetter/${formId}`, data)
 }
 
-export const getFans = (userId, page) => {
-    return http.get(`/user/${userId}/Fans/page/${page}/${userId}`)
+export const getFans = (userId, page, toUserId) => {
+    return http.get(`/user/${userId}/Fans/page/${page}/${toUserId}`)
 }
 
 export const triggerFollow = (userId, followUserId) => {
@@ -23,8 +23,8 @@ export const triggerFollow = (userId, followUserId) => {
 export const byLike = (userId, page) => {
     return http.get(`/user/${userId}/byLike/page/${page}`)
 }
-export const Followers = (userId, page) => {
-    return http.get(`/user/${userId}/Followers/page/${page}/${userId}`)
+export const Followers = (userId, page, toUserId) => {
+    return http.get(`/user/${userId}/Followers/page/${page}/${toUserId}`)
 }
 
 export const getAt = (userId, page) => {

@@ -2,11 +2,10 @@
 import MessageNav from '@/components/messageNav.vue'
 import Followbtn from '@/components/Followbtn.vue'
 import { Followers } from '@/api/Chat'
-import { chatStore, loginStore } from '@/stores/counter'
-const ChatStore = chatStore()
+import { loginStore } from '@/stores/counter'
 const LoginStore = loginStore()
-const loadmore = async (uid, page) => {
-    return await Followers(uid, page)
+const loadmore = async (uid, page, toid) => {
+    return await Followers(uid, page, toid)
 }
 
 </script>
@@ -16,7 +15,8 @@ const loadmore = async (uid, page) => {
             <p>{{ item?.userDesc }}</p>
         </template>
         <template #right="{ item }">
-            <Followbtn defaultmyRelation="follow" :item="item" :myUserId="LoginStore.userinfo.userId" :qf="true"></Followbtn>
+            <Followbtn defaultmyRelation="follow" :item="item" :myUserId="LoginStore.userinfo.userId" :qf="true">
+            </Followbtn>
         </template>
     </MessageNav>
 </template>

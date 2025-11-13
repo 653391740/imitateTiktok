@@ -1,13 +1,11 @@
 <script setup>
-import { onMounted } from 'vue'
 import { getFans } from '@/api/Chat'
+import { loginStore } from '@/stores/counter'
 import MessageNav from '@/components/messageNav.vue'
-import { chatStore, loginStore } from '@/stores/counter'
-const ChatStore = chatStore()
-const LoginStore = loginStore()
-
-const loadmore = async (uid, page) => {
-    return await getFans(uid, page)
+import Followbtn from '@/components/Followbtn.vue'
+const store = loginStore()
+const loadmore = async (uid, page, toid) => {
+    return await getFans(uid, page, toid)
 }
 
 </script>
@@ -19,8 +17,7 @@ const loadmore = async (uid, page) => {
             <p class="time">{{ $formatTime(item.createdAt) }}</p>
         </template>
         <template #right="{ item }">
-            <img v-lazy="item?.videoCover" v-if="item?.videoCover">
-            <p v-else>{{ item?.commentContent }}</p>
+            <Followbtn defaultmyRelation="fan" :item="item" :myUserId="store.userinfo.userId"></Followbtn>
         </template>
     </MessageNav>
 </template>
@@ -28,6 +25,7 @@ const loadmore = async (uid, page) => {
 <style lang="scss" scoped>
 @include time;
 @include newdot;
+
 img {
     width: 60px;
     height: 60px;

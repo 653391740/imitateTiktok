@@ -5,7 +5,9 @@ import { chatStore } from '@/stores/counter'
 const ChatStore = chatStore()
 const route = useRoute();
 const isUserPage = computed(() => {
-    return ['InterestList', 'FanList'].includes(route.name) || (route.name === 'User' && route.params?.id !== 'me') || route.path.includes('/search');
+    return ['InterestList', 'FanList'].includes(route.name)
+        || (route.path.includes('/user') && route.params?.id !== 'me')
+        || route.path.includes('/search');
 })
 const navItems = [
     {

@@ -1,8 +1,10 @@
 <script setup>
-import { ref, useAttrs } from 'vue'
+import { ref, useAttrs, computed } from 'vue'
 import { loginStore } from '@/stores/counter'
 import Title from '@/components/title.vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const { userinfo } = loginStore()
 const attrs = useAttrs()
 const pulluploadRef = ref(null)
@@ -11,11 +13,15 @@ const hasMore = ref(true)
 const page = ref(1)
 const List = ref([])
 const stop = ref(false)
+const toUid = computed(() => {
+    if (route.params.id === undefined) return userinfo.userId
+    return route.params.id == 'me' ? userinfo.userId : route.params.id
+})
 
 const loadmore = async () => {
     if (stop.value) return
     try {
-        const data = await attrs.onLoadmore(userinfo.userId, page.value)
+        const data = await attrs.onLoadmore(userinfo.userId, page.value, toUid.value)
         if (JSON.stringify(List.value) === JSON.stringify(data)) {
             stop.value = true
             hasMore.value = false
@@ -57,6 +63,7 @@ const loadmore = async () => {
 .pullup {
     height: calc(100% - 45px);
 }
+
 .noList {
     margin: 120px auto 0;
 

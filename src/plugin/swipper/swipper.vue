@@ -107,6 +107,7 @@ const scrollToIndex = () => {
 
         &>* {
             flex: 0 0 100%;
+            overflow: hidden;
             position: relative;
             scroll-snap-align: start;
             scroll-snap-stop: always;
