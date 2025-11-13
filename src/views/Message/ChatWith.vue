@@ -60,8 +60,8 @@ const sendComment = async (content) => {
             userAvatar: userinfo.userAvatar,
             userNickname: userinfo.userNickname
         }
-        socket.emit('sendPrivateLetter', obj);
-        letterList.value.push({ ...item, isRead: 0 })
+        proxy.$socket.emit('sendPrivateLetter', obj);
+        letterList.value.push(item)
         const createdAt = new Date().getTime()
         ChatStore.addChat({
             ...route.query,
