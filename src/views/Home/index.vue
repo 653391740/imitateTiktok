@@ -1,29 +1,46 @@
 <script setup>
-import { watch, inject } from 'vue'
 import Video from '@/components/video/index.vue';
 import Login from '@/views/Login/login.vue';
 import Register from '@/views/Login/register.vue';
 import FindPassword from '@/views/Login/findPassword.vue';
-import { homeStore } from '@/stores/counter'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-const HomeStore = homeStore()
+import { loginStore } from '@/stores/counter'
+import { getPopularVideo, isLiked } from '@/api/video'
+
 const router = useRouter()
-const toast = inject('toast')
+const VideoList = ref([])
+const ListoginStore = loginStore()
+const toSearch = () => { router.push({ path: '/search' }) }
 
-const toSearch = () => {
-    router.push({ path: '/search' })
+const getVideoList = async () => {
+    try { // 获取首页视频内容
+        const res = await getPopularVideo();
+        const data = res.map(e => JSON.parse(e))
+        VideoList.value.push(...data)
+        if (!ListoginStore.userinfo.userId) {
+            data.forEach(e => e.isLiked = false)
+        } else {
+            VideoList.value.map(async e => {
+                if (!e.Video) return e
+                try {
+                    const likedRes = await isLiked(ListoginStore.userinfo.userId, e.Video.videoId)
+                    e.isLiked = likedRes
+                } catch (error) {
+                    e.isLiked = false;
+                }
+                return e
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
 }
-
-watch(() => HomeStore.status, (newV) => {
-    if (newV === 500) toast.show('无网络连接')
-})
 </script>
 
 <template>
     <div class="iconfont icon-sousuo" @click="toSearch"></div>
-    <Video :VideoList="HomeStore.VideoList" :autoPlay="true">
-        <template></template>
-    </Video>
+    <Video @pullup="getVideoList" :VideoList="VideoList" :autoPlay="true" />
     <Login></Login>
     <Register></Register>
     <FindPassword></FindPassword>

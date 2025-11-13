@@ -16,7 +16,6 @@ const Fansnum = ref(0)
 const Likesnum = ref(0)
 const byLikesnum = ref(0)
 const Videosnum = ref(0)
-
 const showMenu = ref(false)
 const showDialog = ref(false)
 
@@ -36,9 +35,52 @@ const Time = ref(0) // 时间
 const isStuck = ref(false)
 const updataY = (DifY) => {
     requestAnimationFrame(() => {
-        if (DifY > 150) bg.value.style.height = `${DifY}px`
+        if (DifY > 149) bg.value.style.height = `${DifY}px`
         userinfoContainer.value.style.transform = `translateY(${DifY}px)`
     })
+}
+const maxtransform = () => {
+    const { height } = userinfoContainer.value.getBoundingClientRect()
+    const max = height - window.innerHeight
+    return -max
+}
+const tstart = (e) => {
+    down.value = true
+    StartY.value = e.touches[0].pageY
+    userinfoContainer.value.addEventListener('touchmove', tmove, { passive: true })
+    moveY.value = parseFloat(window.getComputedStyle(userinfoContainer.value).transform.split(',')[5])
+    updataY(moveY.value)
+}
+
+const tmove = (e) => {
+    const max = maxtransform()
+    isStuck.value = nav.value.getBoundingClientRect().top < 44
+    const currentPageY = e.touches[0].pageY
+    const time = Date.now()
+    const isY = userinfoContainer.value.getBoundingClientRect().height + 150 - window.innerHeight > 0
+    const movey = isY ? Math.max(moveY.value + currentPageY - StartY.value, max) : 150
+    speed.value = (movey - DifY.value) / (time - Time.value)
+
+    updataY(movey)
+    DifY.value = movey
+    Time.value = time
+    if (DifY.value > 350) tend()
+}
+
+const tend = (e) => {
+    down.value = false
+    if (DifY.value > 150) {
+        updataY(150)
+        userinfoContainer.value.removeEventListener('touchmove', tmove)
+        return
+    }
+    const max = maxtransform()
+    const offsetY = speed.value * 500
+    const Finalposition = Math.min((Math.max(offsetY + DifY.value, max)), 150)
+    updataY(Finalposition)
+    stickyState()
+}
+const stickyState = () => {
     let checkCount = 0
     let lastPosition = null
     const checkNavPosition = () => {
@@ -53,53 +95,7 @@ const updataY = (DifY) => {
     }
     requestAnimationFrame(checkNavPosition)
 }
-const maxtransform = () => {
-    const { height } = userinfoContainer.value.getBoundingClientRect()
-    const max = height - window.innerHeight
-    return max > 0 ? -max : max
-}
-const tstart = (e) => {
-    down.value = true
-    StartY.value = e.touches[0].pageY
-    userinfoContainer.value.addEventListener('touchmove', tmove, { passive: false })
-    moveY.value = parseFloat(window.getComputedStyle(userinfoContainer.value).transform.split(',')[5])
-    updataY(moveY.value)
-}
-
-const tmove = (e) => {
-    const currentPageY = e.touches[0].pageY
-    const max = maxtransform()
-    isStuck.value = nav.value.getBoundingClientRect().top < 44
-
-    const time = Date.now()
-    const movey = userinfoContainer.value.getBoundingClientRect().height - window.innerHeight > 0 ? Math.max(moveY.value + currentPageY - StartY.value, max) : 150
-    speed.value = (movey - DifY.value) / (time - Time.value)
-
-    updataY(movey)
-    DifY.value = movey
-    Time.value = time
-    if (DifY.value > 350) tend()
-}
-
-const tend = (e) => {
-    down.value = false
-    moveY.value = DifY.value
-    const offsetY = speed.value * 500
-    const max = maxtransform()
-    const Finalposition = Math.min((Math.max(offsetY + DifY.value, max)), 150)
-    updataY(Finalposition)
-    if (moveY.value > 150) {
-        moveY.value = 150
-        requestAnimationFrame(() => {
-            userinfoContainer.value.style.transform = `translateY(150px)`
-            bg.value.style.height = `150px`
-        })
-        userinfoContainer.value.removeEventListener('touchmove', tmove)
-    }
-}
-const toUpdateUserInfo = () => {
-    router.push({ name: 'UpdateUserInfo' })
-}
+const toUpdateUserInfo = () => { router.push({ name: 'UpdateUserInfo' }) }
 
 const Logout = () => {
     logout()
@@ -115,12 +111,8 @@ removeAfter = router.afterEach((e) => {
     updataY(moveY.value)
 })
 onMounted(async () => {
-    // userInfo.value = userinfo
     const id = route.params.id === 'me' ? userinfo.userId : route.params.id
-    nextTick(async() => {
-        id !== userinfo.userId ? userInfo.value = await getUserInfo(id, userinfo.userId) : userInfo.value = userinfo
-    })
-
+    nextTick(async () => id !== userinfo.userId ? userInfo.value = await getUserInfo(id, userinfo.userId) : userInfo.value = userinfo)
     Followersnum.value = await FollowersNum(id)
     Fansnum.value = await FansNum(id)
     Likesnum.value = await LikesNum(id)
@@ -147,8 +139,8 @@ onUnmounted(() => {
     <div class="l iconfont icon-zuojiantou" v-else @click="router.go(-count)"></div>
     <teleport to="#app">
         <transition name="stuck">
-            <div class="abs-nav" v-if="isStuck">
-                <p> {{ userInfo.userNickname }} </p>
+            <div class="abs-nav" v-if="isStuck" @click="stickyState">
+                <p> {{ userInfo.userNickname }}</p>
                 <nav>
                     <router-link :to="`/user/${route.params.id}/videos`">作品{{ Videosnum }}</router-link>
                     <router-link :to="`/user/${route.params.id}/videoAndDesc`">动态{{ Videosnum }}</router-link>
@@ -158,8 +150,8 @@ onUnmounted(() => {
         </transition>
     </teleport>
 
-    <img src="/src/assets/bg.jpg"
-        :style="{ 'transition': down ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)' }" class="bg" ref="bg">
+    <img :style="{ 'transition': down ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)' }"
+        src="/src/assets/bg.jpg" class="bg" ref="bg">
     <div class="userinfo-container" ref="userinfoContainer"
         :style="{ 'transition': down ? 'none' : 'all .7s cubic-bezier(0.165, 0.84, 0.44, 1)' }"
         :class="{ 'pb': route.params.id === 'me' }">
@@ -182,11 +174,17 @@ onUnmounted(() => {
                         <p>{{ byLikesnum }}</p>
                         <span>获赞</span>
                     </div>
-                    <div>
+                    <div @click="router.push({
+                        name: 'InterestList',
+                        params: { id: route.params.id },
+                    })">
                         <p>{{ Followersnum }}</p>
                         <span>关注</span>
                     </div>
-                    <div>
+                    <div @click="router.push({
+                        name: 'FanList',
+                        params: { id: route.params.id },
+                    })">
                         <p>{{ Fansnum }}</p>
                         <span>粉丝</span>
                     </div>

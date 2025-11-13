@@ -1,11 +1,14 @@
 <script setup>
+import { onActivated } from 'vue'
 import Title from '@/components/title.vue'
 import Content from '@/views/Message/index-list.vue'
 import { useRouter } from 'vue-router'
 import { chatStore } from '@/stores/counter'
 const ChatStore = chatStore()
 const router = useRouter()
-
+onActivated(() => {
+    ChatStore.clearAllnewMsg()
+})
 </script>
 <template>
     <div class="message">
@@ -15,22 +18,22 @@ const router = useRouter()
                 <li @click="router.push('/fan')">
                     <div style="background-color: #4f88fb;" class="iconfont icon-fensishu"></div>
                     <p>粉丝</p>
-                    <p class="count" v-if="ChatStore.FanUnreadNumRes">{{ChatStore.FanUnreadNumRes }}</p>
+                    <p class="count" v-if="ChatStore.FanUnreadNumRes">{{ ChatStore.FanUnreadNumRes }}</p>
                 </li>
                 <li @click="router.push('/like')">
                     <div style="background-color: #f8355f;" class="iconfont icon-aixin1"></div>
                     <p>赞</p>
-                    <p class="count" v-if="ChatStore.byLikeUnreadNumRes">{{ChatStore.byLikeUnreadNumRes }}</p>    
+                    <p class="count" v-if="ChatStore.byLikeUnreadNumRes">{{ ChatStore.byLikeUnreadNumRes }}</p>
                 </li>
                 <li @click="router.push('/at')">
                     <div style="background-color: #1cc262;">@</div>
                     <p>@我的</p>
-                    <p class="count" v-if="ChatStore.getAtUnreadNumRes">{{ChatStore.getAtUnreadNumRes }}</p>
+                    <p class="count" v-if="ChatStore.getAtUnreadNumRes">{{ ChatStore.getAtUnreadNumRes }}</p>
                 </li>
                 <li @click="router.push('/comment')">
                     <div style="background-color: #a753ec;" class="iconfont icon-pinglun"></div>
                     <p>评论</p>
-                    <p class="count" v-if="ChatStore.byCommentUnreadNumRes">{{ChatStore.byCommentUnreadNumRes }}</p>
+                    <p class="count" v-if="ChatStore.byCommentUnreadNumRes">{{ ChatStore.byCommentUnreadNumRes }}</p>
                 </li>
             </ul>
         </nav>
@@ -68,6 +71,7 @@ const router = useRouter()
                     font-size: 12px;
                     margin-top: 5px;
                 }
+
                 .count {
                     position: absolute;
                     top: -10px;

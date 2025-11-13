@@ -32,6 +32,16 @@ const router = createRouter({
           component: () => import('@/views/Message/index.vue')
         },
         {
+          path: '/InterestList/:id?',
+          name: 'InterestList',
+          component: () => import('@/views/InterestList.vue'),
+        },
+        {
+          path: '/FanList/:id?',
+          name: 'FanList',
+          component: () => import('@/views/FanList.vue'),
+        },
+        {
           path: '/user/:id?',
           name: 'user',
           redirect: from => {

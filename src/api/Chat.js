@@ -23,6 +23,9 @@ export const triggerFollow = (userId, followUserId) => {
 export const byLike = (userId, page) => {
     return http.get(`/user/${userId}/byLike/page/${page}`)
 }
+export const Followers = (userId, page) => {
+    return http.get(`/user/${userId}/Followers/page/${page}/${userId}`)
+}
 
 export const getAt = (userId, page) => {
     return http.get(`/user/${userId}/getAt/page/${page}`)

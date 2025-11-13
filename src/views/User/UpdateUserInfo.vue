@@ -1,5 +1,6 @@
 <script setup>
 import Title from '@/components/title.vue'
+import Address from './Address.vue'
 import { loginStore } from '@/stores/counter'
 import { ref, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
@@ -120,6 +121,7 @@ const canvasSizeTouchMove = (e) => {
 
 // 创建新的img对象在原像素上进行裁切进行保存
 const saveCrop = () => {
+
     if (!img.value) return
     const { height, width, top, left } = img.value.getBoundingClientRect()
     const { top: canvasTopSize, left: canvasLeftSize, width: canvasSize } = canvasContainer.value.getBoundingClientRect()
@@ -193,6 +195,8 @@ const close = () => {
     showDialog.value = false
     router.back()
 }
+
+const showUserAddress = ref(false)
 </script>
 
 <template>
@@ -220,7 +224,8 @@ const close = () => {
             <p>年龄</p> <input type="text" v-model="userInfo.userAge">
         </li>
         <li>
-            <p>地址</p> <input type="text" v-model="userInfo.userAddress">
+            <p>地址</p>
+            <p @click="showUserAddress = true">{{ userInfo.userAddress }}</p>
         </li>
     </ul>
     <div class="cropper" v-show="croppedSrc">
@@ -231,6 +236,10 @@ const close = () => {
         </div>
         <button class="save-btn" @click="saveCrop">保存</button>
     </div>
+    <popup style="z-index: 20;" @click="showUserAddress = false" position="bottom" background="transparent"
+        :show="showUserAddress">
+        <Address @click.stop v-model:show="showUserAddress" @region-change="userInfo.userAddress = $event"></Address>
+    </popup>
 </template>
 
 <style lang="scss" scoped>
@@ -314,22 +323,27 @@ ul {
 
     li {
         display: flex;
-        padding: 10px 20px;
+        padding: 10px 0;
         line-height: 44px;
         height: 64px;
         justify-content: space-between;
+
+        &>* {
+            padding: 0 10px;
+            margin: 0 10px;
+        }
 
         select {
             background-color: $backcolor;
             color: #fff;
             border-radius: 5px;
             outline: none;
+            margin-right: 20px;
         }
 
         input {
             width: 200px;
             color: #fff;
-            padding: 0 10px;
             text-align: right;
             border: 1px solid transparent;
             border-radius: 5px;

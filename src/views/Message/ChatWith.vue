@@ -1,15 +1,15 @@
 <script setup>
 import Title from '@/components/title.vue'
 import Send from '@/components/send.vue'
-import { ref, inject, onMounted, nextTick } from 'vue'
+import { ref, inject, onMounted, nextTick, getCurrentInstance } from 'vue'
 import { useRoute } from 'vue-router'
 import { getPrivateLetter, readPrivateLetter, sendPrivateLetter } from '@/api/Chat'
 import { loginStore, chatStore } from '@/stores/counter'
 const { userinfo } = loginStore()
 const ChatStore = chatStore()
 const route = useRoute()
-const socket = inject("socket");
-socket.on('receivePrivateLetter', data => {
+const { proxy } = getCurrentInstance()
+proxy.$socket.on('receivePrivateLetter', data => {
     const { content, ...item } = data
     letterList.value.push({ ...item, privateLetterContent: content })
     scrollToBottom()
@@ -46,28 +46,33 @@ const isSameTenMinuteAsPrevious = (index) => {
 }
 
 const sendComment = async (content) => {
-    const { updatedAt, version, id, ...item } = await sendPrivateLetter(userinfo.userId, route.query.userId, {
-        content,
-        fromUserId: userinfo.userId,
-        toUserId: route.query.userId
-    })
-    let obj = {
-        fromId: userinfo.userId,
-        toId: route.query.userId,
-        content,
-        createdAt: new Date().getTime(),
-        userAvatar: userinfo.userAvatar,
-        userNickname: userinfo.userNickname
+    try {
+        const { updatedAt, version, id, ...item } = await sendPrivateLetter(userinfo.userId, route.query.userId, {
+            content,
+            fromUserId: userinfo.userId,
+            toUserId: route.query.userId
+        })
+        let obj = {
+            fromId: userinfo.userId,
+            toId: route.query.userId,
+            content,
+            createdAt: new Date().getTime(),
+            userAvatar: userinfo.userAvatar,
+            userNickname: userinfo.userNickname
+        }
+        socket.emit('sendPrivateLetter', obj);
+        letterList.value.push({ ...item, isRead: 0 })
+        const createdAt = new Date().getTime()
+        ChatStore.addChat({
+            ...route.query,
+            content,
+            createdAt
+        })
+        scrollToBottom()
+    } catch (error) {
+        const { message } = error
+        if (message === "Cannot read property 'bothStatus' of null") proxy.$toast.show('你们还不是好友')
     }
-    socket.emit('sendPrivateLetter', obj);
-    letterList.value.push({ ...item, isRead: 0 })
-    const createdAt = new Date().getTime()
-    ChatStore.addChat({
-        ...route.query,
-        content,
-        createdAt
-    })
-    scrollToBottom()
 }
 </script>
 

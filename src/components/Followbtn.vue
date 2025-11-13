@@ -1,10 +1,8 @@
 <script setup>
 import { defineProps, getCurrentInstance, computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
 import { triggerFollow } from '@/api/Chat'
 const { proxy } = getCurrentInstance()
 const socket = proxy.$socket
-const route = useRoute()
 const props = defineProps({
     item: {
         type: Object,
@@ -13,6 +11,10 @@ const props = defineProps({
     myUserId: {
         type: String,
         required: true
+    },
+    defaultmyRelation: {
+        type: String,
+        default: 'none'
     }
 })
 watch(() => props.item, (newVal) => {
@@ -20,37 +22,57 @@ watch(() => props.item, (newVal) => {
     bothStatus.value = newVal?.bothStatus
 })
 const userId = computed(() => props.item?.userId ?? '')
-const myRelation = ref(props.item?.myRelation)
-const bothStatus = ref(props.item.bothStatus)
+const bothStatus = ref(props.item?.bothStatus)
 
-const textFollow = computed(() => {
-    if (myRelation.value == undefined) {
-        return bothStatus.value ? (route.path === '/fan' ? '互相关注' : '已关注') : '关注'
-    } else {
-        return myRelation.value === 'none' || myRelation.value === 'fan'
-            ? '关注' : myRelation.value === 'follow'
-                ? '已关注' : '互相关注'
+// 根据默认关系状态设置初始关系状态
+const defaultRelation = computed(() => {
+    if (props.defaultmyRelation === 'fan') {
+        return bothStatus.value ? 'both' : 'fan'
+    } else if (props.defaultmyRelation === 'follow') {
+        return bothStatus.value ? 'both' : 'follow'
     }
 })
-
-const updataView = () => {
-    if (myRelation.value == undefined) {
-        bothStatus.value = bothStatus.value === 1 ? 0 : 1
-        proxy.$toast.show(bothStatus.value ? '关注成功' : '取关成功')
+// 定义一个响应式变量来存储关系状态
+const myRelation = ref(props.item?.myRelation ?? defaultRelation.value)
+// 判断是否关注
+const followStatus = computed(() => myRelation.value === 'both' || myRelation.value === 'follow' || myRelation.value === 'me')
+// 根据关系状态显示不同的文本
+const textFollow = computed(() => {
+    if (myRelation.value === 'me') return '我自己'
+    if (myRelation.value === 'none' || myRelation.value === 'fan') {
+        return '关注'
     } else {
-        myRelation.value = myRelation.value === 'fan'
-            ? 'both' : myRelation.value === 'none'
-                ? 'follow' : myRelation.value === 'both'
-                    ? 'fan' : 'none'
+        if (myRelation.value === 'follow') {
+            return '已关注'
+        } else {
+            return '互相关注'
+        }
     }
+})
+// 根据关系状态设置按钮样式
+const updataView = () => {
+    switch (myRelation.value) {
+        case 'fan':
+            myRelation.value = 'both'
+            break
+        case 'follow':
+            myRelation.value = 'none'
+            break
+        case 'both':
+            myRelation.value = 'fan'
+            break
+        case 'none':
+            myRelation.value = 'follow'
+            break
+    }
+    proxy.$toast.show(followStatus.value ? '关注成功' : '取关成功')
 }
 const handleFollow = async () => {
+    if (myRelation.value === 'me') return
     try {
         updataView()
         await triggerFollow(props.myUserId, userId.value)
-        socket.emit('sendTriggerFollow', {
-            toUserId: userId.value
-        })
+        socket.emit('sendTriggerFollow', { toUserId: userId.value })
     } catch (err) {
         console.log(err);
         updataView()
@@ -59,10 +81,7 @@ const handleFollow = async () => {
 </script>
 
 <template>
-    <div class="btn" @click="handleFollow()" :class="{
-        'active': myRelation == undefined
-            ? bothStatus : !(myRelation === 'none' || myRelation === 'fan')
-    }">{{ textFollow }}</div>
+    <div class="btn" @click="handleFollow" :class="{ 'active': followStatus }">{{ textFollow }}</div>
 </template>
 
 <style lang="scss" scoped>

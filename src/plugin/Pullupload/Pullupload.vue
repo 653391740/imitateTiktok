@@ -1,5 +1,6 @@
 <script setup>
-import { ref, useAttrs, watch, defineExpose, onMounted, nextTick } from 'vue'
+import { ref, useAttrs, watch, defineExpose, onMounted, nextTick, inject } from 'vue'
+const pxUtils = inject('pxpxUtils')
 const loading = ref(false)
 const pullupload = ref(null)
 const attrs = useAttrs()
@@ -7,12 +8,12 @@ const attrs = useAttrs()
 const handleScroll = async (e) => {
     const newDom = e.target ? pullupload.value : attrs.newDom
     const { scrollTop, clientHeight, scrollHeight } = newDom
-    if (!(scrollTop + clientHeight >= scrollHeight - 100)) return
+    if (!(scrollTop + clientHeight >= scrollHeight - pxUtils(50))) return
     if (loading.value || !attrs.hasMore) return
     AsyncPullup()
 }
 
-watch(() => attrs.newDom?.scrollTop, () => {
+watch(() => attrs.newDom?.scrollTop, (newV, oldV) => {
     handleScroll(attrs.newDom)
 })
 const AsyncPullup = async () => {

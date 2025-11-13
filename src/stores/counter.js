@@ -1,9 +1,8 @@
 import { ref, inject, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { login, getUserInfo } from '@/api/login'
-import { getPopularVideo, isLiked } from '@/api/video'
+import { getContact } from '@/api/user'
 import { FanUnreadNum, byLikeUnreadNum, byCommentUnreadNum, getAtUnreadNum } from '@/api/Chat'
-import { Toast } from '@/plugin/Toast/index.js';
 export const searchStore = defineStore('search', () => {
   const inputvalue = ref('')
   const searchType = ref('video')
@@ -16,7 +15,7 @@ export const searchStore = defineStore('search', () => {
 export const chatStore = defineStore('chat', () => {
   const socket = inject("socket");
   const chatList = ref(JSON.parse(localStorage.getItem('chatList')) || [])
-  const addChat = (chat) => {
+  const addChat = (chat) => { // 发送消息 --- 信息更新
     const index = chatList.value.findIndex(e => e.info.userId === chat.userId)
     if (index !== -1) {
       chatList.value[index].info.content = chat.content
@@ -29,7 +28,7 @@ export const chatStore = defineStore('chat', () => {
     }
     localStorage.setItem('chatList', JSON.stringify(chatList.value))
   }
-  const receiveChat = (chat) => {
+  const receiveChat = (chat) => { // 接收消息 --- 信息更新
     const index = chatList.value.findIndex(e => e.info.userId === chat.fromId)
     if (index !== -1) {
       chatList.value[index].info.content = chat.content
@@ -39,7 +38,7 @@ export const chatStore = defineStore('chat', () => {
       const { fromId, ...item } = chat
       chatList.value.push({
         info: { ...item, userId: fromId },
-        newMsg: 0
+        newMsg: 1
       })
     }
     localStorage.setItem('chatList', JSON.stringify(chatList.value))
@@ -51,14 +50,29 @@ export const chatStore = defineStore('chat', () => {
       localStorage.setItem('chatList', JSON.stringify(chatList.value))
     }
   }
+  const clearAllnewMsg = () => {
+    chatList.value.forEach(e => e.newMsg = 0)
+    localStorage.setItem('chatList', JSON.stringify(chatList.value))
+  }
   const receive = () => {
     socket.on('receivePrivateLetter', data => {
       receiveChat(data)
     })
   }
   const dot = computed(() => {
-    return Array.from([FanUnreadNumRes.value, byLikeUnreadNumRes.value, byCommentUnreadNumRes.value, getAtUnreadNumRes.value]).some(e => e > 0)
+    const newMsg = chatList.value.some(e => e.newMsg > 0)
+    return Array.from([FanUnreadNumRes.value, byLikeUnreadNumRes.value, byCommentUnreadNumRes.value, getAtUnreadNumRes.value, newMsg]).some(e => e > 0)
   })
+
+  const ContactList = ref([])
+  const getContactList = async () => {
+    try {
+      const res = await getContact(loginStore().userinfo.userId)
+      ContactList.value = res
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const FanUnreadNumRes = ref(0)
   const byLikeUnreadNumRes = ref(0)
@@ -66,16 +80,12 @@ export const chatStore = defineStore('chat', () => {
   const getAtUnreadNumRes = ref(0)
   const socketAccept = () => {
     socket.on('receiveComment', async data => {
-      console.log(data);
-
       byCommentUnreadNumRes.value = await byCommentUnreadNum(loginStore().userinfo.userId)
     })
     socket.on('receiveTriggerLike', async data => {
-      console.log(data);
       byLikeUnreadNumRes.value = await byLikeUnreadNum(loginStore().userinfo.userId)
     })
     socket.on('receiveTriggerFollow', async data => {
-      console.log(data);
       FanUnreadNumRes.value = await FanUnreadNum(loginStore().userinfo.userId)
     })
   }
@@ -90,9 +100,12 @@ export const chatStore = defineStore('chat', () => {
     }
   }
   return {
+    ContactList,
+    getContactList,
     chatList,
     addChat,
     deleteChat,
+    clearAllnewMsg,
     FanUnreadNumRes,
     byLikeUnreadNumRes,
     byCommentUnreadNumRes,
@@ -103,54 +116,7 @@ export const chatStore = defineStore('chat', () => {
     dot
   }
 })
-export const homeStore = defineStore('home', () => {
-  const VideoList = ref([])
-  const isLoading = ref(false)
-  const status = ref(200)
-  const getVideoList = async () => {
-    try { // 获取首页视频内容
-      isLoading.value = true
-      const res = await getPopularVideo();
-      const data = res.map(e => JSON.parse(e))
-      VideoList.value.push(...data)
-      if (!loginStore()?.userinfo.userId) {
-        data.forEach(e => e.isLiked = false)
-        VideoList.value.push(...data)
-      } else {
-        VideoList.value.map(async e => {
-          if (!e.Video) return e
-          try {
-            const likedRes = await isLiked(loginStore().userinfo.userId, e.Video.videoId)
-            e.isLiked = likedRes
-          } catch (error) {
-            if (error.response.data.code === 'auth:not logged in') {
-              loginStore().logout()
-              Toast.show('登录状态已失效，请重新登录')
-              return e
-            }
-            e.isLiked = false;
-          }
-          return e
-        })
-      }
-    } catch (error) {
-      console.log(error);
-      status.value = error.status
-    } finally {
-      isLoading.value = false
-    }
-  }
-  const falseVideoList = () => {
-    VideoList.value.map(e => e.isLiked = false)
-  }
-  return {
-    status,
-    VideoList,
-    isLoading,
-    getVideoList,
-    falseVideoList
-  }
-})
+
 export const commentStore = defineStore('comment', () => {
   const showPopup = ref(false)
   const commentNum = ref(0)
@@ -208,23 +174,21 @@ export const loginStore = defineStore('login', () => {
   const Login = async (proxy) => {
     if (formData.value.email === '') return
     try {
-      proxy.$toast.loading('')
-      await new Promise(resolve => setTimeout(resolve, 1000));
       const { userId } = await login(formData.value) // 登录
       const res = await getUserInfo(userId) // 获取到个人信息
-      updateUserInfo(res)
-      chatStore().getAllrequest()
-      chatStore().socketAccept()
-      chatStore().receive()
-      socket.emit('login', userId)
-      localStorage.setItem('userinfo', JSON.stringify(formData.value))
-      formData.value.password = ''
+      socket.emit('login', userId) // 发送登录事件
+      updateUserInfo(res) // 更新个人信息
+      chatStore().getAllrequest() // 更新消息红点
+      chatStore().socketAccept() // 连接socket
+      chatStore().receive() // 接收消息
+      chatStore().getContactList() // 获取联系人列表
+      localStorage.setItem('userinfo', JSON.stringify(formData.value)) // 存储账号登录信息
       proxy.$toast.show('登录成功')
       closeLogin(res)
+
     } catch (error) {
-      console.log(error);
-      if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) proxy.$toast.show('请求超时，请检查网络连接后重试')
-      if (error.response?.data.message === 'email or password error') {
+      const { message } = error
+      if (message === 'email or password error') {
         if (userinfo.value.userId) {
           logout()
           proxy.$toast.show('登录状态已失效，请重新登录')
@@ -232,9 +196,7 @@ export const loginStore = defineStore('login', () => {
         }
         proxy.$toast.show('邮箱或密码错误')
         loginShow.value = true
-        return
       }
-      proxy.$toast.show('无网络连接，请检查网络后重试')
     }
   }
   return {

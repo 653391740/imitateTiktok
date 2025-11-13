@@ -1,28 +1,25 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, onBeforeUnmount, watch, defineEmits } from 'vue'
-import { searchUser } from '@/api/user'
-import { loginStore } from '@/stores/counter'
+import { chatStore } from '@/stores/counter'
 import { useRouter } from 'vue-router'
 import p from "wl-pinyin";
 
 const emit = defineEmits(['selected'])
-const LoginStore = loginStore()
+const ChatStore = chatStore()
 const router = useRouter()
 const searchText = ref('')
-const list = ref([])
 const firstnameList = ref([])
 
 const filterList = computed(() => {
-    if (searchText.value) return list.value.filter(item => p.getPinyin(item.userNickname).toUpperCase().includes(searchText.value.toUpperCase()))
-    return list.value
+    if (searchText.value) return ChatStore.ContactList.filter(item => p.getPinyin(item.userNickname).toUpperCase().includes(searchText.value.toUpperCase()))
+    return ChatStore.ContactList
 })
 const firstName = (nickname) => {
     return p.getFirstLetter(nickname).toUpperCase().charAt(0)
 }
 onMounted(async () => {
-    list.value = await searchUser(LoginStore.userinfo.userId)
     const quchong = []
-    list.value.map(item => {
+    ChatStore.ContactList.map(item => {
         const current = firstName(item.userNickname)
         if (!quchong.includes(current) && /^[A-Za-z]$/.test(current)) quchong.push(current)
     })

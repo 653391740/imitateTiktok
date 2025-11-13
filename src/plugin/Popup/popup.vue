@@ -21,11 +21,11 @@ const props = defineProps({
 </script>
 
 <template>
-    <transition name="fade">
+    <transition name="fade" :data-position="props.position">
         <div class="popup" v-if="props.show" :style="{
             height: props.height,
             background: props.background
-        }" :data-position="props.position">
+        }">
             <slot></slot>
         </div>
     </transition>

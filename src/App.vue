@@ -9,9 +9,7 @@ LoginStore.Login(proxy)
 </script>
 
 <template>
-  <router-view v-slot="{ Component }">
-    <component :is="Component" />
-  </router-view>
+  <router-view></router-view>
   <CommentPopup></CommentPopup>
 </template>
 

@@ -24,7 +24,7 @@ const loadmore = async (id, page) => {
             <p class="time">{{ $formatTime(item.createdAt) }}</p>
         </template>
         <template #right="{ item }">
-            <Followbtn :item="item" :myUserId="LoginStore.userinfo.userId"></Followbtn>
+            <Followbtn defaultmyRelation="fan" :item="item" :myUserId="LoginStore.userinfo.userId"></Followbtn>
         </template>
     </MessageNav>
 </template>

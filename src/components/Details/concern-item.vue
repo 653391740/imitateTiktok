@@ -1,11 +1,12 @@
 <script setup>
-import { ref, defineProps, watch, getCurrentInstance } from 'vue'
+import { ref, defineProps, defineEmits, watch, getCurrentInstance, nextTick } from 'vue'
 import { loginStore, commentStore } from '@/stores/counter'
 import { triggerLike } from '@/api/video'
 const { proxy } = getCurrentInstance()
 const socket = proxy.$socket
 const LoginStore = loginStore()
 const CommentStore = commentStore()
+const emits = defineEmits(['update:actveindex'])
 const props = defineProps({
     obj: {
         type: Object,
@@ -46,6 +47,9 @@ const handleLike = async () => {
 }
 const videoRef = ref(null)
 const playVideo = () => {
+    console.log(props.obj);
+    
+    emits('update:actveindex', props.index)
     if (videoRef.value.paused) {
         videoRef.value.play()
     } else {

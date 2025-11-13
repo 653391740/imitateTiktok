@@ -1,14 +1,15 @@
 <script setup>
-import { ref, onMounted, getCurrentInstance, computed, nextTick } from 'vue'
-import Video from '@/components/video/index.vue';
-import { commentStore, loginStore } from '@/stores/counter'
+import { ref, getCurrentInstance, computed, nextTick } from 'vue'
+import { useScrollPosition } from '@/hooks/useScrollPosition'
+import { loginStore } from '@/stores/counter'
 import { isLiked } from '@/api/video'
 import { useRoute } from 'vue-router';
 const { userinfo } = loginStore()
 const { proxy } = getCurrentInstance()
 const route = useRoute()
+import Video from '@/components/video/index.vue';
+const { newDom } = useScrollPosition()
 
-// 声明接收的 props，包含父组件传入的加载函数 onLoadmore
 const props = defineProps({
     showDeleteIcon: {
         type: Boolean,
@@ -19,17 +20,16 @@ const props = defineProps({
         required: true
     }
 })
-const CommentStore = commentStore()
 const page = ref(1)
 const list = ref([])
 const id = computed(() => route.params.id === 'me' ? userinfo.userId : route.params.id)
 const loadmore = async () => {
+    if (!hasMore.value) return
     try {
-        // 使用明确传入的 props.onLoadmore 函数（父组件通过 :onLoadmore 传入）
         const res = await props.onLoadmore(id.value, page.value)
         if (res.length === 0) return hasMore.value = false
         const formattedData = await Promise.allSettled(res.map(async e => {
-            if (!e.Video) return null // Return null for items without Video
+            if (!e.Video) return null
             try {
                 const likedRes = await isLiked(userinfo.userId, e.Video.videoId)
                 e.isLiked = likedRes
@@ -52,18 +52,6 @@ const loadmore = async () => {
 const error = ref(false)
 const hasMore = ref(true)
 const showPopup = ref(false)
-const newDom = ref({})
-onMounted(() => {
-    const userinfoContainer = document.querySelector('.userinfo-container')
-    userinfoContainer.addEventListener('touchmove', () => {
-        const { top, height } = userinfoContainer.getBoundingClientRect()
-        newDom.value = {
-            scrollTop: top < 0 ? Math.abs(top) : 0,
-            clientHeight: window.innerHeight,
-            scrollHeight: height
-        }
-    })
-})
 
 const videoRefs = ref(null)
 const activeIndex = ref(0)
@@ -114,7 +102,8 @@ const del = async () => {
     <teleport to="#app">
         <popup position="right" background="#161622" :show="showPopup">
             <div class="close iconfont icon-zuojiantou" @click="closePopup"></div>
-            <Video ref="videoRefs" :VideoList="list" :autoPlay="false" @updateactiveIndex="activeIndex = $event" />
+            <Video @pullup="loadmore" ref="videoRefs" :VideoList="list" :autoPlay="false"
+                @updateactiveIndex="activeIndex = $event" />
         </popup>
     </teleport>
 </template>

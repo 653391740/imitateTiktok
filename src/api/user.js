@@ -1,6 +1,6 @@
 import http from '@/utils/request'
 
-export const searchUser = (uid) => {
+export const getContact = (uid) => {
     return http.get(`user/${uid}/getContact`)
 }
 export const getUserInfo = (uid, userId) => {
