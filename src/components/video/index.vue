@@ -1,9 +1,8 @@
 <script setup>
-import { ref, defineEmits, defineExpose, nextTick, computed, onActivated, defineProps, watch, getCurrentInstance } from 'vue';
+import { ref, defineEmits, defineExpose, nextTick, onActivated, computed, defineProps, watch } from 'vue';
 import { commentStore } from '@/stores/counter'
 import { useRoute } from 'vue-router'
 import Videoitem from '@/components/video/video.vue'
-import Side from '@/components/video/side-desc.vue'
 import Send from '@/components/send.vue';
 
 const route = useRoute()
@@ -24,15 +23,18 @@ const props = defineProps({
 })
 
 onActivated(() => {
-    nextTick(() => {
-        toIndex(activeIndex.value, false)
-    })
+    toIndex(activeIndex.value, false)
 })
-
 const handleVideoEnd = (index) => {
     activeIndex.value = index + 1;
     swiper.value.swipeTo(activeIndex.value)
 }
+watch(() => activeIndex.value, (newVal) => {
+    nextTick(() => {
+        console.log(newVal);
+        toIndex(newVal)
+    })
+})
 
 // 切换到指定索引的视频
 const toIndex = (index, smooth = true) => {
@@ -40,7 +42,7 @@ const toIndex = (index, smooth = true) => {
     emits('updateactiveIndex', index)
     if (swiper.value) swiper.value.swipeTo(index, smooth);
     nextTick(() => {
-        if (video.value && video.value[index]) video.value[index].playPromise();
+        video.value[index]?.playPromise()
     });
 }
 const pausePromise = (index) => {
@@ -56,12 +58,24 @@ defineExpose({
 </script>
 
 <template>
-    <Pullupload ref="pulluploadRef" @pullup="emits('pullup')" :newDom="newDom" :hasMore="true">
-        <swipper ref="swiper" vertical :length="VideoList.length" @scroll="handleSwiperScroll" @change="toIndex">
-            <div class="swipper-item" v-for="item, index in VideoList" :key="item.Video?.videoId || index">
-                <Videoitem ref="video" :item="item" :activeIndex="activeIndex" :index="index" :autoPlay="props.autoPlay"
+    <Pullupload ref="pulluploadRef"
+        @pullup="emits('pullup')"
+        :newDom="newDom"
+        :hasMore="true">
+        <swipper ref="swiper"
+            vertical
+            :length="VideoList.length"
+            @scroll="handleSwiperScroll"
+            @change="activeIndex = $event">
+            <div class="swipper-item"
+                v-for="item, index in VideoList"
+                :key="item.Video?.videoId || index">
+                <Videoitem ref="video"
+                    :item="item"
+                    :activeIndex="activeIndex"
+                    :index="index"
+                    :autoPlay="props.autoPlay"
                     @ended="handleVideoEnd(index)" />
-                <Side :item="item"></Side>
                 <Send v-if="route.path !== '/home'"
                     @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
                 </Send>

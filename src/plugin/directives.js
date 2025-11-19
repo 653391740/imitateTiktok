@@ -72,7 +72,7 @@ const longpress = {
 
       // 设置长按计时器，500ms后触发
       pressTimer = setTimeout(() => {
-        binding.value()
+        binding.value(e)
       }, 500)
     }
 

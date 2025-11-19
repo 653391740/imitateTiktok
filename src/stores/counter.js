@@ -65,43 +65,36 @@ export const chatStore = defineStore('chat', () => {
   })
 
   const ContactList = ref([])
-  const getContactList = async () => {
-    try {
-      const res = await getContact(loginStore().userinfo.userId)
-      ContactList.value = res
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   const FanUnreadNumRes = ref(0)
   const byLikeUnreadNumRes = ref(0)
   const byCommentUnreadNumRes = ref(0)
   const getAtUnreadNumRes = ref(0)
-  const socketAccept = () => {
+  const socketAccept = (userId) => {
     socket.on('receiveComment', async data => {
-      byCommentUnreadNumRes.value = await byCommentUnreadNum(loginStore().userinfo.userId)
+      byCommentUnreadNumRes.value = await byCommentUnreadNum(userId)
     })
     socket.on('receiveTriggerLike', async data => {
-      byLikeUnreadNumRes.value = await byLikeUnreadNum(loginStore().userinfo.userId)
+      byLikeUnreadNumRes.value = await byLikeUnreadNum(userId)
     })
     socket.on('receiveTriggerFollow', async data => {
-      FanUnreadNumRes.value = await FanUnreadNum(loginStore().userinfo.userId)
+      FanUnreadNumRes.value = await FanUnreadNum(userId)
     })
   }
-  const getAllrequest = async () => {
+  const getAllrequest = async (userId) => {
+    console.log(userId);
+
     try {
-      FanUnreadNumRes.value = await FanUnreadNum(loginStore().userinfo.userId)
-      byLikeUnreadNumRes.value = await byLikeUnreadNum(loginStore().userinfo.userId)
-      byCommentUnreadNumRes.value = await byCommentUnreadNum(loginStore().userinfo.userId)
-      getAtUnreadNumRes.value = await getAtUnreadNum(loginStore().userinfo.userId)
+      ContactList.value = await getContact(userId)
+      FanUnreadNumRes.value = await FanUnreadNum(userId)
+      byLikeUnreadNumRes.value = await byLikeUnreadNum(userId)
+      byCommentUnreadNumRes.value = await byCommentUnreadNum(userId)
+      getAtUnreadNumRes.value = await getAtUnreadNum(userId)
     } catch (error) {
       console.log(error);
     }
   }
   return {
     ContactList,
-    getContactList,
     chatList,
     addChat,
     deleteChat,
@@ -173,18 +166,18 @@ export const loginStore = defineStore('login', () => {
   const Login = async (proxy) => {
     if (formData.value.email === '') return
     try {
-      const { userId } = await login(formData.value) // 登录
-      const res = await getUserInfo(userId) // 获取到个人信息
-      socket.emit('login', userId) // 发送登录事件
+      const { userId } = await login(formData.value)
+      const res = await getUserInfo(userId)
       updateUserInfo(res) // 更新个人信息
-      chatStore().getAllrequest() // 更新消息红点
-      chatStore().socketAccept() // 连接socket
+      Promise.all([
+        socket.emit('login', userId),
+        chatStore().getAllrequest(userId),
+      ])
       chatStore().receive() // 接收消息
-      chatStore().getContactList() // 获取联系人列表
+      chatStore().socketAccept(userId) // 连接socket
       localStorage.setItem('userinfo', JSON.stringify(formData.value)) // 存储账号登录信息
       proxy.$toast.show('登录成功')
       closeLogin(res)
-
     } catch (error) {
       const { message } = error
       if (message === 'email or password error') {

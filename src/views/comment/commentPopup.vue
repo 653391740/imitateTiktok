@@ -142,7 +142,7 @@ const send = ref(null)
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding-bottom: 44px;
+    padding-bottom: 50px;
 
     .header {
         color: #626260;

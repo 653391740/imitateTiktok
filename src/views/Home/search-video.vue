@@ -56,11 +56,18 @@ watch(inputvalue, (newValue, oldValue) => {
 </script>
 
 <template>
-    <Pullupload ref="pulluploadRef" @pullup="loading" :error="error" :hasMore="hasMore">
+    <Pullupload ref="pulluploadRef"
+        @pullup="loading"
+        :error="error"
+        :hasMore="hasMore">
         <div class="list">
-            <div class="item" v-for="(item, index) in list" :key="item.Video?.userId" @click="openPopup(index)"
+            <div class="item"
+                v-for="(item, index) in list"
+                :key="item.Video?.userId"
+                @click="openPopup(index)"
                 :style="{ backgroundImage: `url(${$imgSrc(item.Video?.videoCover)})` }">
-                <div class="img"></div>
+                <div class="img">
+                </div>
                 <div class="info">
                     <div class="desc">{{ item.Video?.videoDesc }}</div>
                     <div class="userAndLike">
@@ -73,9 +80,15 @@ watch(inputvalue, (newValue, oldValue) => {
                 </div>
             </div>
         </div>
-        <popup class="popupRef" position="right" background="#161622" :show="showPopup">
-            <div class="close iconfont icon-zuojiantou" @click="closePopup(list)"></div>
-            <Video ref="videoRef" :VideoList="list" :autoPlay="false">
+        <popup class="popupRef"
+            position="right"
+            background="#161622"
+            :show="showPopup">
+            <div class="close iconfont icon-zuojiantou"
+                @click="closePopup(list)"></div>
+            <Video ref="videoRef"
+                :VideoList="list"
+                :autoPlay="false">
                 <template #default="{ item }">
                     <Send @click="CommentStore.openCommentPopup(item.Video.videoId, item.WSLCNum?.commentNum || 0)">
                     </Send>
@@ -97,22 +110,24 @@ watch(inputvalue, (newValue, oldValue) => {
 
 .list {
     column-count: 2;
-    column-gap: 0px;
+    column-gap: 0;
 
     .item {
+        break-inside: avoid;
         position: relative;
         overflow: hidden;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-        border-top: 1px solid #000;
-        background-size: 100% 100%;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
 
         &>.img {
-            width: 100%;
             height: 200px;
         }
     }
 
     .info {
+        backdrop-filter: blur(12px);
         padding: 8px;
 
         .desc {

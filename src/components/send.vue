@@ -39,7 +39,7 @@ defineExpose({
     left: 0;
     bottom: 0;
     width: 100%;
-    height: 44px;
+    height: 50px;
     display: flex;
 
     input {
@@ -50,7 +50,7 @@ defineExpose({
 
     span {
         width: 44px;
-        line-height: 44px;
+        line-height: 50px;
         text-align: center;
         color: #fff;
     }

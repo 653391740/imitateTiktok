@@ -39,8 +39,11 @@ const getVideoList = async () => {
 </script>
 
 <template>
-    <div class="iconfont icon-sousuo" @click="toSearch"></div>
-    <Video @pullup="getVideoList" :VideoList="VideoList" :autoPlay="true" />
+    <div class="iconfont icon-sousuo"
+        @click="toSearch"></div>
+    <Video @pullup="getVideoList"
+        :VideoList="VideoList"
+        :autoPlay="true" />
     <Login></Login>
     <Register></Register>
     <FindPassword></FindPassword>

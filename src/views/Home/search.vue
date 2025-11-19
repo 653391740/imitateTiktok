@@ -1,5 +1,4 @@
 <script setup>
-import { ref, toRefs, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { searchStore } from '@/stores/counter'
 import searchUser from './search-user.vue'
@@ -10,13 +9,17 @@ const router = useRouter()
 const route = useRoute()
 
 const handleInput = (e) => {
-    // SearchStore.inputvalue = e.target.value
+    SearchStore.inputvalue = e.target.value
+}
+const bacK = () => {
+    SearchStore.inputvalue = ''
+    router.back()
 }
 </script>
 
 <template>
     <div class="search">
-        <a @click="router.back()" class="iconfont icon-zuojiantou"></a>
+        <a @click="bacK" class="iconfont icon-zuojiantou"></a>
         <div class="input">
             <span class="iconfont icon-sousuo"></span>
             <input type="text" :value="SearchStore.inputvalue" v-debounce.input="handleInput"

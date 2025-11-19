@@ -78,7 +78,6 @@ const tend = (e) => {
         return
     }
     const max = maxtransform()
-    console.log(speed.value);
     const offsetY = speed.value * 500
     const Finalposition = Math.min((Math.max(offsetY + DifY.value, max)), 150)
     updataY(Finalposition)

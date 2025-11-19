@@ -14,13 +14,14 @@ const emit = defineEmits(['change', 'scroll'])
 
 const container = ref(null)
 const activeIndex = ref(0)
+const touend = ref(false)
 
 // 使用单个可移除的滚动处理器，避免在每次更新时重复绑定
 let scrollTimeout = null
 const onScroll = () => {
     clearTimeout(scrollTimeout)
     scrollTimeout = setTimeout(() => {
-        scrollToIndex()
+        if (touend.value) scrollToIndex()
     }, 100)
 }
 
@@ -67,7 +68,7 @@ const scrollToIndex = () => {
 }
 </script>
 <template>
-    <div class="swipper" :class="{ vertical: props.vertical }">
+    <div class="swipper" :class="{ vertical: props.vertical }" @touchstart="touend = false" @touchend="touend = true">
         <div class="swipper-container" ref="container">
             <slot></slot>
         </div>
